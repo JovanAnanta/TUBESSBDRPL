@@ -37,7 +37,7 @@ export class Nasabah extends Model {
 
     @Column({
         type: DataType.STRING,
-        allowNull: false,
+        allowNull: true,
     })
     declare pin: string;
 
