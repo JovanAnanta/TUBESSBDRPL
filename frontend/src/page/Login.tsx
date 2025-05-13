@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { encrypt,decrypt } from '../../../backend/enkripsi/Encryptor';
+import { encrypt, decrypt } from '../../../backend/enkripsi/Encryptor';
+import "../style/Login.css"; // Import your CSS file
 
 export const login = async (kodeAkses: string, password: string) => {
   try {
@@ -45,7 +46,7 @@ const LoginForm = () => {
       } else {
         navigate("/user");  // Arahkan ke halaman utama
       }
-      
+
       localStorage.setItem("nasabahId", data.nasabah_id);
       alert(`Login berhasil! Selamat datang, ${data.nama}`);
     } catch (err: any) {
@@ -55,11 +56,11 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="bodyLogin">
-      <div className="login-container">
-        <h2>Login</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="input-group">
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h2 className="login-heading">Welcome Back</h2>
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
             <input
               type="text"
               id="kodeAkses"
@@ -68,9 +69,10 @@ const LoginForm = () => {
               onChange={handleChange}
               placeholder="Kode Akses"
               required
+              className="form-input"
             />
           </div>
-          <div className="input-group">
+          <div className="form-group">
             <input
               type="password"
               id="password"
@@ -79,18 +81,17 @@ const LoginForm = () => {
               onChange={handleChange}
               placeholder="Password"
               required
+              className="form-input"
             />
           </div>
-          <button type="submit" className="button">Login</button>
+          <button type="submit" className="btn btn-login">Login</button>
           <Link to="/auth/register">
-            <button className="button5">Register</button>
-          </Link>
-          <Link to="/">
-            <button className="button6">Home here</button>
+            <button type="button" className="btn btn-secondary">Register</button>
           </Link>
         </form>
       </div>
     </div>
+
   );
 };
 

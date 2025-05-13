@@ -25,12 +25,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const nasabah = await Nasabah.findOne({ where: { kodeAkses: encryptedKodeAkses } });
 
     if (!nasabah) {
-      throw new Error('Kode Akses atau Password salah 1');
+      throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
 
     const encryptedInputPassword = encrypt(password);
     if (encryptedInputPassword !== nasabah.password) {
-      throw new Error('Kode Akses atau Password salah 2');
+      throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
 
 
