@@ -1,9 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../style/HomePage.css";
+import "../style/Report.css";
+import ReportForm from "./ReportForm";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const [showReportForm, setShowReportForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -26,7 +29,6 @@ const HomePage: React.FC = () => {
     { name: "M-Payment", icon: "💳", path: "/user/mpayment" },
     { name: "Account Settings", icon: "⚙️", path: "/user/settings" },
   ];
-
   return (
     <div className="homepage-container">
       <h2 className="homepage-title">Welcome to BCA Mobile</h2>
@@ -48,6 +50,16 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Action Button untuk Report */}
+      <button className="fab" onClick={() => setShowReportForm(true)}>
+        📝
+      </button>
+
+      {/* Report Form Modal */}
+      {showReportForm && (
+        <ReportForm onClose={() => setShowReportForm(false)} />
+      )}
     </div>
   );
 };
