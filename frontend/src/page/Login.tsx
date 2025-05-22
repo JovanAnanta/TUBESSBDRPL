@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { encrypt, decrypt } from '../../../backend/enkripsi/Encryptor';
-import "../style/Login.css"; // Import your CSS file
+import "../style/Login.css";
 
 export const login = async (kodeAkses: string, password: string) => {
   try {
@@ -26,6 +26,7 @@ export const login = async (kodeAkses: string, password: string) => {
 };
 
 const LoginForm = () => {
+  const [role, setRole] = useState<'nasabah' | 'cs'>('nasabah');
   const [formData, setFormData] = useState({ kodeAkses: "", password: "" });
   const navigate = useNavigate();
 
@@ -39,8 +40,10 @@ const LoginForm = () => {
 
     try {
       const data = await login(formData.kodeAkses, formData.password);
-      localStorage.setItem("token", data.token);
+      localStorage.removeItem("cs_token");
 
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("nasabahId", data.nasabah_id);
       if (data.pinStatus === 'empty') {
         navigate("/user/set-pin");  // Arahkan ke halaman set PIN
       } else {
@@ -55,10 +58,34 @@ const LoginForm = () => {
     }
   };
 
+  const handleRoleChange = (selectedRole: 'nasabah' | 'cs') => {
+    if (selectedRole === 'cs') {
+      navigate('/cs/login');
+    } else {
+      setRole('nasabah');
+    }
+  };
+
   return (
     <div className="login-wrapper">
       <div className="login-card">
         <h2 className="login-heading">Welcome Back</h2>
+        
+        <div className="role-selector">
+          <button 
+            className={`role-button ${role === 'nasabah' ? 'active' : ''}`}
+            onClick={() => handleRoleChange('nasabah')}
+          >
+            Nasabah
+          </button>
+          <button 
+            className={`role-button ${role === 'cs' ? 'active' : ''}`}
+            onClick={() => handleRoleChange('cs')}
+          >
+            Customer Service
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <input

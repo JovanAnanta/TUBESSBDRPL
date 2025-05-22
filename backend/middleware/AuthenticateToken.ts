@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+
 const authenticateToken = (req: Request, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 
@@ -11,17 +13,17 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction): voi
 
   const token = authHeader.split(' ')[1];
 
-  jwt.verify(token, process.env.JWT_SECRET || 'secret_key', (err, decoded: any) => {
-  if (err) {
-    res.status(403).json({ error: 'Token tidak valid' });
-    return;
-  }
+  jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
+    if (err) {
+      res.status(403).json({ error: 'Token tidak valid' });
+      return;
+    }
+    req.user = {
+      id: decoded.nasabah_id
+    };
 
-  console.log('Decoded JWT:', decoded); // Pastikan decoded berisi nasabah_id
-  req.body.nasabah_id = decoded.nasabah_id;
-  next();
-});
-
+    next();
+  });
 };
 
 export default authenticateToken;
