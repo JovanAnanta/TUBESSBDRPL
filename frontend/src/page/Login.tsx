@@ -48,6 +48,7 @@ const LoginForm = () => {
         navigate("/user/set-pin");  // Arahkan ke halaman set PIN
       } else {
         navigate("/user");  // Arahkan ke halaman utama
+        window.location.reload();
       }
 
       localStorage.setItem("nasabahId", data.nasabah_id);
