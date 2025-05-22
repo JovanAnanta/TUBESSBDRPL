@@ -9,11 +9,16 @@ import config from '../config/config.json';
 
 import { Nasabah } from './models/Nasabah';
 import { Report } from './models/Report';
+import csRoutes from './routes/CSRoutes';
+import { LayananPelanggan } from './models/LayananPelanggan';
+import csReportRoutes from './routes/CSReportRoutes';
+
+
 
 const sequelize = new Sequelize({
   ...config.development,
   dialect: 'postgres',
-  models: [Nasabah, Report]
+  models: [Nasabah, Report, LayananPelanggan]
 });
 
 const app = express();
@@ -27,6 +32,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/report', reportRoutes);
+
+app.use('/api/cs', csRoutes);
+app.use('/api/cs', csReportRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

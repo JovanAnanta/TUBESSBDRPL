@@ -1,0 +1,157 @@
+.cs-report-container {
+  padding: 2rem;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.cs-report-header {
+  margin-bottom: 2rem;
+}
+
+.cs-report-header h1 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.cs-report-filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #FF6B6B;
+  border-radius: 8px;
+  background: transparent;
+  color: #FF6B6B;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filter-btn.active {
+  background: #FF6B6B;
+  color: white;
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.report-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.diproses {
+  background: #FEF3C7;
+  color: #D97706;
+}
+
+.status-badge.diterima {
+  background: #DEF7EC;
+  color: #057A55;
+}
+
+.status-badge.diabaikan {
+  background: #FDE2E2;
+  color: #DC2626;
+}
+
+.report-date {
+  color: #6B7280;
+  font-size: 0.875rem;
+}
+
+.report-content {
+  margin-bottom: 1.5rem;
+}
+
+.report-email {
+  color: #4B5563;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.report-description {
+  color: #6B7280;
+  line-height: 1.5;
+}
+
+.report-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.action-btn.accept {
+  background: #057A55;
+  color: white;
+}
+
+.action-btn.accept:hover {
+  background: #046C4E;
+}
+
+.action-btn.reject {
+  background: #DC2626;
+  color: white;
+}
+
+.action-btn.reject:hover {
+  background: #B91C1C;
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 2rem;
+  color: #6B7280;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.back-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: #333;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: #1a1a1a;
+}
