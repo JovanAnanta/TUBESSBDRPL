@@ -9,9 +9,11 @@ import { MInfo } from "../page/DetailHomePage/MInfo";
 import  { MPayment }  from "../page/DetailHomePage/MPayment";
 import { MTransfer } from "../page/DetailHomePage/MTransfer";
 import { Setting } from "../page/DetailHomePage/Setting";
+import CSLogin from '../page/CSLogin';
+import CSHomePage from '../page/CSHomePage';
+import CSReportPage from '../page/CSReportPage';
 
-
-const isAuthenticated = localStorage.getItem("token") !== null; 
+const checkAuth = () => localStorage.getItem("token") !== null;
 
 const Routers = createBrowserRouter([
   {
@@ -33,7 +35,7 @@ const Routers = createBrowserRouter([
   },
   {
     path: "/user",
-    element: isAuthenticated ? <UserLayout /> : <Navigate to="/login" />,
+    element: checkAuth() ? <UserLayout /> : <Navigate to="/auth/login" />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "set-pin", element: <PinPage /> },
@@ -42,6 +44,18 @@ const Routers = createBrowserRouter([
       { path: "mpayment", element: <MPayment /> },
       { path: "settings", element: <Setting /> },
     ]
+  },
+  {
+    path: '/cs/login',
+    element: <CSLogin />
+  },
+  {
+    path: "/cs/dashboard",
+    element: <CSHomePage />
+  },
+  {
+    path: "/cs/reports",
+    element: <CSReportPage />
   }
 ]);
 
