@@ -19,10 +19,10 @@ export class Tagihan extends Model {
     declare id: number;
 
     @Column({
-    type: DataType.ENUM('AIR', 'LISTRIK'),
-    allowNull: false
+        type: DataType.ENUM({ values: Object.values(TagihanType) }),
+        allowNull: false
     })
-    declare statusTagihanType: 'AIR' | 'LISTRIK';
+    declare statusTagihanType: TagihanType;
 
     @Column({
         type: DataType.DOUBLE,

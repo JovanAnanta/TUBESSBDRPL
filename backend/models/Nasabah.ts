@@ -1,10 +1,9 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 
-export enum NasabahStatus {
-    Aktif = "Aktif",
-    TidakAktif = "Tidak Aktif"
+export enum StatusAkun {
+    AKTIF = "AKTIF",
+    TIDAK_AKTIF = "TIDAK_AKTIF"
 }
-
 @Table({
     tableName: "nasabah",
     timestamps: false
@@ -60,9 +59,8 @@ export class Nasabah extends Model {
     declare kodeAkses: string;
 
     @Column({
-        type: DataType.ENUM('Aktif', 'Tidak Aktif'),
-        allowNull: false,
-        defaultValue: 'Tidak Aktif'
+    type: DataType.ENUM({ values: Object.values(StatusAkun) }),
+    allowNull: false
     })
-    declare status: NasabahStatus;
+    declare statusAkun: StatusAkun;
 }
