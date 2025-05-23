@@ -5,9 +5,8 @@ module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.sequelize.query('DROP TYPE IF EXISTS "enum_nasabah_status";');
     await queryInterface.addColumn('nasabah', 'status', {
-      type: Sequelize.ENUM('Aktif', 'Tidak Aktif'),
+      type: Sequelize.ENUM('AKTIF', 'TIDAK AKTIF'),
       allowNull: false,
-      defaultValue: 'Tidak Aktif'
     });
   },
 
