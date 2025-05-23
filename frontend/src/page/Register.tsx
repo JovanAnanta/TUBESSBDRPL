@@ -35,15 +35,6 @@ const RegisterForm: React.FC = () => {
     form.append("saldo", formData.saldo.toString());
     form.append("kodeAkses", formData.kodeAkses);
 
-    try {
-      await api.postFormData<null>('auth/register', form, false);
-      alert("Registration successful");
-      navigate("/auth/login"); // Redirect to login page after successful registration
-    } catch (err: any) {
-      console.error("Error detail:", err);
-      alert("Registration failed: " + err.message);
-    }
-
     fetch("/api/auth/register", {
       method: "POST",
       headers: {

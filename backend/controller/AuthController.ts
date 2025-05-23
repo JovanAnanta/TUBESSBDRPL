@@ -28,8 +28,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
 
-    const encryptedInputPassword = encrypt(password);
-    if (encryptedInputPassword !== nasabah.password) {
+    const isMatch = await bcrypt.compare(password, nasabah.password);
+    if (!isMatch) {
       throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
 
@@ -49,6 +49,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       nasabah_id: nasabah.nasabah_id,
       pinStatus,  // Kirim status PIN
       nama: nasabah.nama,
+      status: nasabah.status,
+      saldo: nasabah.saldo,
     });
   } catch (err) {
     if (err instanceof Error) {
