@@ -5,6 +5,14 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { encrypt,decrypt } from '../enkripsi/Encryptor';
 
+// helper to safely decrypt encrypted fields
+const safeDecrypt = (val: string): string => {
+  try {
+    return decrypt(val);
+  } catch {
+    return val; // fallback to raw value if decryption fails
+  }
+};
 
 const JWT_SECRET = "your_jwt_secret_key";
 
@@ -44,11 +52,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set'; // Jika PIN kosong, set ke 'empty'
 
+    const decryptedNama = safeDecrypt(nasabah.nama);
+    
     res.status(200).json({
       token,
       nasabah_id: nasabah.nasabah_id,
       pinStatus,  // Kirim status PIN
-      nama: nasabah.nama,
+      nama: decryptedNama,
       status: nasabah.status,
       saldo: nasabah.saldo,
     });
@@ -85,12 +95,13 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
       message: "nasabah data fetched successfully", // Menambahkan pesan sukses
       data: { 
         nasabah_id: nasabah.nasabah_id,
-        nama: nasabah.nama,
-        email: nasabah.email,
-        noRekening: nasabah.noRekening,
-        pin: nasabah.pin,
+        nama: safeDecrypt(nasabah.nama),
+        email: safeDecrypt(nasabah.email),
+        noRekening: safeDecrypt(nasabah.noRekening),
+        pin: safeDecrypt(nasabah.pin),
         saldo: nasabah.saldo,
-        kodeAkses: nasabah.kodeAkses,
+        kodeAkses: safeDecrypt(nasabah.kodeAkses),
+        status: nasabah.status,
       }
     });
   } catch (error) {

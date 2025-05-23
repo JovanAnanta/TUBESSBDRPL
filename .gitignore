@@ -23,3 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 config.json
+
+# Ignore sensitive configuration files
+/config/config.json
+/backend/config/config.json

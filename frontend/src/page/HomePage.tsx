@@ -4,23 +4,60 @@ import "../style/HomePage.css";
 import "../style/Report.css";
 import ReportForm from "./ReportForm";
 
+type Nasabah = {
+  nama: string;
+  email: string;
+  noRekening: string;
+  saldo: number;
+  profileImage: string;
+  pin: string;
+  kodeAkses: string;
+};
+
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
   const [showReportForm, setShowReportForm] = useState(false);
+  const [nasabah, setNasabah] = useState<Nasabah | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     const nasabahId = localStorage.getItem("nasabahId");
 
-    if (!token || !nasabahId) {
-      navigate("/auth/login");
+    if (token && nasabahId) {
+      fetchNasabahData(token);
+    } else {
+      navigate('/auth/login'); // jika tidak ada token, redirect
     }
-  }, [navigate]);
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("nasabahId");
+    setNasabah(null);
     navigate("/auth/login");
+  };
+
+  const fetchNasabahData = async (token: string) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/user/getDataNasabah', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal mengambil data nasabah');
+      }
+
+      const data = await response.json();
+      setNasabah(data.data);
+    } catch (error) {
+      setError('Terjadi kesalahan saat mengambil data nasabah');
+      console.error('Error:', error);
+    }
   };
 
   const features = [

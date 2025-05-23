@@ -8,6 +8,7 @@ const RegisterForm: React.FC = () => {
     nama: "",
     email: "",
     password: "",
+    confirmPassword: "",
     noRekening: "",
     pin: null,
     saldo: 0,
@@ -28,12 +29,11 @@ const RegisterForm: React.FC = () => {
 
     const form = new FormData();
 
-    form.append("nama", formData.nama);
-    form.append("email", formData.email);
-    form.append("password", formData.password);
-    form.append("noRekening", formData.noRekening);
-    form.append("saldo", formData.saldo.toString());
-    form.append("kodeAkses", formData.kodeAkses);
+    if (formData.password !== formData.confirmPassword) {
+      alert("Password tidak sama");
+      return;
+
+    }
 
     fetch("/api/auth/register", {
       method: "POST",
@@ -90,6 +90,16 @@ const RegisterForm: React.FC = () => {
             type="password"
             name="password"
             id="password"
+            required
+            onChange={handleChange}
+            className="form-input"
+          />
+
+          <label htmlFor="confirmPassword" className="form-label">confirmPassword</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            id="confirmPassword"
             required
             onChange={handleChange}
             className="form-input"
