@@ -34,7 +34,7 @@ export default {
       kodeAkses: {
         type: sequelize.STRING,
         allowNull: false,
-      },
+      }
     });
   },
 

@@ -1,17 +1,17 @@
-import express from 'express';
 import bodyParser from 'body-parser';
-import authRoutes from './routes/AuthRoutes';
-import userRoutes from './routes/UserRoutes';
-import reportRoutes from './routes/ReportRoutes';
-import { Sequelize } from 'sequelize-typescript';
 import cors from 'cors';
-import config from '../config/config.json';
+import express from 'express';
+import { Sequelize } from 'sequelize-typescript';
+import config from './config/config.json';
+import authRoutes from './routes/AuthRoutes';
+import reportRoutes from './routes/ReportRoutes';
+import userRoutes from './routes/UserRoutes';
 
+import { LayananPelanggan } from './models/LayananPelanggan';
 import { Nasabah } from './models/Nasabah';
 import { Report } from './models/Report';
-import csRoutes from './routes/CSRoutes';
-import { LayananPelanggan } from './models/LayananPelanggan';
 import csReportRoutes from './routes/CSReportRoutes';
+import csRoutes from './routes/CSRoutes';
 
 
 

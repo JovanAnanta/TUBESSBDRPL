@@ -1,7 +1,13 @@
-import { Table, Column, Model, DataType } from "sequelize-typescript";
+import { Column, DataType, Model, Table } from "sequelize-typescript";
+
+export enum NasabahStatus {
+    Aktif = "Aktif",
+    TidakAktif = "Tidak Aktif"
+}
 
 @Table({
-    tableName: "nasabah", timestamps: false
+    tableName: "nasabah",
+    timestamps: false
 })
 export class Nasabah extends Model {
     @Column({
@@ -52,4 +58,11 @@ export class Nasabah extends Model {
         allowNull: false,
     })
     declare kodeAkses: string;
+
+    @Column({
+        type: DataType.ENUM('Aktif', 'Tidak Aktif'),
+        allowNull: false,
+        defaultValue: 'Tidak Aktif'
+    })
+    declare status: NasabahStatus;
 }

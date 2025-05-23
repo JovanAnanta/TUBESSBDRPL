@@ -1,22 +1,32 @@
-export default{
-  up: async (queryInterface, sequelize) => {
-    await queryInterface.createTable('tagihan', {
+'use strict';
+
+/** @type {import('sequelize-cli').Migration} */
+export default {
+  up: async (queryInterface, Sequelize) => {
+    queryInterface.createTable('tagihan', {
+      id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false
+      },
       statusTagihanType: {
-        type: sequelize.ENUM('AIR', 'LISTRIK'),
-        allowNull: false,
+        type: Sequelize.ENUM('AIR', 'LISTRIK'),
+        allowNull: false
       },
       jumlahSaldoBerkurang: {
-        type: sequelize.DOUBLE,
-        allowNull: false,
+        type: Sequelize.DOUBLE,
+        allowNull: false
       },
       nomorTagihan: {
-        type: sequelize.STRING,
-        allowNull: false,
+        type: Sequelize.STRING,
+        allowNull: false
       },
     });
   },
-
-  down: async (queryInterface, sequelize) => {
-    await queryInterface.dropTable('tagihan');
-  },
 };
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable('tagihan');
+    await queryInterface.sequelize.query('DROP TYPE IF EXISTS enum_tagihan_statusTagihanType;');
+  }
