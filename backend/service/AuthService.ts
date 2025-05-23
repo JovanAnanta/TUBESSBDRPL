@@ -55,3 +55,4 @@ export const registerNasabah = async (data: any) => {
     throw new Error(`Registration failed: ${(error as Error).message}`);
   }
 };
+// ...existing code...
