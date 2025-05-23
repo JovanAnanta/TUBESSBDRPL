@@ -1,9 +1,5 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
-
-export enum TagihanType {
-    AIR = "AIR",
-    LISTRIK = "LISTRIK"
-}
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey } from "sequelize-typescript";
+import { Transaksi } from "./Transaksi";
 
 @Table({
     tableName: "tagihan",
@@ -11,24 +7,23 @@ export enum TagihanType {
 })
 export class Tagihan extends Model {
     @Column({
-        type: DataType.INTEGER,
         primaryKey: true,
-        autoIncrement: true,
+        type: DataType.UUID
+    })
+    declare tagihan_id: string;
+
+    @ForeignKey(() => Transaksi)
+    @Column({
+        type: DataType.UUID,
         allowNull: false
     })
-    declare id: number;
+    declare transaksi_id: string;
 
     @Column({
-        type: DataType.ENUM({ values: Object.values(TagihanType) }),
-        allowNull: false
+        type: DataType.ENUM("AIR", "LISTRIK"),
+        allowNull: false,
     })
-    declare statusTagihanType: TagihanType;
-
-    @Column({
-        type: DataType.DOUBLE,
-        allowNull: false
-    })
-    declare jumlahSaldoBerkurang: number;
+    declare statusTagihanType: string;
 
     @Column({
         type: DataType.STRING,

@@ -26,12 +26,6 @@ export class Transaksi extends Model {
     declare transaksiType: string;
 
     @Column({
-        type: DataType.ENUM("BERHASIL", "TERTUNDA", "GAGAL"),
-        allowNull: false
-    })
-    declare statusType: string;
-
-    @Column({
         type: DataType.DATE,
         allowNull: false
     })

@@ -1,13 +1,13 @@
-'use strict';
+"use strict";
 
+/** @type {import('sequelize-cli').Migration} */
 export default {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('admin', {
       admin_id: {
         type: Sequelize.UUID,
-        allowNull: false,
         primaryKey: true,
-        defaultValue: Sequelize.UUID // untuk MySQL / MariaDB
+        allowNull: false,
       },
       nama: {
         type: Sequelize.STRING,

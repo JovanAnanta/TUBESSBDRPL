@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import "../style/Register.css"; // Import your CSS file
+// import { api } from '../api/Api'; // Import your API utility
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +11,7 @@ const RegisterForm: React.FC = () => {
     noRekening: "",
     pin: null,
     saldo: 0,
-    kodeAkses: ""
+    kodeAkses: "",
   });
 
   // Inisialisasi navigate di luar handleSubmit
@@ -22,7 +23,7 @@ const RegisterForm: React.FC = () => {
   };
 
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const form = new FormData();
@@ -33,6 +34,15 @@ const RegisterForm: React.FC = () => {
     form.append("noRekening", formData.noRekening);
     form.append("saldo", formData.saldo.toString());
     form.append("kodeAkses", formData.kodeAkses);
+
+    try {
+      await api.postFormData<null>('auth/register', form, false);
+      alert("Registration successful");
+      navigate("/auth/login"); // Redirect to login page after successful registration
+    } catch (err: any) {
+      console.error("Error detail:", err);
+      alert("Registration failed: " + err.message);
+    }
 
     fetch("/api/auth/register", {
       method: "POST",

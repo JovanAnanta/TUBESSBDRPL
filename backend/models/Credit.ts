@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey } from "sequelize-typescript";
+import { Transaksi } from "./Transaksi";
 
 @Table({
     tableName: "credit", timestamps: false
@@ -6,14 +7,23 @@ import { Table, Column, Model, DataType } from "sequelize-typescript";
 export class Credit extends Model {
 
     @Column({
-        type: DataType.STRING,
-        allowNull: false
-    })
-    declare nomorRekeningAsal: string;
+            primaryKey: true,
+            type: DataType.UUID
+        })
+        declare credit_id: string;
+    
+        @ForeignKey(() => Transaksi)
+        @Column({
+            type: DataType.UUID,
+            allowNull: false
+        })
+        declare transaksi_id: string;
 
     @Column({
         type: DataType.DOUBLE,
         allowNull: false
     })
     declare jumlahSaldoBertambah: number;
+
+    
 }

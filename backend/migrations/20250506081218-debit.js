@@ -1,18 +1,33 @@
+"use strict";
+
+/** @type {import('sequelize-cli').Migration} */
 export default {
-  up: async (queryInterface, sequelize) => {
+  up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('debit', {
-      nomorRekeningTujuan: {
-        type: sequelize.STRING,
-        allowNull: false,
-      },
+      debit_id: {
+              type: Sequelize.UUID,
+              primaryKey: true,
+              allowNull: false,
+            },
+            transaksi_id: {
+              type: Sequelize.UUID,
+              allowNull: false,
+              references: {
+                model: "transaksi", 
+                key: "transaksi_id",
+              },
+              onDelete: "CASCADE",
+            },
       jumlahSaldoBerkurang: {
-        type: sequelize.DOUBLE,
+        type: Sequelize.DOUBLE,
         allowNull: false,
       },
+      
     });
   },
 
-  down: async (queryInterface, sequelize) => {
+  down: async (queryInterface, Sequelize) => {
+
     await queryInterface.dropTable('debit');
   },
 };

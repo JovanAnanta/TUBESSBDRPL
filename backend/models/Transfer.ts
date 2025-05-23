@@ -2,15 +2,15 @@ import { Table, Column, Model, DataType, PrimaryKey, ForeignKey } from "sequeliz
 import { Transaksi } from "./Transaksi";
 
 @Table({
-    tableName: "debit", timestamps: false
+    tableName: "transfer",
+    timestamps: false
 })
-export class Debit extends Model {
-
+export class Tagihan extends Model {
     @Column({
         primaryKey: true,
         type: DataType.UUID
     })
-    declare debit_id: string;
+    declare transfer_id: string;
 
     @ForeignKey(() => Transaksi)
     @Column({
@@ -20,10 +20,8 @@ export class Debit extends Model {
     declare transaksi_id: string;
 
     @Column({
-        type: DataType.DOUBLE,
-        allowNull: false
+        type: DataType.STRING,
+        allowNull: false,
     })
-    declare jumlahSaldoBerkurang: number;
-
-    
+    declare noRekening: string;
 }

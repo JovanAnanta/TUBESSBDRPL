@@ -1,6 +1,10 @@
     import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { TagihanType } from '../../../backend/models/Tagihan'; // Pastikan ini adalah enum, bukan model
+// Define TagihanType enum locally if not exported from backend
+export enum TagihanType {
+    AIR = 'AIR',
+    LISTRIK = 'LISTRIK'
+}
 import '../style/Tagihan.css';
 
     interface TagihanFormData {

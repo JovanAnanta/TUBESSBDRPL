@@ -1,21 +1,26 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
+
 export default {
-  up: async (queryInterface, Sequelize) => {
+  async up(queryInterface, Sequelize) {
     queryInterface.createTable('tagihan', {
-      id: {
-        type: Sequelize.INTEGER,
+      tagihan_id: {
+        type: Sequelize.UUID,
         primaryKey: true,
-        autoIncrement: true,
-        allowNull: false
+        allowNull: false,
+      },
+      transaksi_id: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "transaksi",
+          key: "transaksi_id",
+        },
+        onDelete: "CASCADE",
       },
       statusTagihanType: {
         type: Sequelize.ENUM('AIR', 'LISTRIK'),
-        allowNull: false
-      },
-      jumlahSaldoBerkurang: {
-        type: Sequelize.DOUBLE,
         allowNull: false
       },
       nomorTagihan: {
@@ -24,9 +29,9 @@ export default {
       },
     });
   },
-};
 
-  down: async (queryInterface, Sequelize) => {
+  async down(queryInterface) {
     await queryInterface.dropTable('tagihan');
     await queryInterface.sequelize.query('DROP TYPE IF EXISTS enum_tagihan_statusTagihanType;');
   }
+};

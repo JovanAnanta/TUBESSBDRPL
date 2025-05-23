@@ -1,44 +1,55 @@
+"use strict";
+
+/** @type {import('sequelize-cli').Migration} */
 export default {
-  up: async (queryInterface, sequelize) => {
+  up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('nasabah', {
       nasabah_id: {
-        type: sequelize.UUID,
-        defaultValue: sequelize.UUIDV4,
-        allowNull: false,
+        type: Sequelize.UUID,
         primaryKey: true,
+        allowNull: false,
       },
       nama: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       email: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       password: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       noRekening: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       pin: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       saldo: {
-        type: sequelize.DOUBLE,
+        type: Sequelize.DOUBLE,
         allowNull: false,
       },
       kodeAkses: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
-      }
+      },
+      status: {
+        type: Sequelize.ENUM("AKTIF", "TIDAK AKTIF"),
+        allowNull: false,
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.NOW,
+      },
     });
   },
 
-  down: async (queryInterface, sequelize) => {
+  down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('nasabah');
   },
 };

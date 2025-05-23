@@ -18,12 +18,8 @@ const checkAuth = () => localStorage.getItem("token") !== null;
 
 const Routers = createBrowserRouter([
   {
-    path: "",
-    element: <LoginPage />
-  },
-  {
     path: "/",
-    element: <LoginPage />
+    element: <Navigate to="/auth/login" replace />
   },
   {
     path: "/auth",

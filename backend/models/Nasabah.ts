@@ -1,13 +1,10 @@
 import { Column, DataType, Model, Table } from "sequelize-typescript";
 
-export enum StatusAkun {
-    AKTIF = "AKTIF",
-    TIDAK_AKTIF = "TIDAK_AKTIF"
-}
 @Table({
     tableName: "nasabah",
     timestamps: false
 })
+
 export class Nasabah extends Model {
     @Column({
         primaryKey: true,
@@ -59,8 +56,16 @@ export class Nasabah extends Model {
     declare kodeAkses: string;
 
     @Column({
-    type: DataType.ENUM({ values: Object.values(StatusAkun) }),
-    allowNull: false
+        type: DataType.ENUM('AKTIF', 'TIDAK AKTIF'),
+        allowNull: false,
+        defaultValue: 'AKTIF',
     })
-    declare statusAkun: StatusAkun;
+    declare status: string;
+
+    @Column({
+        type: DataType.DATE,
+        allowNull: false,
+        defaultValue: DataType.NOW
+    })
+    declare createdAt: Date;
 }

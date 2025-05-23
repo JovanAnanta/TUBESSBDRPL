@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
-import { TagihanType } from '../../../../backend/models/Tagihan';
-import '../../style/MPayment.css';
+// filepath: c:\Tugas Kuliah\Semester 4\SBD\TUBES SBD RPL\shared\models\Tagihan.ts
+export enum TagihanType {
+    AIR = "AIR",
+    LISTRIK = "LISTRIK"
+}import '../../style/MPayment.css';
 
 export const MPayment = () => {
   const paymentOptions = [

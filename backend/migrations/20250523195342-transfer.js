@@ -3,8 +3,8 @@
 /** @type {import('sequelize-cli').Migration} */
 export default {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('credit', {
-      credit_id: {
+    await queryInterface.createTable('transfer', {
+      transfer_id: {
         type: Sequelize.UUID,
         primaryKey: true,
         allowNull: false,
@@ -18,8 +18,8 @@ export default {
         },
         onDelete: "CASCADE",
       },
-      jumlahSaldoBertambah: {
-        type: Sequelize.DOUBLE,
+      noRekening: {
+        type: Sequelize.STRING,
         allowNull: false,
       },
       
@@ -27,6 +27,6 @@ export default {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('credit');
+    await queryInterface.dropTable('transfer');
   },
 };

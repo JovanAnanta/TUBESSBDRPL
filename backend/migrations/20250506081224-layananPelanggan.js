@@ -1,28 +1,30 @@
+"use strict";
+
+/** @type {import('sequelize-cli').Migration} */
 export default {
-  up: async (queryInterface, sequelize) => {
+  up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('cs', {
       cs_id: {
-        type: sequelize.UUID,
-        defaultValue: sequelize.UUIDV4,
-        allowNull: false,
+        type: Sequelize.UUID,
         primaryKey: true,
+        allowNull: false,
       },
       nama: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       email: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       password: {
-        type: sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false,
       },
     });
   },
 
-  down: async (queryInterface, sequelize) => {
+  down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('cs');
   },
 };

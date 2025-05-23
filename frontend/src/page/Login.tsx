@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { encrypt, decrypt } from '../../../backend/enkripsi/Encryptor';
 import "../style/Login.css";
 
 export const login = async (kodeAkses: string, password: string) => {

@@ -22,7 +22,7 @@ export class LayananPelanggan extends Model {
         allowNull: false
     })
     declare email: string;
-
+    
     @Column({
         type: DataType.STRING,
         allowNull: false
