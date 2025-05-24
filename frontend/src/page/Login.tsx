@@ -35,7 +35,6 @@ const LoginForm = () => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -48,19 +47,31 @@ const LoginForm = () => {
       const data = await login(formData.kodeAkses, formData.password);
       localStorage.removeItem("cs_token");
 
+      // Cek status nasabah dari response
+      if (data.status !== 'AKTIF') {
+        alert('Akun Anda sedang diblokir. Silakan hubungi customer service untuk informasi lebih lanjut.');
+        return;
+      }
+
       localStorage.setItem("token", data.token);
       localStorage.setItem("nasabahId", data.nasabah_id);
-      if (data.pinStatus === 'empty') {
+      
+      if (data.pinStatus === 'empty' || data.pinStatus === '') {
         navigate("/user/set-pin");  // Arahkan ke halaman set PIN
       } else {
         navigate("/user");  // Arahkan ke halaman utama
       }
 
-      localStorage.setItem("nasabahId", data.nasabah_id);
       alert(`Login berhasil! Selamat datang, ${data.nama}`);
     } catch (err: any) {
       console.error('Error on login submit:', err);
-      alert('Login gagal: ' + err.message);
+      
+      // Cek apakah error adalah akun yang diblokir
+      if (err.message && err.message.includes('diblokir')) {
+        alert(`⚠️ ${err.message}`);
+      } else {
+        alert('Login gagal: ' + err.message);
+      }
     }
   };
 

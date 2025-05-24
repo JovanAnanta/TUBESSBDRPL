@@ -1,0 +1,165 @@
+/* InfoSaldo.css */
+.info-saldo-container {
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  font-family: sans-serif;
+}
+
+.page-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1f2937;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #6b7280;
+  margin-top: 3rem;
+}
+
+.error-message {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+  border: 1px solid #fecaca;
+}
+
+/* Saldo Card */
+.saldo-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  max-width: 500px;
+  margin: 0 auto 2rem auto;
+}
+
+.saldo-header {
+  margin-bottom: 1.5rem;
+}
+
+.saldo-header h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.account-info {
+  opacity: 0.9;
+}
+
+.account-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.account-number {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.saldo-amount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.saldo-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-bottom: 0.5rem;
+}
+
+.saldo-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Back Button */
+.back-button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.back-button {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.back-button:hover {
+  background-color: #5a67d8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.back-button:active {
+  transform: translateY(0);
+}
+
+/* Last Update */
+.last-update {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.update-label {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.update-time {
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .info-saldo-container {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .saldo-card {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+
+  .saldo-value {
+    font-size: 2rem;
+  }
+
+  .back-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
