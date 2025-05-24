@@ -1,11 +1,23 @@
+import { Link, useNavigate } from "react-router-dom";
+import "../../style/Settings.css";
+
 export const Setting = () => {
+  const navigate = useNavigate();
   return (
     <div className="setting-container">
-      <h2 className="setting-title">Setting</h2>
-      <div className="setting-content">
-        <p>Welcome to the Setting page!</p>
-        <p>Here you can manage your account settings.</p>
+      <button
+        className="mpayment-back-button"
+        onClick={() => navigate('/user')}
+        style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
+      >
+        Kembali
+      </button>
+      <h2 className="setting-title">Pengaturan Akun</h2>
+      <div className="setting-options">
+        <Link to="/user/nasabah/ganti-pin" className="setting-option">
+          🔒 Ganti PIN
+        </Link>
       </div>
     </div>
   );
-}
+};

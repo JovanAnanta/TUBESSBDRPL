@@ -17,6 +17,7 @@ import { Debit } from './models/Debit';
 import { Transfer } from './models/Transfer';
 import csReportRoutes from './routes/CSReportRoutes';
 import csRoutes from './routes/CSRoutes';
+import gantiPinRoutes from './routes/GantiPinRoutes';
 import tagihanRoutes from './routes/TagihanRoutes';
 
 
@@ -39,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/tagihan', tagihanRoutes);
+app.use('/api/nasabah', gantiPinRoutes);
 
 app.use('/api/cs', csRoutes);
 app.use('/api/cs', csReportRoutes);

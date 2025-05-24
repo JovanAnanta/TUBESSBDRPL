@@ -1,0 +1,61 @@
+.ganti-pin-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ganti-pin-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.ganti-pin-form input {
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.ganti-pin-form button {
+    padding: 0.75rem;
+    background-color: #2e8b57;
+    color: white;
+    border: none;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.ganti-pin-form button:disabled {
+    background-color: #ccc;
+}
+
+.ganti-pin-message {
+    margin-top: 1rem;
+    color: #d9534f;
+    font-weight: bold;
+}
+
+.pin-back-button {
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #e0e0e0;
+    border: 1.5px solid #bbb;
+    color: #444;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.pin-back-button:hover {
+    background-color: #cfcfcf;
+    border-color: #999;
+    color: #222;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
