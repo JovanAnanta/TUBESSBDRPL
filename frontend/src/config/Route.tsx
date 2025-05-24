@@ -8,6 +8,7 @@ import { MInfo } from "../page/DetailHomePage/MInfo";
 import { MPayment } from "../page/DetailHomePage/MPayment";
 import { MTransfer } from "../page/DetailHomePage/MTransfer";
 import { Setting } from "../page/DetailHomePage/Setting";
+import { GantiPin } from "../page/GantiPin";
 import HomePage from "../page/HomePage";
 import LoginPage from "../page/Login";
 import RegisterPage from "../page/Register";
@@ -41,6 +42,7 @@ const Routers = createBrowserRouter([
       { path: "mpayment", element: <MPayment /> },
       { path: "mpayment/:type", element: <TagihanComponent /> },
       { path: "settings", element: <Setting /> },
+      { path: "nasabah/ganti-pin", element: <GantiPin />}
     ]
   },
   {
