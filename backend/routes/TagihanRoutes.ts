@@ -1,11 +1,10 @@
-import express from 'express';
-import * as TagihanController from '../controller/TagihanController';
-import AuthenticateToken from '../middleware/AuthenticateToken';
+import { Router } from "express";
+import * as tagihanController from "../controller/TagihanController";
+import authenticateToken from "../middleware/AuthenticateToken";
 
-const router = express.Router();
+const router = Router();
 
-router.post('/:type', AuthenticateToken, TagihanController.bayarTagihan);
-router.get('/riwayat', AuthenticateToken, TagihanController.getRiwayatTagihan);
-
+router.post("/bayar", authenticateToken, tagihanController.bayarTagihan);
+router.get("/riwayat", authenticateToken, tagihanController.getRiwayatTagihan);
 
 export default router;

@@ -61,3 +61,20 @@
     color: #666;
     font-size: 0.875rem;
 }
+
+.mpayment-back-button {
+    margin-top: 1rem;
+    padding: 0.5rem 1.2rem;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.4);
+}
+
+.mpayment-back-button:hover {
+    background-color: #0056b3;
+}
