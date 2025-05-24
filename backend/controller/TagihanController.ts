@@ -1,48 +1,48 @@
-import { Request, Response } from 'express';
-import { TagihanType } from '../models/Tagihan';
-import * as TagihanService from '../service/TagihanService';
+import { Request, Response } from "express";
+import * as tagihanService from "../service/TagihanService";
 
 export const bayarTagihan = async (req: Request, res: Response) => {
   try {
-    const { nomorTagihan, jumlahBayar } = req.body;
-    const nasabah_id = req.user?.id;
-    const type = req.params.type?.toUpperCase();
+    const nasabah_id = String(req.user?.id);
+    const { statusTagihanType, nomorTagihan, jumlahBayar } = req.body;
 
-    if (!nasabah_id || !nomorTagihan || !jumlahBayar) {
-      res.status(400).json({ message: 'Data tidak lengkap' });
+    if (!nasabah_id) {
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    if (!Object.values(TagihanType).includes(type as TagihanType)) {
-      res.status(400).json({ message: 'Tipe tagihan tidak valid' });
+    if (!statusTagihanType || !nomorTagihan || !jumlahBayar) {
+      res.status(400).json({ error: "Data pembayaran tidak lengkap" });
       return;
     }
 
-    const result = await TagihanService.bayarTagihan(
-      String(nasabah_id),
-      type as TagihanType,
-      String(nomorTagihan),
-      Number(jumlahBayar)
+    const result = await tagihanService.bayarTagihan(
+      nasabah_id,
+      statusTagihanType,
+      nomorTagihan,
+      jumlahBayar
     );
 
     res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ message: error instanceof Error ? error.message : 'Internal server error' });
+    return;
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+    return;
   }
 };
 
-
 export const getRiwayatTagihan = async (req: Request, res: Response) => {
   try {
-    const nasabah_id = req.user?.id;
+    const nasabah_id = String(req.user?.id);
+
     if (!nasabah_id) {
-      res.status(401).json({ message: 'Unauthorized' });
+      res.status(401).json({ error: "Unauthorized" });
       return;
     }
 
-    const riwayat = await TagihanService.getRiwayatTagihan(String(nasabah_id));
+    const riwayat = await tagihanService.getRiwayatTagihan(nasabah_id);
     res.status(200).json(riwayat);
-  } catch (error) {
-    res.status(500).json({ message: error instanceof Error ? error.message : 'Internal server error' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 };

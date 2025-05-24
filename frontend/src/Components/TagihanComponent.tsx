@@ -1,15 +1,16 @@
     import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-// Define TagihanType enum locally if not exported from backend
-export enum TagihanType {
+
+    export enum TagihanType {
     AIR = 'AIR',
     LISTRIK = 'LISTRIK'
-}
-import '../style/Tagihan.css';
+    }
+
+    import '../style/Tagihan.css';
 
     interface TagihanFormData {
     nomorTagihan: string;
-    jumlahBayar: string; // masih string karena input HTML
+    jumlahBayar: string;
     }
 
     export const TagihanComponent = () => {
@@ -21,7 +22,6 @@ import '../style/Tagihan.css';
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Validasi type
     const upperType = type?.toUpperCase() as TagihanType;
     if (!upperType || !Object.values(TagihanType).includes(upperType)) {
         return <div>Invalid tagihan type</div>;
@@ -58,7 +58,7 @@ import '../style/Tagihan.css';
             },
             body: JSON.stringify({
             nomorTagihan: formData.nomorTagihan,
-            jumlahBayar: parseFloat(formData.jumlahBayar), // konversi ke number
+            jumlahBayar: parseFloat(formData.jumlahBayar)
             })
         });
 
@@ -102,6 +102,15 @@ import '../style/Tagihan.css';
             {loading ? 'Memproses...' : currentConfig.buttonText}
             </button>
         </form>
+
+        {/* Back Button */}
+        <button
+            className="tagihan-back-button"
+            onClick={() => navigate('/user/mpayment')}
+        >
+            Kembali
+        </button>
+
         </div>
     );
     };

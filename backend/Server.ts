@@ -10,15 +10,18 @@ import userRoutes from './routes/UserRoutes';
 import { LayananPelanggan } from './models/LayananPelanggan';
 import { Nasabah } from './models/Nasabah';
 import { Report } from './models/Report';
+import { Tagihan } from './models/Tagihan';
+import { Transaksi } from './models/Transaksi';
 import csReportRoutes from './routes/CSReportRoutes';
 import csRoutes from './routes/CSRoutes';
+import tagihanRoutes from './routes/TagihanRoutes';
 
 
 
 const sequelize = new Sequelize({
   ...config.development,
   dialect: 'postgres',
-  models: [Nasabah, Report, LayananPelanggan]
+  models: [Nasabah, Report, LayananPelanggan, Tagihan, Transaksi],
 });
 
 const app = express();
@@ -32,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/tagihan', tagihanRoutes);
 
 app.use('/api/cs', csRoutes);
 app.use('/api/cs', csReportRoutes);
