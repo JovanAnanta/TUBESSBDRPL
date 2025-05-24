@@ -79,8 +79,8 @@ const PinInput: React.FC<PinInputProps> = ({ length = 6, onComplete }) => {
             const responseUser = await fetch('/api/user/getDataNasabah', {
                 method: 'GET',
                 headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             if (!responseUser.ok) {
@@ -94,15 +94,13 @@ const PinInput: React.FC<PinInputProps> = ({ length = 6, onComplete }) => {
             localStorage.setItem('nasabahId', nasabahId);
 
             // Set PIN
-            const responsePin = await fetch('/api/user/setPin', {
+            const responsePin = await fetch('/api/user/setpin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    nasabahId,
-                    pin,
-                }),
+                body: JSON.stringify({ nasabahId, pin }),
             });
 
             if (!responsePin.ok) {

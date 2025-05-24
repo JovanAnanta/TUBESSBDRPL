@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import * as PinController from '../controller/PinController';
 import * as MutasiController from '../controller/MutasiController';
+import * as TransferController from '../controller/TransferController';
 import { getNasabahData } from '../controller/AuthController';
 import { validateNasabahStatus } from '../middleware/ValidateNasabahStatus';
 
@@ -15,6 +16,11 @@ router.post('/setpin', validateNasabahStatus, PinController.setPin);
 router.post('/verifyPin', validateNasabahStatus, PinController.verifyPin);
 router.post('/blockAccount', validateNasabahStatus, PinController.blockAccount);
 router.get('/pinStatus/:nasabahId', validateNasabahStatus, PinController.checkPinStatus);
+
+// Transfer & Top Up routes (with server-side PIN validation)
+router.post('/top-up', validateNasabahStatus, TransferController.topUpWithPin);
+router.post('/transfer', validateNasabahStatus, TransferController.transferWithPin);
+router.get('/e-receipt/:transaksiId', validateNasabahStatus, TransferController.getEReceipt);
 
 // Mutasi & Saldo routes
 router.get('/saldo/:nasabahId', validateNasabahStatus, MutasiController.getSaldoInfo);

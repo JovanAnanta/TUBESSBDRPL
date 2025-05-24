@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../../style/MutasiRekening.css';
+import '../../../style/MutasiRekening.css';
 
 type MutasiData = {
   transaksi_id: string;

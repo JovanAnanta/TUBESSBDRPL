@@ -7,17 +7,17 @@ import { Transaksi } from "./Transaksi";
 export class Credit extends Model {
 
     @Column({
-            primaryKey: true,
-            type: DataType.UUID
-        })
-        declare credit_id: string;
-    
-        @ForeignKey(() => Transaksi)
-        @Column({
-            type: DataType.UUID,
-            allowNull: false
-        })
-        declare transaksi_id: string;
+        primaryKey: true,
+        type: DataType.UUID
+    })
+    declare credit_id: string;
+
+    @ForeignKey(() => Transaksi)
+    @Column({
+        type: DataType.UUID,
+        allowNull: false
+    })
+    declare transaksi_id: string;
 
     @Column({
         type: DataType.DOUBLE,
@@ -25,5 +25,5 @@ export class Credit extends Model {
     })
     declare jumlahSaldoBertambah: number;
 
-    
+
 }

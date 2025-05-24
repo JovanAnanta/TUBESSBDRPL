@@ -45,7 +45,7 @@ export const registerNasabah = async (data: any) => {
       pin: encrypt(''),
       saldo: Number(saldo),
       kodeAkses: encrypt(kodeAkses),
-      status: 'Aktif',
+      status: 'AKTIF',
     });
 
     return created;

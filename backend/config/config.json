@@ -1,8 +1,8 @@
 {
   "development": {
     "username": "postgres",
-    "password": "rja021005",
-    "database": "tubessbdrpl",
+    "password": "1234",
+    "database": "tubessbd",
     "host": "127.0.0.1",
     "dialect": "postgres"
   },
