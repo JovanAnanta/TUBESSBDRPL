@@ -5,6 +5,8 @@ import CSHomePage from '../page/CSHomePage';
 import CSLogin from '../page/CSLogin';
 import CSReportPage from '../page/CSReportPage';
 import { MInfo } from "../page/DetailHomePage/MInfo";
+import InfoSaldo from "../page/DetailHomePage/InfoSaldo";
+import MutasiRekening from "../page/DetailHomePage/MutasiRekening";
 import { MPayment } from "../page/DetailHomePage/MPayment";
 import { MTransfer } from "../page/DetailHomePage/MTransfer";
 import { Setting } from "../page/DetailHomePage/Setting";
@@ -13,6 +15,7 @@ import HomePage from "../page/HomePage";
 import LoginPage from "../page/Login";
 import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
+import CekPinPage from "../page/cekPinPage";
 import UserLayout from "../page/UserLayout";
 
 const checkAuth = () => localStorage.getItem("token") !== null;
@@ -33,11 +36,13 @@ const Routers = createBrowserRouter([
   },
   {
     path: "/user",
-    element: checkAuth() ? <UserLayout /> : <Navigate to="/auth/login" />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: "set-pin", element: <PinPage /> },
+    element: checkAuth() ? <UserLayout /> : <Navigate to="/auth/login" />,    children: [
+      { index: true, element: <HomePage /> },      
+      { path: "set-pin", element: <PinPage /> },      
+      { path: "verify-pin", element: <CekPinPage /> },
       { path: "minfo", element: <MInfo />},
+      { path: "minfo/saldo", element: <InfoSaldo />},
+      { path: "minfo/mutasi", element: <MutasiRekening />},
       { path: "mtransfer", element: <MTransfer /> },
       { path: "mpayment", element: <MPayment /> },
       { path: "mpayment/:type", element: <TagihanComponent /> },

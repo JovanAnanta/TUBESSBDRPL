@@ -5,7 +5,7 @@ import { Transaksi } from "./Transaksi";
     tableName: "transfer",
     timestamps: false
 })
-export class Tagihan extends Model {
+export class Transfer extends Model {
     @Column({
         primaryKey: true,
         type: DataType.UUID

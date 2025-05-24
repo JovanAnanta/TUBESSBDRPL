@@ -3,16 +3,10 @@ import * as AuthService from '../service/AuthService';
 import { Nasabah } from '../models/Nasabah';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { encrypt,decrypt } from '../enkripsi/Encryptor';
+import { encrypt, decrypt } from '../enkripsi/Encryptor';
 
 // helper to safely decrypt encrypted fields
-const safeDecrypt = (val: string): string => {
-  try {
-    return decrypt(val);
-  } catch {
-    return val; // fallback to raw value if decryption fails
-  }
-};
+
 
 const JWT_SECRET = "your_jwt_secret_key";
 
@@ -26,7 +20,7 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { kodeAkses, password } = req.body;
+  const { kodeAkses, password, status } = req.body;
 
   try {
     const encryptedKodeAkses = encrypt(kodeAkses);
@@ -34,13 +28,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     if (!nasabah) {
       throw new Error('Kode Akses atau Password Tidak Ditemukan');
-    }
-
-    const isMatch = await bcrypt.compare(password, nasabah.password);
+    }    const isMatch = await bcrypt.compare(password, nasabah.password);
     if (!isMatch) {
       throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
 
+    // Cek status nasabah sebelum melanjutkan login
+    if (nasabah.status !== 'AKTIF') {
+      throw new Error('Akun Anda sedang diblokir. Silakan hubungi customer service untuk informasi lebih lanjut.');
+    }
 
     const token = jwt.sign(
       {
@@ -52,12 +48,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set'; // Jika PIN kosong, set ke 'empty'
 
-    const decryptedNama = safeDecrypt(nasabah.nama);
+    const decryptedNama = decrypt(nasabah.nama);
+    const decryptedPin = decrypt(nasabah.pin);
     
     res.status(200).json({
       token,
       nasabah_id: nasabah.nasabah_id,
-      pinStatus,  // Kirim status PIN
+      pinStatus: decryptedPin,
       nama: decryptedNama,
       status: nasabah.status,
       saldo: nasabah.saldo,
@@ -95,12 +92,12 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
       message: "nasabah data fetched successfully", // Menambahkan pesan sukses
       data: { 
         nasabah_id: nasabah.nasabah_id,
-        nama: safeDecrypt(nasabah.nama),
-        email: safeDecrypt(nasabah.email),
-        noRekening: safeDecrypt(nasabah.noRekening),
-        pin: safeDecrypt(nasabah.pin),
+        nama: decrypt(nasabah.nama),
+        email: decrypt(nasabah.email),
+        noRekening: decrypt(nasabah.noRekening),
+        pin: decrypt(nasabah.pin),
         saldo: nasabah.saldo,
-        kodeAkses: safeDecrypt(nasabah.kodeAkses),
+        kodeAkses: decrypt(nasabah.kodeAkses),
         status: nasabah.status,
       }
     });
