@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { encrypt, decrypt } from '../../../backend/enkripsi/Encryptor';
 import "../style/Login.css";
 
 export const login = async (kodeAkses: string, password: string) => {
@@ -28,8 +29,6 @@ const LoginForm = () => {
   const [role, setRole] = useState<'nasabah' | 'cs'>('nasabah');
   const [formData, setFormData] = useState({ kodeAkses: "", password: "" });
   const navigate = useNavigate();
-  const SECRET_CODE = "a%*h^7(j$80^#$";
-  const SECRET_CODE2 = "a%*h^7(j$80^#$";
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,21 +38,18 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.kodeAkses === SECRET_CODE || formData.password === SECRET_CODE2) {
-      navigate("/cs/login");
-      return;
-    }
-
     try {
       const data = await login(formData.kodeAkses, formData.password);
       localStorage.removeItem("cs_token");
+      localStorage.removeItem('cs_name');
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("nasabahId", data.nasabah_id);
       if (data.pinStatus === 'empty') {
         navigate("/user/set-pin");  // Arahkan ke halaman set PIN
       } else {
-        navigate("/user");  // Arahkan ke halaman utama
+        navigate("/user", { replace: true });
+
       }
 
       localStorage.setItem("nasabahId", data.nasabah_id);
@@ -64,10 +60,33 @@ const LoginForm = () => {
     }
   };
 
+  const handleRoleChange = (selectedRole: 'nasabah' | 'cs') => {
+    if (selectedRole === 'cs') {
+      navigate('/cs/login');
+    } else {
+      setRole('nasabah');
+    }
+  };
+
   return (
     <div className="login-wrapper">
       <div className="login-card">
         <h2 className="login-heading">Welcome Back</h2>
+        
+        <div className="role-selector">
+          <button 
+            className={`role-button ${role === 'nasabah' ? 'active' : ''}`}
+            onClick={() => handleRoleChange('nasabah')}
+          >
+            Nasabah
+          </button>
+          <button 
+            className={`role-button ${role === 'cs' ? 'active' : ''}`}
+            onClick={() => handleRoleChange('cs')}
+          >
+            Customer Service
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">

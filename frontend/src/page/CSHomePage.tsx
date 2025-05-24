@@ -45,7 +45,8 @@ const CSHomePage: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('cs_token');
     localStorage.removeItem('cs_name');
-    navigate('/auth/login');
+    localStorage.removeItem('token');
+    navigate('/cs/login');
   };
 
   const statsDisplay = [
@@ -66,12 +67,12 @@ const CSHomePage: React.FC = () => {
       icon: '📊',
       title: 'Aktivitas Nasabah',
       description: 'Pantau dan tinjau riwayat transaksi dan aktivitas nasabah',
-      path: '/cs/activities'
+      path: '/cs/validation'
     },
     {
       icon: '✅',
       title: 'Validasi Nasabah',
-      description: 'Verifikasi dan validasi data nasabah baru yang mendaftar',
+      description: 'Validasi data nasabah untuk keamanan dan keperluan layanan',
       path: '/cs/validation'
     },
     {

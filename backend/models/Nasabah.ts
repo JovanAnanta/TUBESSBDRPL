@@ -1,4 +1,6 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, Model, Table, HasMany } from "sequelize-typescript";
+import { Transaksi } from "./Transaksi";
+import { LoginActivity } from "./LoginActivity";
 
 @Table({
     tableName: "nasabah",
@@ -68,4 +70,10 @@ export class Nasabah extends Model {
         defaultValue: DataType.NOW
     })
     declare createdAt: Date;
+
+    @HasMany(() => Transaksi)
+    declare transaksi?: Transaksi[];
+
+    @HasMany(() => LoginActivity)
+    declare login_activities?: LoginActivity[];
 }

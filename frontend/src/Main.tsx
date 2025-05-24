@@ -5,5 +5,7 @@ import App from './App'
 import { Router } from './config/Route'
 
 createRoot(document.getElementById('root')!).render(
+  <StrictMode>
     <App />
+  </StrictMode>,
 )

@@ -1,29 +1,44 @@
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
-import { TagihanComponent } from "../Components/TagihanComponent";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import AuthLayout from "../page/AuthLayout";
-import CSHomePage from '../page/CSHomePage';
-import CSLogin from '../page/CSLogin';
-import CSReportPage from '../page/CSReportPage';
+import UserLayout from "../page/UserLayout";
+import HomePage from "../page/HomePage";
+import RegisterPage from "../page/Register";
+import LoginPage from "../page/Login";
+import PinPage from "../page/SetPinPage";
 import { MInfo } from "../page/DetailHomePage/MInfo";
-import { MPayment } from "../page/DetailHomePage/MPayment";
+import  { MPayment }  from "../page/DetailHomePage/MPayment";
 import { MTransfer } from "../page/DetailHomePage/MTransfer";
 import { Setting } from "../page/DetailHomePage/Setting";
-import HomePage from "../page/HomePage";
-import LoginPage from "../page/Login";
-import RegisterPage from "../page/Register";
-import PinPage from "../page/SetPinPage";
-import UserLayout from "../page/UserLayout";
+import CSLogin from '../page/CSLogin';
+import CSHomePage from '../page/CSHomePage';
+import CSReportPage from '../page/CSReportPage';
+import CSValidationPage from '../page/CSValidation';
+import CSCustomerActivityPage from '../page/CSActivity';
+import { ProtectedUser, ProtectedCS } from "./ProtectedRoute";
 
-const checkAuth = () => localStorage.getItem("token") !== null;
+const checkAuth = () => {
+  const token = localStorage.getItem("token");
+  return token && token.trim() !== '';
+};
+
+const checkCSAuth = () => {
+  const token = localStorage.getItem("cs_token");
+  return token && token.trim() !== '';
+};
+
 
 const Routers = createBrowserRouter([
   {
+    path: "",
+    element: <LoginPage />
+  },
+  {
     path: "/",
-    element: <Navigate to="/auth/login" replace />
+    element: <LoginPage />
   },
   {
     path: "/auth",
-    element:  <AuthLayout />,
+    element: <AuthLayout />,
     children: [
       { index: true, element: <LoginPage /> }, // default route
       { path: "login", element: <LoginPage /> },
@@ -32,28 +47,64 @@ const Routers = createBrowserRouter([
   },
   {
     path: "/user",
-    element: checkAuth() ? <UserLayout /> : <Navigate to="/auth/login" />,
+    element: (
+      <ProtectedUser>
+        <UserLayout />
+      </ProtectedUser>
+    ),
     children: [
       { index: true, element: <HomePage /> },
       { path: "set-pin", element: <PinPage /> },
-      { path: "minfo", element: <MInfo />},
+      { path: "minfo", element: <MInfo /> },
       { path: "mtransfer", element: <MTransfer /> },
       { path: "mpayment", element: <MPayment /> },
-      { path: "mpayment/:type", element: <TagihanComponent /> },
-      { path: "settings", element: <Setting /> },
+      { path: "settings", element: <Setting /> }
     ]
   },
+  // CS Routes
   {
-    path: '/cs/login',
+    path: "/cs/login",
     element: <CSLogin />
   },
   {
     path: "/cs/dashboard",
-    element: <CSHomePage />
+    element: (
+      <ProtectedCS>
+        <CSHomePage />
+      </ProtectedCS>
+    )
+  },
+  {
+    path: "/cs",
+    element: (
+      <ProtectedCS>
+        <CSHomePage />
+      </ProtectedCS>
+    )
   },
   {
     path: "/cs/reports",
-    element: <CSReportPage />
+    element: (
+      <ProtectedCS>
+        <CSReportPage />
+      </ProtectedCS>
+    )
+  },
+  {
+    path: "/cs/validation",
+    element: (
+      <ProtectedCS>
+        <CSValidationPage />
+      </ProtectedCS>
+    )
+  },
+  {
+    path: "/cs/customer-activity",
+    element: (
+      <ProtectedCS>
+        <CSCustomerActivityPage />
+      </ProtectedCS>
+    )
   }
 ]);
 

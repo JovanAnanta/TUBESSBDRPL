@@ -4,15 +4,8 @@ import { Nasabah } from '../models/Nasabah';
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { encrypt,decrypt } from '../enkripsi/Encryptor';
-
-// helper to safely decrypt encrypted fields
-const safeDecrypt = (val: string): string => {
-  try {
-    return decrypt(val);
-  } catch {
-    return val; // fallback to raw value if decryption fails
-  }
-};
+import { LoginActivity } from '../models/LoginActivity';
+import geoip from 'geoip-lite';
 
 const JWT_SECRET = "your_jwt_secret_key";
 
@@ -26,42 +19,54 @@ export const register = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { kodeAkses, password } = req.body;
+  const { kodeAkses, password, lat, long } = req.body;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const device_info = req.headers['user-agent'] || 'Unknown';
 
   try {
     const encryptedKodeAkses = encrypt(kodeAkses);
     const nasabah = await Nasabah.findOne({ where: { kodeAkses: encryptedKodeAkses } });
 
-    if (!nasabah) {
-      throw new Error('Kode Akses atau Password Tidak Ditemukan');
+    const status = nasabah ? (encrypt(password) === nasabah.password ? 'SUCCESS' : 'FAILED') : 'FAILED';
+
+    // Tentukan lokasi
+    let location = 'Unknown';
+    if (lat && long) {
+      location = `lat:${lat}, long:${long}`;
+    } else {
+      const geo = geoip.lookup(ip as string);
+      if (geo) location = `${geo.city || 'Unknown City'}, ${geo.country || 'Unknown Country'}`;
     }
 
-    const isMatch = await bcrypt.compare(password, nasabah.password);
-    if (!isMatch) {
+    // Simpan aktivitas login
+    await LoginActivity.create({
+      nasabah_id: nasabah?.nasabah_id || null,
+      waktu_login: new Date(),
+      location,
+      device_info,
+      status
+    });
+
+    // Jika gagal login, balas error
+    if (!nasabah || encrypt(password) !== nasabah.password) {
       throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
-
 
     const token = jwt.sign(
-      {
-        nasabah_id: nasabah.nasabah_id
-      },
+      { nasabah_id: nasabah.nasabah_id },
       JWT_SECRET,
-      { expiresIn: '1h' } // Token expired dalam 1 jam
+      { expiresIn: '1h' }
     );
 
-    const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set'; // Jika PIN kosong, set ke 'empty'
+    const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set';
 
-    const decryptedNama = safeDecrypt(nasabah.nama);
-    
     res.status(200).json({
       token,
       nasabah_id: nasabah.nasabah_id,
-      pinStatus,  // Kirim status PIN
-      nama: decryptedNama,
-      status: nasabah.status,
-      saldo: nasabah.saldo,
+      pinStatus,
+      nama: nasabah.nama,
     });
+
   } catch (err) {
     if (err instanceof Error) {
       res.status(400).json({ message: err.message });
@@ -76,7 +81,7 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
 
     if (!token) {
     res.status(401).json({ message: "Token is required" });
-    return
+    return;
   }
   try {
     // Verifikasi token
@@ -88,20 +93,19 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
     
     if (!nasabah) {
       res.status(404).json({ message: "nasabah not found" });
-      return
+      return;
     }
 
     res.status(200).json({
       message: "nasabah data fetched successfully", // Menambahkan pesan sukses
       data: { 
         nasabah_id: nasabah.nasabah_id,
-        nama: safeDecrypt(nasabah.nama),
-        email: safeDecrypt(nasabah.email),
-        noRekening: safeDecrypt(nasabah.noRekening),
-        pin: safeDecrypt(nasabah.pin),
+        nama: nasabah.nama,
+        email: nasabah.email,
+        noRekening: nasabah.noRekening,
+        pin: nasabah.pin,
         saldo: nasabah.saldo,
-        kodeAkses: safeDecrypt(nasabah.kodeAkses),
-        status: nasabah.status,
+        kodeAkses: nasabah.kodeAkses,
       }
     });
   } catch (error) {
@@ -109,7 +113,7 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
     // Menangani error jika token tidak valid atau ada kesalahan lainnya
     if (error instanceof jwt.JsonWebTokenError) {
       res.status(401).json({ message: "Invalid token" });
-      return
+      return;
     }
     res.status(500).json({ message: "Internal server error" });
   }
