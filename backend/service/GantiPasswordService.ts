@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { safeDecrypt } from '../enkripsi/Encryptor';
+import { decrypt } from '../enkripsi/Encryptor';
 import { Nasabah } from '../models/Nasabah';
 
 export const gantiPassword = async (
@@ -16,7 +16,7 @@ export const gantiPassword = async (
     if (currentHashed.startsWith('$2b$')) {
         isMatch = await bcrypt.compare(oldPassword, currentHashed);
     } else {
-        const decrypted = safeDecrypt(currentHashed);
+        const decrypted = decrypt(currentHashed);
         isMatch = decrypted === oldPassword;
     }
 

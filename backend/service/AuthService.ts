@@ -1,6 +1,8 @@
 
 import { decrypt } from '../enkripsi/Encryptor';
 import { Request, Response } from "express";
+import { Nasabah } from "../models/Nasabah";
+import { encrypt } from "../enkripsi/Encryptor";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
@@ -15,7 +17,7 @@ function generateNomorRekeningDenganPrefix(prefix: string = '3480', digitTambaha
 }
 
 export const registerNasabah = async (data: any) => {
-  const { nama, email, password, noRekening, pin, saldo, kodeAkses} = data;
+  const { nama, email, password, noRekening, pin, saldo, kodeAkses, status} = data;
   
   try {
     const existingUser = await Nasabah.findOne({ where: { email: encrypt(email) } });
@@ -46,6 +48,7 @@ export const registerNasabah = async (data: any) => {
     pin: encrypt(''),
     saldo: Number(data.saldo),
     kodeAkses: encrypt(data.kodeAkses),
+    status: 'AKTIF',
   });
 
   return created;

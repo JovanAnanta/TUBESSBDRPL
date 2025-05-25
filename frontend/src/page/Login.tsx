@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { encrypt, decrypt } from '../../../backend/enkripsi/Encryptor';
 import "../style/Login.css";
 
 export const login = async (kodeAkses: string, password: string, lat?: number, long?: number) => {
   try {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch("http://localhost:3000/api/auth/loginNasabah", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ kodeAkses, password, lat, long }),
@@ -60,7 +59,7 @@ const LoginForm = () => {
       localStorage.removeItem('cs_name');
 
       // Cek status nasabah dari response
-      if (data.status == 'AKTIF') {
+      if (data.status !== 'AKTIF') {
         alert('Akun Anda sedang diblokir. Silakan hubungi customer service untuk informasi lebih lanjut.');
         return;
       }
