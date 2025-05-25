@@ -1,21 +1,22 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { TagihanComponent } from "../Components/TagihanComponent";
 import AuthLayout from "../page/AuthLayout";
+import CekPinPage from "../page/cekPinPage";
 import CSHomePage from '../page/CSHomePage';
 import CSLogin from '../page/CSLogin';
 import CSReportPage from '../page/CSReportPage';
-import { MInfo } from "../page/DetailHomePage/MInfo";
 import InfoSaldo from "../page/DetailHomePage/InfoSaldo";
-import MutasiRekening from "../page/DetailHomePage/MutasiRekening";
+import { MInfo } from "../page/DetailHomePage/MInfo";
 import { MPayment } from "../page/DetailHomePage/MPayment";
 import { MTransfer } from "../page/DetailHomePage/MTransfer";
+import MutasiRekening from "../page/DetailHomePage/MutasiRekening";
 import { Setting } from "../page/DetailHomePage/Setting";
+import GantiPassword from '../page/GantiPassword';
 import { GantiPin } from "../page/GantiPin";
 import HomePage from "../page/HomePage";
 import LoginPage from "../page/Login";
 import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
-import CekPinPage from "../page/cekPinPage";
 import UserLayout from "../page/UserLayout";
 
 const checkAuth = () => localStorage.getItem("token") !== null;
@@ -37,8 +38,8 @@ const Routers = createBrowserRouter([
   {
     path: "/user",
     element: checkAuth() ? <UserLayout /> : <Navigate to="/auth/login" />,    children: [
-      { index: true, element: <HomePage /> },      
-      { path: "set-pin", element: <PinPage /> },      
+      { index: true, element: <HomePage /> },
+      { path: "set-pin", element: <PinPage /> },
       { path: "verify-pin", element: <CekPinPage /> },
       { path: "minfo", element: <MInfo />},
       { path: "minfo/saldo", element: <InfoSaldo />},
@@ -47,7 +48,8 @@ const Routers = createBrowserRouter([
       { path: "mpayment", element: <MPayment /> },
       { path: "mpayment/:type", element: <TagihanComponent /> },
       { path: "settings", element: <Setting /> },
-      { path: "nasabah/ganti-pin", element: <GantiPin />}
+      { path: "nasabah/ganti-pin", element: <GantiPin />},
+      { path: "nasabah/ganti-password", element: <GantiPassword /> }
     ]
   },
   {

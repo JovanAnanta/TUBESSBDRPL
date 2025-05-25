@@ -14,6 +14,7 @@ import { Tagihan } from './models/Tagihan';
 import { Transaksi } from './models/Transaksi';
 import csReportRoutes from './routes/CSReportRoutes';
 import csRoutes from './routes/CSRoutes';
+import gantiPasswordRotues from './routes/GantiPasswordRoutes';
 import gantiPinRoutes from './routes/GantiPinRoutes';
 import tagihanRoutes from './routes/TagihanRoutes';
 
@@ -38,6 +39,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/tagihan', tagihanRoutes);
 app.use('/api/nasabah', gantiPinRoutes);
+app.use('/api/nasabah', gantiPasswordRotues);
 
 app.use('/api/cs', csRoutes);
 app.use('/api/cs', csReportRoutes);
