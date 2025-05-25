@@ -8,15 +8,12 @@ import CSLogin from '../page/CSLogin';
 import CSReportPage from '../page/CSReportPage';
 import CSValidationPage from '../page/CSValidation';
 import InfoSaldo from "../page/DetailHomePage/DetailMInfo/InfoSaldo";
-<<<<<<< HEAD
+import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
 import MutasiDatePage from "../page/DetailHomePage/DetailMInfo/MutasiDatePage";
 import MutasiListPage from "../page/DetailHomePage/DetailMInfo/MutasiListPage";
-=======
-import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
 import TopUp from "../page/DetailHomePage/DetailMTransfer/TopUp";
 import Transfer from "../page/DetailHomePage/DetailMTransfer/Transfer";
 import { MInfo } from "../page/DetailHomePage/MInfo";
->>>>>>> fa24b798ebe07c1bf90b21e78b7b15a9b39f7c25
 import { MPayment } from "../page/DetailHomePage/MPayment";
 import { Mtransfer } from "../page/DetailHomePage/MTransfer";
 import { Setting } from "../page/DetailHomePage/Setting";

@@ -160,7 +160,6 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Internal server error" });
   }
 };
-<<<<<<< HEAD
 
 
 
@@ -222,5 +221,3 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
 //     res.status(500).json({ message: "Internal server error" });
 //   }
 // };
-=======
->>>>>>> fa24b798ebe07c1bf90b21e78b7b15a9b39f7c25
