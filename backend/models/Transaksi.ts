@@ -27,7 +27,6 @@ export class Transaksi extends Model {
   })
   declare nasabah_id: string;
 
-<<<<<<< HEAD
   @Column({
     type: DataType.ENUM("MASUK", "KELUAR"),
     allowNull: false
@@ -56,17 +55,4 @@ export class Transaksi extends Model {
   @HasOne(() => Pinjaman)
   declare Pinjaman?: Pinjaman | null;
 
-=======
-    @Column({
-        type: DataType.ENUM("MASUK", "KELUAR"),
-        allowNull: false
-    })
-    declare transaksiType: string;
-    
-    @Column({
-        type: DataType.DATE,
-        allowNull: false
-    })
-    declare tanggalTransaksi: Date;
->>>>>>> origin/main
 }

@@ -60,16 +60,16 @@ const LoginForm = () => {
       localStorage.removeItem('cs_name');
 
       // Cek status nasabah dari response
-      if (data.status !== 'AKTIF') {
+      if (data.status == 'AKTIF') {
         alert('Akun Anda sedang diblokir. Silakan hubungi customer service untuk informasi lebih lanjut.');
         return;
       }
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("nasabahId", data.nasabah_id);
-      
-      if (data.pinStatus === 'empty' || data.pinStatus === '') {
-        navigate("/user/set-pin");  // Arahkan ke halaman set PIN
+
+      if (data.pinStatus === 'empty') {
+        navigate("/user/set-pin");
       } else {
         navigate("/user", { replace: true });
       }

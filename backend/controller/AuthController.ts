@@ -10,6 +10,7 @@ import fetch from 'node-fetch';
 
 const JWT_SECRET = "your_jwt_secret_key";
 
+// Reverse geocoding function using OpenStreetMap Nominatim
 async function reverseGeocode(lat: number, lon: number): Promise<string> {
   try {
     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10`);
@@ -53,6 +54,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const status = nasabah && encrypt(password) === nasabah.password ? 'SUCCESS' : 'FAILED';
 
+    // Tentukan lokasi
     let location = 'Unknown';
     if (lat && long) {
       location = await reverseGeocode(lat, long);
@@ -61,10 +63,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       if (geo && geo.city && geo.country) {
         location = `${geo.city}, ${geo.country}`;
       } else {
-        location = "Bandung, Indonesia";
+        location = "Bandung, Indonesia"; // fallback default dev
       }
     }
 
+    // Tentukan device info yang lebih ramah
     let device_info = 'Unknown';
     if (userAgent.includes("Android")) {
       device_info = "Mobile App - Android";
@@ -82,6 +85,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       device_info = userAgent;
     }
 
+    // Simpan aktivitas login
     await LoginActivity.create({
       nasabah_id: nasabah?.nasabah_id || null,
       waktu_login: new Date(),
@@ -102,16 +106,11 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set';
 
-    const decryptedNama = decrypt(nasabah.nama);
-    const decryptedPin = decrypt(nasabah.pin);
-    
     res.status(200).json({
       token,
       nasabah_id: nasabah.nasabah_id,
-      pinStatus: decryptedPin,
-      nama: decryptedNama,
-      status: nasabah.status,
-      saldo: nasabah.saldo,
+      pinStatus,
+      nama: nasabah.nama,
     });
 
   } catch (err) {
@@ -144,13 +143,12 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
       message: "nasabah data fetched successfully",
       data: {
         nasabah_id: nasabah.nasabah_id,
-        nama: decrypt(nasabah.nama),
-        email: decrypt(nasabah.email),
-        noRekening: decrypt(nasabah.noRekening),
-        pin: decrypt(nasabah.pin),
+        nama: nasabah.nama,
+        email: nasabah.email,
+        noRekening: nasabah.noRekening,
+        pin: nasabah.pin,
         saldo: nasabah.saldo,
-        kodeAkses: decrypt(nasabah.kodeAkses),
-        status: nasabah.status,
+        kodeAkses: nasabah.kodeAkses,
       }
     });
   } catch (error) {
