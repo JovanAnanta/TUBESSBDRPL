@@ -110,10 +110,6 @@ const InfoSaldo: React.FC = () => {
             <span className="saldo-label">Saldo Tersedia</span>
             <span className="saldo-value">{formatCurrency(saldoInfo.saldo)}</span>
           </div>
-          <div className="last-update">
-            <span className="update-label">Terakhir diperbarui:</span>
-            <span className="update-time">{formatDate(saldoInfo.lastUpdate)}</span>
-          </div>
         </div>
       )}
 

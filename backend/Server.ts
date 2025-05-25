@@ -15,6 +15,7 @@ import { Transaksi } from './models/Transaksi';
 import { Credit } from './models/Credit';
 import { Debit } from './models/Debit';
 import { Transfer } from './models/Transfer';
+import { Pinjaman } from './models/Pinjaman';
 import csReportRoutes from './routes/CSReportRoutes';
 import csRoutes from './routes/CSRoutes';
 import gantiPinRoutes from './routes/GantiPinRoutes';
@@ -25,7 +26,7 @@ import tagihanRoutes from './routes/TagihanRoutes';
 const sequelize = new Sequelize({
   ...config.development,
   dialect: 'postgres',
-  models: [Nasabah, Report, LayananPelanggan, Tagihan, Transaksi, Credit, Debit, Transfer],
+  models: [Nasabah, Report, LayananPelanggan, Tagihan, Transaksi, Credit, Debit, Transfer, Pinjaman],
 });
 
 const app = express();

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { navigateWithPinVerification } from '../../../utils/pinUtils';
+import '../../../style/Transfer_new.css';
 
 type Nasabah = {
   nasabah_id: string;
@@ -90,41 +91,48 @@ const Transfer: React.FC = () => {
 const formatCurrency = (value: string) => {
     const numericValue = value.replace(/\D/g, '');
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-};
-
-    return (
-        <div className="min-h-screen bg-gray-50 p-4">
-            <div className="max-w-md mx-auto">
+};    return (
+        <div className="transfer-container">
+            <div className="transfer-wrapper">
                 {/* Header */}
-                <div className="flex items-center mb-6">
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="mr-4 p-2 rounded-full hover:bg-gray-200"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="transfer-header">
+                    <Link to={"/user/mtransfer"} className="transfer-back-link">
+                    <button className="transfer-back-btn">
+                        <svg className="transfer-back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h1 className="text-xl font-semibold text-gray-800">Transfer</h1>
+                    </Link>
+                    <h1 className="transfer-title">💸 Transfer Dana</h1>
                 </div>
 
                 {/* Transfer Form */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="transfer-card">
+                    <div className="transfer-card-header">
+                        <h2 className="transfer-card-title">Kirim Uang</h2>
+                        <p className="transfer-card-subtitle">Transfer dengan mudah dan aman</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="transfer-form">
                         {/* Dari Rekening */}
-                        <div>
-                            <label htmlFor="fromAccount" className="block text-sm font-medium text-gray-700 mb-2">
-                                Dari Rekening : 
+                        <div className="transfer-field-group">
+                            <label htmlFor="fromAccount" className="transfer-label">
+                                🏦 Dari Rekening
                             </label>
-                            <p>
-                            {nasabah?.noRekening}
-                            </p>
+                            <div className="transfer-account-display">
+                                <span className="transfer-account-number">
+                                    {nasabah?.noRekening || '****-****-****-****'}
+                                </span>
+                                <span className="transfer-balance">
+                                    Saldo: Rp {nasabah?.saldo?.toLocaleString('id-ID') || '0'}
+                                </span>
+                            </div>
                         </div>
 
                         {/* Ke Rekening */}
-                        <div>
-                            <label htmlFor="toAccount" className="block text-sm font-medium text-gray-700 mb-2">
-                                Ke Rekening
+                        <div className="transfer-field-group">
+                            <label htmlFor="toAccount" className="transfer-label">
+                                🎯 Ke Rekening
                             </label>
                             <input
                                 type="text"
@@ -135,18 +143,18 @@ const formatCurrency = (value: string) => {
                                     setToAccount(formatAccountNumber(raw));
                                 }}
                                 placeholder="1234567890123456"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="transfer-input"
                                 required
                             />
                         </div>
 
                         {/* Jumlah Uang */}
-                        <div>
-                            <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                                Jumlah Uang
+                        <div className="transfer-field-group">
+                            <label htmlFor="amount" className="transfer-label">
+                                💰 Jumlah Transfer
                             </label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                            <div className="transfer-amount-container">
+                                <span className="transfer-currency-prefix">
                                     Rp
                                 </span>
                                 <input
@@ -158,32 +166,40 @@ const formatCurrency = (value: string) => {
                                         setAmount(formatCurrency(raw));
                                     }}
                                     placeholder="0"
-                                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                                    className="transfer-amount-input"
                                     required
                                 />
                             </div>
                         </div>
 
-                        {/* Berita (Optional) */}
-                        <div>
-                            <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
-                                Berita (Opsional)
+                        {/* Berita */}
+                        <div className="transfer-field-group">
+                            <label htmlFor="note" className="transfer-label">
+                                💬 Berita Transfer (Opsional)
                             </label>
                             <textarea
                                 id="note"
                                 value={note}
                                 onChange={(e) => setNote(e.target.value)}
-                                placeholder="Catatan transfer..."
+                                placeholder="Tambahkan catatan transfer..."
                                 rows={3}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                className="transfer-textarea"
                             />
                         </div>
 
+                        {error && (
+                            <div className="transfer-error">
+                                ⚠️ {error}
+                            </div>
+                        )}
+
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200"
+                            className="transfer-submit-btn"
                         >
-                            Konfirmasi Transfer
+                            <span className="transfer-btn-text">
+                                ✅ Konfirmasi Transfer
+                            </span>
                         </button>
                     </form>
                 </div>

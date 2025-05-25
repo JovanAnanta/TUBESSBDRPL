@@ -1,6 +1,10 @@
 import { Transaksi } from '../models/Transaksi';
 import { Nasabah } from '../models/Nasabah';
 import { Transfer } from '../models/Transfer';
+import { Credit } from '../models/Credit';
+import { Debit } from '../models/Debit';
+import { Tagihan } from '../models/Tagihan';
+import { Pinjaman } from '../models/Pinjaman';
 import { decrypt } from '../enkripsi/Encryptor';
 import { Op } from 'sequelize';
 
@@ -46,9 +50,10 @@ export const getSaldoInfo = async (nasabahId: string): Promise<SaldoInfo | null>
 };
 
 export const getMutasiRekening = async (
-    nasabahId: string, 
-    limit: number = 20, 
-    offset: number = 0,
+    nasabahId: string,
+    // limit and offset no longer used, kept for signature compatibility
+    _limit?: number,
+    _offset?: number,
     startDate?: Date,
     endDate?: Date
 ): Promise<{ transactions: MutasiData[]; totalCount: number }> => {
@@ -63,61 +68,70 @@ export const getMutasiRekening = async (
         const whereCondition: any = { nasabah_id: nasabahId };
         
         if (startDate && endDate) {
+            // include full endDate day
+            const endOfDay = new Date(endDate);
+            endOfDay.setHours(23, 59, 59, 999);
             whereCondition.tanggalTransaksi = {
-                [Op.between]: [startDate, endDate]
+                [Op.between]: [startDate, endOfDay]
             };
         } else if (startDate) {
             whereCondition.tanggalTransaksi = {
                 [Op.gte]: startDate
             };
         } else if (endDate) {
+            // include full endDate day
+            const endOfDay = new Date(endDate);
+            endOfDay.setHours(23, 59, 59, 999);
             whereCondition.tanggalTransaksi = {
-                [Op.lte]: endDate
+                [Op.lte]: endOfDay
             };
         }
 
-        // Get total count untuk pagination
-        const totalCount = await Transaksi.count({ where: whereCondition });
-
-        // Get transaksi dengan pagination
+        // Fetch all transactions in date range (ignore pagination)
         const transaksis = await Transaksi.findAll({
             where: whereCondition,
-            order: [['tanggalTransaksi', 'DESC']],
-            limit,
-            offset,
-            include: [
-                {
-                    model: Transfer,
-                    required: false,
-                    attributes: ['noRekening']
-                }
-            ]
+            order: [['tanggalTransaksi', 'DESC']]
         });
 
-        // Transform data untuk response
-        const transactions: MutasiData[] = await Promise.all(
-            transaksis.map(async (transaksi, index) => {
-                // Simulasi nominal dan keterangan berdasarkan type
-                // Dalam implementasi nyata, ini harus dari tabel yang sesuai
-                const nominal = transaksi.transaksiType === 'MASUK' 
-                    ? Math.floor(Math.random() * 1000000) + 100000 
-                    : Math.floor(Math.random() * 500000) + 50000;
+        // Map each transaction to MutasiData by querying related tables
+        const mapped = await Promise.all(
+            transaksis.map(async (trx, index) => {
+                const credit = await Credit.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Credit | null;
+                const debit = await Debit.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Debit | null;
+                const transfer = await Transfer.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Transfer | null;
+                const tagihan = await Tagihan.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Tagihan | null;
+                const pinjaman = await Pinjaman.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Pinjaman | null;
 
+                let nominal = 0;
                 let keterangan = '';
-                if (transaksi.transaksiType === 'MASUK') {
+                // Prioritas dengan cek transaksiType: outgoing/incoming transfer, top-up, tagihan, pinjaman
+                if (trx.transaksiType === 'MASUK' && transfer && credit && credit.jumlahSaldoBertambah > 0) {
+                    nominal = credit.jumlahSaldoBertambah;
                     keterangan = 'Transfer Masuk';
-                } else {
+                } else if (trx.transaksiType === 'KELUAR' && transfer && debit && debit.jumlahSaldoBerkurang > 0) {
+                    nominal = debit.jumlahSaldoBerkurang;
                     keterangan = 'Transfer Keluar';
+                } else if (credit && credit.jumlahSaldoBertambah > 0) {
+                    nominal = credit.jumlahSaldoBertambah;
+                    keterangan = 'Top-up';
+                } else if (tagihan && debit) {
+                    nominal = debit.jumlahSaldoBerkurang;
+                    keterangan = `Tagihan ${tagihan.statusTagihanType}`;
+                } else if (pinjaman && debit) {
+                    nominal = debit.jumlahSaldoBerkurang;
+                    keterangan = `Pinjaman ${pinjaman.statusJatuhTempo}`;
+                } else {
+                    nominal = 0;
+                    keterangan = trx.transaksiType === 'MASUK' ? 'Masuk' : 'Keluar';
                 }
 
-                // Simulasi saldo setelah transaksi
-                // Dalam implementasi nyata, ini harus disimpan atau dihitung dari riwayat
-                const saldoSetelahTransaksi = nasabah.saldo + (index * 10000);
+                // Simulasi saldo setelah transaksi (ganti sesuai kebutuhan)
+                const saldoSetelahTransaksi = nasabah.saldo + index * 10000;
 
                 return {
-                    transaksi_id: transaksi.transaksi_id,
-                    tanggalTransaksi: transaksi.tanggalTransaksi,
-                    transaksiType: transaksi.transaksiType as 'MASUK' | 'KELUAR',
+                    transaksi_id: trx.transaksi_id,
+                    tanggalTransaksi: trx.tanggalTransaksi,
+                    transaksiType: trx.transaksiType as 'MASUK' | 'KELUAR',
                     nominal,
                     keterangan,
                     saldoSetelahTransaksi
@@ -126,8 +140,8 @@ export const getMutasiRekening = async (
         );
 
         return {
-            transactions,
-            totalCount
+            transactions: mapped,
+            totalCount: mapped.length
         };
     } catch (error) {
         console.error('Error in getMutasiRekening:', error);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import '../style/EReceipt.css';
 
 interface EReceiptData {
   transaksi_id: string;
@@ -36,51 +37,134 @@ const EReceipt: React.FC = () => {
     };
     if (transaksiId) fetchData();
   }, [transaksiId]);
-
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
-  if (error) return <div className="text-center text-red-600 mt-10">{error}</div>;
-  if (!data) return <div className="text-center mt-10">Data tidak ditemukan</div>;
+  if (loading) return <div className="ereceipt-loading">⏳ Loading...</div>;
+  if (error) return <div className="ereceipt-error">❌ {error}</div>;
+  if (!data) return <div className="ereceipt-not-found">📄 Data tidak ditemukan</div>;
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 mt-8">
-      <h2 className="text-xl font-bold mb-4">E-Receipt</h2>
-      <div className="mb-2">Tanggal: {new Date(data.tanggalTransaksi).toLocaleString('id-ID')}</div>
-      <div className="mb-2">Jenis: {data.jenis}</div>
-      <div className="mb-2">
-        Status: <span className={data.transaksiType === 'MASUK' ? 'text-green-600' : 'text-red-600'}>
-          {data.transaksiType === 'MASUK' ? 'Masuk' : 'Keluar'}
-        </span>
-      </div>
-      <div className="mb-2">Nominal: <span className={data.transaksiType === 'MASUK' ? 'text-green-600' : 'text-red-600'}>Rp {data.nominal.toLocaleString('id-ID')}</span></div>
-      {data.keterangan && <div className="mb-2">Keterangan: {data.keterangan}</div>}
-      {/* Detail spesifik per jenis transaksi */}
-      {data.jenis === 'TRANSFER' && data.detail && (
-        <>
-          <div className="mb-2">Dari Rekening: {data.detail.noRekeningAsal}</div>
-          <div className="mb-2">Ke Rekening: {data.detail.noRekeningTujuan}</div>
-          <div className="mb-2">Berita: {data.detail.berita}</div>
-        </>
-      )}
-      {data.jenis === 'TAGIHAN' && data.detail && (
-        <>
-          <div className="mb-2">Nomor Tagihan: {data.detail.nomorTagihan}</div>
-          <div className="mb-2">Tipe Tagihan: {data.detail.statusTagihanType}</div>
-        </>
-      )}
-      {data.jenis === 'PINJAMAN' && data.detail && (
-        <>
-          <div className="mb-2">Jumlah per Bulan: Rp {data.detail.jumlahPerBulan?.toLocaleString('id-ID')}</div>
-          <div className="mb-2">Jatuh Tempo: {new Date(data.detail.tanggalJatuhTempo).toLocaleDateString('id-ID')}</div>
-        </>
-      )}
-      {/* Tambahkan detail lain sesuai kebutuhan */}
-    <Link to="/user" className="block text-center mt-6">
-        <button>
-            Kembali
-        </button>
-    </Link>
-    </div>
+    <div className="ereceipt-container">
+      <div className="ereceipt-wrapper">
+        <div className="ereceipt-card">
+          <div className="ereceipt-header">
+            <div className="ereceipt-icon">
+              🧾
+            </div>
+            <h2 className="ereceipt-title">E-Receipt</h2>
+            <p className="ereceipt-subtitle">Bukti Transaksi Digital</p>
+          </div>
+          
+          <div className="ereceipt-content">
+            <div className="ereceipt-info-grid">
+              <div className="ereceipt-info-item">
+                <span className="ereceipt-info-label">📅 Tanggal:</span>
+                <span className="ereceipt-info-value">
+                  {new Date(data.tanggalTransaksi).toLocaleString('id-ID')}
+                </span>
+              </div>
+              
+              <div className="ereceipt-info-item">
+                <span className="ereceipt-info-label">🏷️ Jenis:</span>
+                <span className="ereceipt-info-value ereceipt-jenis">
+                  {data.jenis}
+                </span>
+              </div>
+              
+              <div className="ereceipt-info-item">
+                <span className="ereceipt-info-label">📊 Status:</span>
+                <span className={`ereceipt-info-value ereceipt-status ${data.transaksiType === 'MASUK' ? 'ereceipt-masuk' : 'ereceipt-keluar'}`}>
+                  {data.transaksiType === 'MASUK' ? '📈 Masuk' : '📉 Keluar'}
+                </span>
+              </div>
+              
+              <div className="ereceipt-info-item ereceipt-nominal-item">
+                <span className="ereceipt-info-label">💰 Nominal:</span>
+                <span className={`ereceipt-nominal ${data.transaksiType === 'MASUK' ? 'ereceipt-nominal-masuk' : 'ereceipt-nominal-keluar'}`}>
+                  {data.transaksiType === 'MASUK' ? '+' : '-'} Rp {data.nominal.toLocaleString('id-ID')}
+                </span>
+              </div>
+            </div>
 
+            {/* Keterangan: use detail.berita for TRANSFER, otherwise data.keterangan */}
+            {(data.jenis === 'TRANSFER' ? data.detail?.berita : data.keterangan) && (
+              <div className="ereceipt-keterangan">
+                <span className="ereceipt-info-label">💬 Keterangan:</span>
+                <p className="ereceipt-keterangan-text">
+                  {data.jenis === 'TRANSFER' ? data.detail.berita : data.keterangan}
+                </p>
+              </div>
+            )}
+
+            {/* Detail spesifik per jenis transaksi */}
+            {data.detail && data.jenis.toLowerCase().includes('transfer') && (
+              <div className="ereceipt-detail-section">
+                <h3 className="ereceipt-detail-title">📋 Detail Transfer</h3>
+                <div className="ereceipt-detail-grid">
+                  <div className="ereceipt-detail-item">
+                    <span className="ereceipt-detail-label">
+                      {data.transaksiType === 'MASUK' ? 'Dari Rekening:' : 'Ke Rekening:'}
+                    </span>
+                    <span className="ereceipt-detail-value">
+                      {data.transaksiType === 'MASUK' ? data.detail.fromRekening : data.detail.toRekening}
+                    </span>
+                  </div>
+                  {data.detail.berita && (
+                    <div className="ereceipt-detail-item">
+                      <span className="ereceipt-detail-label">Berita:</span>
+                      <span className="ereceipt-detail-value">{data.detail.berita}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {data.jenis === 'TAGIHAN' && data.detail && (
+              <div className="ereceipt-detail-section">
+                <h3 className="ereceipt-detail-title">📋 Detail Tagihan</h3>
+                <div className="ereceipt-detail-grid">
+                  <div className="ereceipt-detail-item">
+                    <span className="ereceipt-detail-label">Nomor Tagihan:</span>
+                    <span className="ereceipt-detail-value">{data.detail.nomorTagihan}</span>
+                  </div>
+                  <div className="ereceipt-detail-item">
+                    <span className="ereceipt-detail-label">Tipe Tagihan:</span>
+                    <span className="ereceipt-detail-value">{data.detail.statusTagihanType}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {data.jenis === 'PINJAMAN' && data.detail && (
+              <div className="ereceipt-detail-section">
+                <h3 className="ereceipt-detail-title">📋 Detail Pinjaman</h3>
+                <div className="ereceipt-detail-grid">
+                  <div className="ereceipt-detail-item">
+                    <span className="ereceipt-detail-label">Jumlah per Bulan:</span>
+                    <span className="ereceipt-detail-value">
+                      Rp {data.detail.jumlahPerBulan?.toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                  <div className="ereceipt-detail-item">
+                    <span className="ereceipt-detail-label">Jatuh Tempo:</span>
+                    <span className="ereceipt-detail-value">
+                      {new Date(data.detail.tanggalJatuhTempo).toLocaleDateString('id-ID')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <div className="ereceipt-footer">
+            <Link to="/user" className="ereceipt-back-link">
+              <button className="ereceipt-back-btn">
+                <span className="ereceipt-back-icon">←</span>
+                <span className="ereceipt-back-text">Kembali ke Beranda</span>
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

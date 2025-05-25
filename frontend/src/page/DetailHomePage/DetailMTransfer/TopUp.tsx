@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { navigateWithPinVerification } from '../../../utils/pinUtils';
+import '../../../style/TopUp.css';
 
 const TopUp: React.FC = () => {
     const [nominal, setNominal] = useState<string>('');
@@ -48,33 +49,36 @@ const TopUp: React.FC = () => {
             data: { action: 'topup', amount }
         });
         return;
-    };
-
-    return (
-        <div className="min-h-screen bg-gray-50 p-4">
-            <div className="max-w-md mx-auto">
+    };    return (
+        <div className="topup-container">
+            <div className="topup-wrapper">
                 {/* Header */}
-                <div className="flex items-center mb-6">
-                    <button 
-                        onClick={() => navigate(-1)}
-                        className="mr-4 p-2 rounded-full hover:bg-gray-200"
-                    >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <h1 className="text-xl font-semibold text-gray-800">Top Up</h1>
+                <div className="topup-header">
+
+            <Link to="/user/mtransfer" className="topup-back-link">
+                <button className="topup-back-btn">
+                    <svg className="topup-back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+            </Link>
+                    <h1 className="topup-title">💰 Top Up Saldo</h1>
                 </div>
 
                 {/* Top Up Form */}
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-6">
-                            <label htmlFor="nominal" className="block text-sm font-medium text-gray-700 mb-2">
-                                Nominal Top Up
+                <div className="topup-card">
+                    <div className="topup-card-header">
+                        <h2 className="topup-card-title">Isi Saldo Anda</h2>
+                        <p className="topup-card-subtitle">Masukkan nominal yang ingin ditambahkan</p>
+                    </div>
+                    
+                    <form onSubmit={handleSubmit} className="topup-form">
+                        <div className="topup-input-group">
+                            <label htmlFor="nominal" className="topup-label">
+                                💵 Nominal Top Up
                             </label>
-                            <div className="relative">
-                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                            <div className="topup-input-container">
+                                <span className="topup-currency-prefix">
                                     Rp
                                 </span>
                                 <input
@@ -83,23 +87,27 @@ const TopUp: React.FC = () => {
                                     value={nominal}
                                     onChange={handleNominalChange}
                                     placeholder="0"
-                                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg"
+                                    className="topup-input"
                                     required
                                     disabled={loading}
                                 />
                             </div>
                         </div>
+                        
                         {message && (
-                            <div className={`mb-4 text-center ${message.includes('berhasil') ? 'text-green-600' : 'text-red-600'}`}>
+                            <div className={`topup-message ${message.includes('berhasil') ? 'topup-success' : 'topup-error'}`}>
                                 {message}
                             </div>
                         )}
+                        
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-200"
+                            className={`topup-submit-btn ${loading ? 'topup-loading' : ''}`}
                             disabled={loading}
                         >
-                            {loading ? 'Memproses...' : 'Konfirmasi Top Up'}
+                            <span className="topup-btn-text">
+                                {loading ? '⏳ Memproses...' : '✅ Konfirmasi Top Up'}
+                            </span>
                         </button>
                     </form>
                 </div>

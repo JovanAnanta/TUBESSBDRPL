@@ -93,39 +93,55 @@ export const getEReceipt = async (req: Request, res: Response): Promise<void> =>
             res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
             return;
         }
-        // Cari detail credit
+        // Fetch related records
         const credit = await Credit.findOne({ where: { transaksi_id: transaksiId } });
-        let jenis = 'UNKNOWN';
-        let nominal = 0;
-        let detail = null;
-        if (credit) {
-            jenis = 'TOPUP';
-            nominal = credit.jumlahSaldoBertambah;
-        } else if (transaksi.transaksiType === 'KELUAR') {
-            // Transfer: ambil detail debit dan transfer
-            const debit = await Debit.findOne({ where: { transaksi_id: transaksiId } });
-            const transferRec = await Transfer.findOne({ where: { transaksi_id: transaksiId } });
-            if (debit && transferRec) {
-                jenis = 'TRANSFER';
+        const debit = await Debit.findOne({ where: { transaksi_id: transaksiId } });
+        const transferRec = await Transfer.findOne({ where: { transaksi_id: transaksiId } });
+        // Determine jenis and nominal
+        let jenis: string;
+        let nominal: number;
+        let detail: any = null;
+        if (transaksi.transaksiType === 'MASUK') {
+            if (transferRec && credit) {
+                jenis = 'Transfer Masuk';
+                nominal = credit.jumlahSaldoBertambah;
+                detail = { fromRekening: transferRec.noRekening, berita: transferRec.berita };
+            } else if (credit) {
+                jenis = 'Top-up';
+                nominal = credit.jumlahSaldoBertambah;
+            } else {
+                jenis = 'Masuk';
+                nominal = 0;
+            }
+        } else {
+            if (transferRec && debit) {
+                jenis = 'Transfer Keluar';
                 nominal = debit.jumlahSaldoBerkurang;
                 detail = { toRekening: transferRec.noRekening, berita: transferRec.berita };
+            } else if (debit) {
+                jenis = 'Keluar';
+                nominal = debit.jumlahSaldoBerkurang;
+            } else {
+                jenis = 'Keluar';
+                nominal = credit ? credit.jumlahSaldoBertambah : 0;
             }
         }
-        res.status(200).json({
-            success: true,
-            data: {
-                transaksi_id: transaksi.transaksi_id,
-                tanggalTransaksi: transaksi.tanggalTransaksi,
+
+         res.status(200).json({
+             success: true,
+             data: {
+                 transaksi_id: transaksi.transaksi_id,
+                 tanggalTransaksi: transaksi.tanggalTransaksi,
                 transaksiType: transaksi.transaksiType as 'MASUK' | 'KELUAR',
-                nominal,
                 jenis,
+                nominal,
                 detail
-            }
-        });
-    } catch (error) {
-        console.error('Error in getEReceipt controller:', error);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
-    }
+             }
+         });
+     } catch (error) {
+         console.error('Error in getEReceipt controller:', error);
+         res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
+     }
 }
 
 // Combined handler: verify PIN then top-up
@@ -206,15 +222,51 @@ export const transferWithPin = async (req: Request, res: Response): Promise<void
         target.saldo += amount;
         await source.save();
         await target.save();
-        // Buat transaksi debit dan credit
-        const debitTx = await Transaksi.create({ nasabah_id: nasabahId, transaksiType: 'KELUAR', tanggalTransaksi: new Date() });
-        await Transfer.create({ transfer_id: uuidv4(), transaksi_id: debitTx.transaksi_id, noRekening: toRekening, berita: note });
-        await Debit.create({ debit_id: uuidv4(), transaksi_id: debitTx.transaksi_id, jumlahSaldoBerkurang: amount });
-        
-        // Buat transaksi credit untuk nasabah tujuan
-        const creditTx = await Transaksi.create({ nasabah_id: target.nasabah_id, transaksiType: 'MASUK', tanggalTransaksi: new Date() });
-        await Credit.create({ credit_id: uuidv4(), transaksi_id: creditTx.transaksi_id, jumlahSaldoBertambah: amount });
-        res.status(200).json({ success: true, data: { transaksi_id: debitTx.transaksi_id } });
+        // Buat transaksi debit dan credit untuk sumber
+        const transaksi = await Transaksi.create({
+            nasabah_id: nasabahId,
+            transaksiType: 'KELUAR',
+            tanggalTransaksi: new Date(),
+        });
+        await Debit.create({
+            debit_id: uuidv4(),
+            transaksi_id: transaksi.transaksi_id,
+            jumlahSaldoBerkurang: amount,
+        });
+        await Credit.create({
+            credit_id: uuidv4(),
+            transaksi_id: transaksi.transaksi_id, // credit kosong untuk transfer keluar
+            jumlahSaldoBertambah: 0,
+        });
+        await Transfer.create({
+            transfer_id: uuidv4(),
+            transaksi_id: transaksi.transaksi_id,
+            noRekening: toRekening,
+            berita: note,
+        });
+        // Proses penerima
+        const transaksiMasuk = await Transaksi.create({
+            nasabah_id: target.nasabah_id,
+            transaksiType: 'MASUK',
+            tanggalTransaksi: new Date(),
+        });
+        await Debit.create({
+            debit_id: uuidv4(),
+            transaksi_id: transaksiMasuk.transaksi_id,
+            jumlahSaldoBerkurang: 0,
+        });
+        await Credit.create({
+            credit_id: uuidv4(),
+            transaksi_id: transaksiMasuk.transaksi_id,
+            jumlahSaldoBertambah: amount,
+        });
+        await Transfer.create({
+            transfer_id: uuidv4(),
+            transaksi_id: transaksiMasuk.transaksi_id,
+            noRekening: nasabahId, // atau gunakan source rekening jika ada
+            berita: note,
+        });
+        res.status(200).json({ success: true, data: { transaksi_id: transaksi.transaksi_id } });
     } catch (error) {
         console.error('Error in transferWithPin controller:', error);
         res.status(500).json({ success: false, message: 'Terjadi kesalahan saat memproses transfer' });

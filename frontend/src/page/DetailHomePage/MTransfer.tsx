@@ -7,6 +7,11 @@ export const Mtransfer = () => {
   const navigate = useNavigate();
 
   const handleFeatureClick = (featureName: string, targetPath: string) => {
+    // Bypass PIN for transfer and top-up
+    if (featureName === 'm-transfer' || featureName === 'top-up') {
+      navigate(targetPath);
+      return;
+    }
     // Navigate with PIN verification
     navigateWithPinVerification(navigate, {
       redirectTo: targetPath,

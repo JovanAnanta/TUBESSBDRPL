@@ -6,7 +6,8 @@ import CSLogin from '../page/CSLogin';
 import CSReportPage from '../page/CSReportPage';
 import { MInfo } from "../page/DetailHomePage/MInfo";
 import InfoSaldo from "../page/DetailHomePage/DetailMInfo/InfoSaldo";
-import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
+import MutasiDatePage from "../page/DetailHomePage/DetailMInfo/MutasiDatePage";
+import MutasiListPage from "../page/DetailHomePage/DetailMInfo/MutasiListPage";
 import { MPayment } from "../page/DetailHomePage/MPayment";
 import MTransfer from "../page/DetailHomePage/MTransfer";
 import  Transfer  from "../page/DetailHomePage/DetailMTransfer/Transfer";
@@ -47,7 +48,8 @@ const Routers = createBrowserRouter([
       { path: "minfo", element: <MInfo />},
       { path: "mtransfer", element: <MTransfer />},
       { path: "minfo/saldo", element: <InfoSaldo />},
-      { path: "minfo/mutasi", element: <MutasiRekening />},
+      { path: "minfo/mutasi", element: <MutasiDatePage />},
+      { path: "minfo/mutasi/list", element: <MutasiListPage /> },
       { path: "mtransfer/transfer", element: <Transfer /> },
       { path: "mtransfer/top-up", element: <TopUp /> },
       { path: "e-receipt/:transaksiId", element: <EReceipt /> },

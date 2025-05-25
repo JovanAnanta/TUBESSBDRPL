@@ -1,0 +1,373 @@
+/* E-Receipt Modern UI Styles */
+
+.ereceipt-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ereceipt-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.ereceipt-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: ereceipt-fade-in 0.6s ease-out;
+}
+
+@keyframes ereceipt-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.ereceipt-header {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.ereceipt-header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: ereceipt-dots-move 20s linear infinite;
+}
+
+@keyframes ereceipt-dots-move {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(30px, 30px); }
+}
+
+.ereceipt-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.ereceipt-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  position: relative;
+  z-index: 1;
+}
+
+.ereceipt-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* Content */
+.ereceipt-content {
+  padding: 2rem;
+}
+
+.ereceipt-info-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.ereceipt-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+  transition: all 0.3s ease;
+}
+
+.ereceipt-info-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateX(5px);
+}
+
+.ereceipt-info-label {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 0.95rem;
+}
+
+.ereceipt-info-value {
+  font-weight: 500;
+  color: #2d3748;
+  text-align: right;
+}
+
+.ereceipt-jenis {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.ereceipt-status {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.ereceipt-masuk {
+  background: linear-gradient(45deg, #48bb78, #38a169);
+  color: white;
+}
+
+.ereceipt-keluar {
+  background: linear-gradient(45deg, #f56565, #e53e3e);
+  color: white;
+}
+
+.ereceipt-nominal-item {
+  border-left-color: #4facfe;
+  background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+}
+
+.ereceipt-nominal {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.ereceipt-nominal-masuk {
+  color: #38a169;
+}
+
+.ereceipt-nominal-keluar {
+  color: #e53e3e;
+}
+
+/* Keterangan */
+.ereceipt-keterangan {
+  background: rgba(237, 242, 247, 0.7);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border-left: 4px solid #4facfe;
+}
+
+.ereceipt-keterangan .ereceipt-info-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #4facfe;
+}
+
+.ereceipt-keterangan-text {
+  margin: 0;
+  color: #2d3748;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* Detail Section */
+.ereceipt-detail-section {
+  background: linear-gradient(135deg, rgba(245, 101, 101, 0.05), rgba(229, 62, 62, 0.05));
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(245, 101, 101, 0.1);
+}
+
+.ereceipt-detail-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e53e3e;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ereceipt-detail-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.ereceipt-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border-left: 3px solid #f56565;
+}
+
+.ereceipt-detail-label {
+  font-weight: 600;
+  color: #e53e3e;
+  font-size: 0.9rem;
+}
+
+.ereceipt-detail-value {
+  font-weight: 500;
+  color: #2d3748;
+  text-align: right;
+}
+
+/* Footer */
+.ereceipt-footer {
+  padding: 2rem;
+  background: rgba(246, 250, 254, 0.5);
+  text-align: center;
+}
+
+.ereceipt-back-link {
+  text-decoration: none;
+}
+
+.ereceipt-back-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.ereceipt-back-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+}
+
+.ereceipt-back-btn:active {
+  transform: translateY(-1px);
+}
+
+.ereceipt-back-icon {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.ereceipt-back-btn:hover .ereceipt-back-icon {
+  transform: translateX(-3px);
+}
+
+.ereceipt-back-text {
+  font-size: 1rem;
+}
+
+/* Loading, Error, Not Found States */
+.ereceipt-loading,
+.ereceipt-error,
+.ereceipt-not-found {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.ereceipt-error {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.ereceipt-loading {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ereceipt-container {
+    padding: 0.5rem;
+  }
+  
+  .ereceipt-wrapper {
+    padding: 1rem 0;
+  }
+  
+  .ereceipt-header {
+    padding: 2rem 1.5rem;
+  }
+  
+  .ereceipt-title {
+    font-size: 1.6rem;
+  }
+  
+  .ereceipt-content {
+    padding: 1.5rem;
+  }
+  
+  .ereceipt-info-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .ereceipt-info-value {
+    text-align: left;
+  }
+  
+  .ereceipt-detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .ereceipt-detail-value {
+    text-align: left;
+  }
+  
+  .ereceipt-back-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ereceipt-info-grid {
+    gap: 1rem;
+  }
+  
+  .ereceipt-info-item,
+  .ereceipt-detail-item {
+    padding: 0.8rem;
+  }
+  
+  .ereceipt-nominal {
+    font-size: 1.1rem;
+  }
+  
+  .ereceipt-icon {
+    font-size: 2.5rem;
+  }
+}

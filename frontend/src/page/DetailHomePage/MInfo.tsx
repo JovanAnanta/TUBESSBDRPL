@@ -7,6 +7,11 @@ export const MInfo = () => {
   const navigate = useNavigate();
 
   const handleFeatureClick = (featureName: string, targetPath: string) => {
+    // Jika fitur Mutasi Rekening, langsung navigasi tanpa PIN
+    if (featureName === 'Mutasi Rekening') {
+      navigate(targetPath);
+      return;
+    }
     // Navigate with PIN verification
     navigateWithPinVerification(navigate, {
       redirectTo: targetPath,

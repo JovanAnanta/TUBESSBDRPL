@@ -157,7 +157,7 @@ const CekPinPage: React.FC = () => {
             // Jika aksi topup, verifikasi PIN dan top-up bersama di server
             if (additionalData?.action === 'topup') {
                 const amount = additionalData.amount;
-                const resTopup = await fetch('/api/user/top-up', {
+                const resTopup = await fetch('http://localhost:3000/api/user/top-up', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -173,7 +173,13 @@ const CekPinPage: React.FC = () => {
                 navigate(`/user/e-receipt/${transaksiId}`);
                 return;
             }
-            // Bukan aksi topup atau transfer: hanya verifikasi PIN
+            // Jika aksi mutasi: hanya verifikasi PIN untuk melihat mutasi
+            if (additionalData?.action === 'mutasi') {
+                navigate(redirectTo, { state: { pinVerified: true, startDate: additionalData.startDate, endDate: additionalData.endDate } });
+                setLoading(false);
+                return;
+            }
+            // Bukan aksi topup, transfer, atau mutasi: hanya verifikasi PIN
             const verifyRes = await fetch('/api/user/verifyPin', {
                 method: 'POST',
                 headers: {

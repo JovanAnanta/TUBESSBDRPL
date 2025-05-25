@@ -111,3 +111,64 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// export const getNasabahData = async (req: Request, res: Response): Promise<void> => {
+//   const token = req.headers.authorization?.split(" ")[1];
+
+//   if (!token) {
+//     res.status(401).json({ message: "Token is required" });
+//     return;
+//   }
+
+//   try {
+//     const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload;
+//     const nasabah = await Nasabah.findOne({ where: { nasabah_id: decoded.nasabah_id } });
+
+//     if (!nasabah) {
+//       res.status(404).json({ message: "nasabah not found" });
+//       return;
+//     }
+
+//     res.status(200).json({
+//       message: "nasabah data fetched successfully",
+//       data: {
+//         nasabah_id: nasabah.nasabah_id,
+//         nama: nasabah.nama,
+//         email: nasabah.email,
+//         noRekening: nasabah.noRekening,
+//         pin: nasabah.pin,
+//         saldo: nasabah.saldo,
+//         kodeAkses: nasabah.kodeAkses,
+//       }
+//     });
+//   } catch (error) {
+//     console.error("Error fetching user data:", error);
+//     if (error instanceof jwt.JsonWebTokenError) {
+//       res.status(401).json({ message: "Invalid token" });
+//       return;
+//     }
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
