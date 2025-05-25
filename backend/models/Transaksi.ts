@@ -24,7 +24,7 @@ export class Transaksi extends Model {
         allowNull: false
     })
     declare transaksiType: string;
-
+    
     @Column({
         type: DataType.DATE,
         allowNull: false

@@ -134,26 +134,60 @@ const CekPinPage: React.FC = () => {
                 throw new Error('Token atau Nasabah ID tidak ditemukan');
             }
 
-            const response = await fetch('/api/user/verifyPin', {
+            // Jika aksi transfer, verifikasi PIN dan transfer bersama di server
+            if (additionalData?.action === 'transfer') {
+                const { toRekening, amount, note } = additionalData;
+                const res = await fetch('http://localhost:3000/api/user/transfer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ nasabahId, toRekening, amount, note, pin }),
+                });
+                const resJson = await res.json();
+                if (!res.ok) {
+                    throw new Error(resJson.message || 'Transfer gagal');
+                }
+                const transaksiId = resJson.data.transaksi_id;
+                navigate(`/user/e-receipt/${transaksiId}`);
+                return;
+            }
+            
+            // Jika aksi topup, verifikasi PIN dan top-up bersama di server
+            if (additionalData?.action === 'topup') {
+                const amount = additionalData.amount;
+                const resTopup = await fetch('/api/user/top-up', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ nasabahId, amount, pin }),
+                });
+                const resData = await resTopup.json();
+                if (!resTopup.ok) {
+                    throw new Error(resData.message || 'Top up gagal');
+                }
+                const transaksiId = resData.data.transaksi_id;
+                navigate(`/user/e-receipt/${transaksiId}`);
+                return;
+            }
+            // Bukan aksi topup atau transfer: hanya verifikasi PIN
+            const verifyRes = await fetch('/api/user/verifyPin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    nasabahId,
-                    pin,
-                }),
+                body: JSON.stringify({ nasabahId, pin }),
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'PIN salah');
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) {
+                throw new Error(verifyData.message || 'PIN salah');
             }
 
-            // PIN benar - navigate ke tujuan
-            // Always include pinVerified flag and any additional data when navigating after PIN success
+            // PIN benar - navigasi ke tujuan
             const stateParams = { pinVerified: true, ...(additionalData || {}) };
             navigate(redirectTo, { state: stateParams });
 

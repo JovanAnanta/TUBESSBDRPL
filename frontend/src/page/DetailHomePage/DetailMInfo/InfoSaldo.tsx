@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../../style/InfoSaldo.css';
+import '../../../style/InfoSaldo.css';
 
 type SaldoInfo = {
   nasabah_id: string;
