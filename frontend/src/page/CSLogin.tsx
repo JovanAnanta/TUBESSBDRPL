@@ -30,6 +30,8 @@ const CSLogin = () => {
       localStorage.removeItem('nasabahId');
       localStorage.setItem('cs_token', data.token);
       localStorage.setItem('cs_name', data.nama);
+      console.log('Token CS:', data.token);
+      console.log('CS Name:', data.nama);
       navigate('/cs/dashboard');
     } catch (error: any) {
       alert('Gagal login: ' + error.message);

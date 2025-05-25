@@ -17,49 +17,22 @@ type Nasabah = {
 };
 
 const HomePage: React.FC = () => {
-  const [showReportForm, setShowReportForm] = useState(false);
-  const [nasabah, setNasabah] = useState<Nasabah | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
   const navigate = useNavigate();
+  const [showReportForm, setShowReportForm] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     const nasabahId = localStorage.getItem("nasabahId");
 
-    if (token && nasabahId) {
-      fetchNasabahData(token);
-    } else {
-      navigate('/auth/login'); // jika tidak ada token, redirect
+    if (!token || !nasabahId) {
+      navigate("/auth/login");
     }
-  }, []);
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("nasabahId");
-    setNasabah(null);
     navigate("/auth/login");
-  };
-
-  const fetchNasabahData = async (token: string) => {
-    try {
-      const response = await fetch('http://localhost:3000/api/user/getDataNasabah', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Gagal mengambil data nasabah');
-      }
-
-      const data = await response.json();
-      setNasabah(data.data);
-    } catch (error) {
-      setError('Terjadi kesalahan saat mengambil data nasabah');
-      console.error('Error:', error);
-    }
   };
 
   const features = [
@@ -91,12 +64,10 @@ const HomePage: React.FC = () => {
             </Link>
           ))}
 
-          {/* Tombol Logout */}
-          <div className="feature-link" onClick={handleLogout}>
-            <div className="feature-card">
-              <div className="feature-icon">🚪</div>
-              <div className="feature-label">Logout</div>
-            </div>
+        <div className="feature-link" onClick={handleLogout}>
+          <div className="feature-card">
+            <div className="feature-icon">🚪</div>
+            <div className="feature-label">Logout</div>
           </div>
         </div>
 
@@ -110,7 +81,15 @@ const HomePage: React.FC = () => {
           <ReportForm onClose={() => setShowReportForm(false)} />
         )}
       </div>
-    // </div>
+
+      <button className="fab" onClick={() => setShowReportForm(true)}>
+        📝
+      </button>
+
+      {showReportForm && (
+        <ReportForm onClose={() => setShowReportForm(false)} />
+      )}
+    </div>
   );
 };
 

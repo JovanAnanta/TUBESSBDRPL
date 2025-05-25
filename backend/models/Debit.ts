@@ -24,6 +24,5 @@ export class Debit extends Model {
         allowNull: false
     })
     declare jumlahSaldoBerkurang: number;
-
     
 }
