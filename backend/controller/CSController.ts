@@ -36,3 +36,32 @@ export const getStats = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Gagal mengambil statistik' });
   }
 };
+
+import { verifyNasabahData as verifyNasabahService } from '../service/CSService';
+
+export const verifyNasabahData = async (req: Request, res: Response) => {
+  const { nama, email, password } = req.body;
+
+  try {
+    const nasabah = await verifyNasabahService(nama, email, password);
+
+    if (!nasabah) {
+      res.status(404).json({ message: "Data tidak cocok atau nasabah tidak ditemukan" });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Nasabah berhasil diverifikasi",
+      nasabah: {
+        nasabah_id: nasabah.nasabah_id,
+        nama: nasabah.nama,
+        email: email,
+        saldo: nasabah.saldo,
+        noRekening: nasabah.noRekening
+      }
+    });
+  } catch (err) {
+    console.error("Verifikasi nasabah gagal:", err);
+    res.status(500).json({ message: "Terjadi kesalahan server saat verifikasi" });
+  }
+};

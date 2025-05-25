@@ -39,3 +39,22 @@ export const getDashboardStats = async () => {
   };
 };
 
+export const verifyNasabahData = async (nama: string, email: string, password: string) => {
+  const encryptedEmail = encrypt(email);
+  const encryptedPassword = encrypt(password);
+
+  console.log('MENCARI NASABAH DENGAN:');
+  console.log('Nama:', nama);
+  console.log('Email (terenkripsi):', encryptedEmail);
+  console.log('Password (terenkripsi):', encryptedPassword);
+
+  const nasabah = await Nasabah.findOne({
+    where: {
+      nama,
+      email: encryptedEmail,
+      password: encryptedPassword
+    }
+  });
+
+  return nasabah;
+};

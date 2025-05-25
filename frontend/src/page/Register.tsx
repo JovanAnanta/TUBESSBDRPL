@@ -1,18 +1,16 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import "../style/Register.css"; // Import your CSS file
-// import { api } from '../api/Api'; // Import your API utility
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
     nama: "",
     email: "",
     password: "",
-    confirmPassword: "",
     noRekening: "",
     pin: null,
     saldo: 0,
-    kodeAkses: "",
+    kodeAkses: ""
   });
 
   // Inisialisasi navigate di luar handleSubmit
@@ -24,16 +22,17 @@ const RegisterForm: React.FC = () => {
   };
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const form = new FormData();
 
-    if (formData.password !== formData.confirmPassword) {
-      alert("Password tidak sama");
-      return;
-
-    }
+    form.append("nama", formData.nama);
+    form.append("email", formData.email);
+    form.append("password", formData.password);
+    form.append("noRekening", formData.noRekening);
+    form.append("saldo", formData.saldo.toString());
+    form.append("kodeAkses", formData.kodeAkses);
 
     fetch("/api/auth/register", {
       method: "POST",
@@ -90,16 +89,6 @@ const RegisterForm: React.FC = () => {
             type="password"
             name="password"
             id="password"
-            required
-            onChange={handleChange}
-            className="form-input"
-          />
-
-          <label htmlFor="confirmPassword" className="form-label">confirmPassword</label>
-          <input
-            type="password"
-            name="confirmPassword"
-            id="confirmPassword"
             required
             onChange={handleChange}
             className="form-input"

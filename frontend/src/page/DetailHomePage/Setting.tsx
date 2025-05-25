@@ -17,7 +17,11 @@ export const Setting = () => {
         <Link to="/user/nasabah/ganti-pin" className="setting-option">
           🔒 Ganti PIN
         </Link>
+        <Link to="/user/nasabah/ganti-password" className="setting-option">
+          🔑 Ganti Password
+        </Link>
       </div>
+
     </div>
   );
 };

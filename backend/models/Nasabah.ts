@@ -1,4 +1,6 @@
-import { Column, DataType, Model, Table } from "sequelize-typescript";
+import { Column, DataType, Model, Table, HasMany } from "sequelize-typescript";
+import { Transaksi } from "./Transaksi";
+import { LoginActivity } from "./LoginActivity";
 
 @Table({
     tableName: "nasabah",
@@ -56,9 +58,9 @@ export class Nasabah extends Model {
     declare kodeAkses: string;
 
     @Column({
-        type: DataType.ENUM('Aktif', 'Tidak Aktif'),
+        type: DataType.ENUM('AKTIF', 'TIDAK AKTIF'),
         allowNull: false,
-        defaultValue: 'Aktif',
+        defaultValue: 'AKTIF',
     })
     declare status: string;
 
@@ -68,4 +70,10 @@ export class Nasabah extends Model {
         defaultValue: DataType.NOW
     })
     declare createdAt: Date;
+
+    @HasMany(() => Transaksi)
+    declare transaksi?: Transaksi[];
+
+    @HasMany(() => LoginActivity)
+    declare login_activities?: LoginActivity[];
 }
