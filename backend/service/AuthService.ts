@@ -1,7 +1,9 @@
+
 import { decrypt } from '../enkripsi/Encryptor';
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+
 
 function generateNomorRekeningDenganPrefix(prefix: string = '3480', digitTambahan: number = 6): string {
   let randomDigits = '';
