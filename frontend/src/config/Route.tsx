@@ -6,6 +6,7 @@ import CSCustomerActivityPage from '../page/CSActivity';
 import CSHomePage from '../page/CSHomePage';
 import CSLogin from '../page/CSLogin';
 import CSReportPage from '../page/CSReportPage';
+import CSResetPassword from '../page/CSResetPassword';
 import CSValidationPage from '../page/CSValidation';
 import InfoSaldo from "../page/DetailHomePage/DetailMInfo/InfoSaldo";
 import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
@@ -100,6 +101,14 @@ const Routers = createBrowserRouter([
     element: (
       <ProtectedCS>
         <CSHomePage />
+      </ProtectedCS>
+    )
+  },
+  {
+    path: "/cs/reset-password",
+    element: (
+      <ProtectedCS>
+        <CSResetPassword />
       </ProtectedCS>
     )
   },

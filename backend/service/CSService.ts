@@ -1,4 +1,4 @@
-import { encrypt } from '../enkripsi/Encryptor';
+import { encrypt, decrypt } from '../enkripsi/Encryptor';
 import { LayananPelanggan } from '../models/LayananPelanggan';
 import { Report } from '../models/Report';
 import { Nasabah } from '../models/Nasabah';
@@ -59,3 +59,21 @@ export const verifyNasabahData = async (nama: string, email: string, password: s
   return isMatch ? nasabah : null;
 };
 
+export const resetNasabahPassword = async (email: string, passwordBaru: string) => {
+  const encryptedEmail = encrypt(email);
+  const nasabah = await Nasabah.findOne({ where: { email: encryptedEmail } });
+
+  if (!nasabah) {
+    throw new Error('Nasabah tidak ditemukan');
+  }
+
+  const hashedPassword = await bcrypt.hash(passwordBaru, 10);
+  nasabah.password = hashedPassword;
+
+  await nasabah.save();
+
+  return {
+    nama: decrypt(nasabah.nama),
+    email: email
+  };
+};
