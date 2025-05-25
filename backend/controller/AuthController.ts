@@ -102,11 +102,16 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
     const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set';
 
+    const decryptedNama = decrypt(nasabah.nama);
+    const decryptedPin = decrypt(nasabah.pin);
+    
     res.status(200).json({
       token,
       nasabah_id: nasabah.nasabah_id,
-      pinStatus,
-      nama: nasabah.nama,
+      pinStatus: decryptedPin,
+      nama: decryptedNama,
+      status: nasabah.status,
+      saldo: nasabah.saldo,
     });
 
   } catch (err) {
@@ -139,12 +144,13 @@ export const getNasabahData = async (req: Request, res: Response): Promise<void>
       message: "nasabah data fetched successfully",
       data: {
         nasabah_id: nasabah.nasabah_id,
-        nama: nasabah.nama,
-        email: nasabah.email,
-        noRekening: nasabah.noRekening,
-        pin: nasabah.pin,
+        nama: decrypt(nasabah.nama),
+        email: decrypt(nasabah.email),
+        noRekening: decrypt(nasabah.noRekening),
+        pin: decrypt(nasabah.pin),
         saldo: nasabah.saldo,
-        kodeAkses: nasabah.kodeAkses,
+        kodeAkses: decrypt(nasabah.kodeAkses),
+        status: nasabah.status,
       }
     });
   } catch (error) {

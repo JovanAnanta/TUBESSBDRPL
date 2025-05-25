@@ -13,6 +13,9 @@ import csRoutes from './routes/CSRoutes';
 import { LayananPelanggan } from './models/LayananPelanggan';
 import csReportRoutes from './routes/CSReportRoutes';
 import csActivityRoutes from './routes/CSActivityRoutes';
+import gantiPasswordRotues from './routes/GantiPasswordRoutes';
+import gantiPinRoutes from './routes/GantiPinRoutes';
+import tagihanRoutes from './routes/TagihanRoutes';
 
 import { Transaksi } from './models/Transaksi';
 import { Debit } from './models/Debit';
@@ -54,6 +57,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/tagihan', tagihanRoutes);
+app.use('/api/nasabah', gantiPinRoutes);
+app.use('/api/nasabah', gantiPasswordRotues);
 
 app.use('/api/cs', csRoutes);
 app.use('/api/cs', csReportRoutes);

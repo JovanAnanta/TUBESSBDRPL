@@ -22,6 +22,10 @@ export default {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      berita: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       
     });
   },

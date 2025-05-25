@@ -24,4 +24,10 @@ export class Transfer extends Model {
         allowNull: false,
     })
     declare noRekening: string;
+
+    @Column({
+        type: DataType.STRING,
+        allowNull: false,
+    })
+    declare berita: string;
 }

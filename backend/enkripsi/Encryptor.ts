@@ -22,3 +22,11 @@ export function decrypt(text: string): string {
   const decrypted = Buffer.concat([decipher.update(encryptedText), decipher.final()]);
   return decrypted.toString();
 }
+
+export const safeDecrypt = (val: string): string => {
+  try {
+    return decrypt(val);
+  } catch {
+    return val; // fallback to raw value if decryption fails
+  }
+};
