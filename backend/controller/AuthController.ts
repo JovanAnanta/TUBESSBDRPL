@@ -43,53 +43,53 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
-export const loginNasabah = async (req: Request, res: Response): Promise<void> => {
-  const { kodeAkses, password, status } = req.body;
+// export const loginNasabah = async (req: Request, res: Response): Promise<void> => {
+//   const { kodeAkses, password, status } = req.body;
 
-  try {
-    const encryptedKodeAkses = encrypt(kodeAkses);
-    const nasabah = await Nasabah.findOne({ where: { kodeAkses: encryptedKodeAkses } });
+//   try {
+//     const encryptedKodeAkses = encrypt(kodeAkses);
+//     const nasabah = await Nasabah.findOne({ where: { kodeAkses: encryptedKodeAkses } });
 
-    if (!nasabah) {
-      throw new Error('Kode Akses atau Password Tidak Ditemukan');
-    }    const isMatch = await bcrypt.compare(password, nasabah.password);
-    if (!isMatch) {
-      throw new Error('Kode Akses atau Password Tidak Ditemukan');
-    }
+//     if (!nasabah) {
+//       throw new Error('Kode Akses atau Password Tidak Ditemukan');
+//     }    const isMatch = await bcrypt.compare(password, nasabah.password);
+//     if (!isMatch) {
+//       throw new Error('Kode Akses atau Password Tidak Ditemukan');
+//     }
 
-    if (nasabah.status !== 'AKTIF') {
-      throw new Error('Akun Anda sedang diblokir. Silakan hubungi customer service untuk informasi lebih lanjut.');
-    }
+//     if (nasabah.status !== 'AKTIF') {
+//       throw new Error('Akun Anda sedang diblokir. Silakan hubungi customer service untuk informasi lebih lanjut.');
+//     }
 
-    const token = jwt.sign(
-      {
-        nasabah_id: nasabah.nasabah_id
-      },
-      JWT_SECRET,
-      { expiresIn: '1h' } // Token expired dalam 1 jam
-    );
+//     const token = jwt.sign(
+//       {
+//         nasabah_id: nasabah.nasabah_id
+//       },
+//       JWT_SECRET,
+//       { expiresIn: '1h' } // Token expired dalam 1 jam
+//     );
 
-    const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set'; // Jika PIN kosong, set ke 'empty'
+//     const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set'; // Jika PIN kosong, set ke 'empty'
 
-    const decryptedNama = decrypt(nasabah.nama);
-    const decryptedPin = decrypt(nasabah.pin);
+//     const decryptedNama = decrypt(nasabah.nama);
+//     const decryptedPin = decrypt(nasabah.pin);
     
-    res.status(200).json({
-      token,
-      nasabah_id: nasabah.nasabah_id,
-      pinStatus: decryptedPin,
-      nama: decryptedNama,
-      status: nasabah.status,
-      saldo: nasabah.saldo,
-    });
-  } catch (err) {
-    if (err instanceof Error) {
-      res.status(400).json({ message: err.message });
-    } else {
-      res.status(500).json({ message: "Internal server error" });
-    }
-  }
-};
+//     res.status(200).json({
+//       token,
+//       nasabah_id: nasabah.nasabah_id,
+//       pinStatus: decryptedPin,
+//       nama: decryptedNama,
+//       status: nasabah.status,
+//       saldo: nasabah.saldo,
+//     });
+//   } catch (err) {
+//     if (err instanceof Error) {
+//       res.status(400).json({ message: err.message });
+//     } else {
+//       res.status(500).json({ message: "Internal server error" });
+//     }
+//   }
+// };
 
 
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -101,73 +101,63 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const encryptedKodeAkses = encrypt(kodeAkses);
     const nasabah = await Nasabah.findOne({ where: { kodeAkses: encryptedKodeAkses } });
 
-    const status = nasabah && encrypt(password) === nasabah.password ? 'SUCCESS' : 'FAILED';
+    if (!nasabah) {
+      throw new Error('Kode Akses atau Password Tidak Ditemukan');
+    }
 
-    // Tentukan lokasi
+    const passwordValid = await bcrypt.compare(password, nasabah.password);
+    const status = passwordValid ? 'SUCCESS' : 'FAILED';
+
+    // Lokasi
     let location = 'Unknown';
     if (lat && long) {
       location = await reverseGeocode(lat, long);
     } else {
       const geo = geoip.lookup(ip as string);
-      if (geo && geo.city && geo.country) {
-        location = `${geo.city}, ${geo.country}`;
-      } else {
-        location = "Bandung, Indonesia"; // fallback default dev
-      }
+      location = geo?.city && geo?.country ? `${geo.city}, ${geo.country}` : 'Bandung, Indonesia';
     }
 
-    // Tentukan device info yang lebih ramah
+    // Device Info
     let device_info = 'Unknown';
-    if (userAgent.includes("Android")) {
-      device_info = "Mobile App - Android";
-    } else if (userAgent.includes("iPhone") || userAgent.includes("iOS")) {
-      device_info = "Mobile App - iOS";
-    } else if (userAgent.includes("Chrome")) {
-      device_info = "Web Browser - Chrome";
-    } else if (userAgent.includes("Safari")) {
-      device_info = "Web Browser - Safari";
-    } else if (userAgent.includes("Firefox")) {
-      device_info = "Web Browser - Firefox";
-    } else if (userAgent.includes("Windows")) {
-      device_info = "Web Browser - Windows";
-    } else {
-      device_info = userAgent;
-    }
+    if (userAgent.includes("Android")) device_info = "Mobile App - Android";
+    else if (userAgent.includes("iPhone") || userAgent.includes("iOS")) device_info = "Mobile App - iOS";
+    else if (userAgent.includes("Chrome")) device_info = "Web Browser - Chrome";
+    else if (userAgent.includes("Safari")) device_info = "Web Browser - Safari";
+    else if (userAgent.includes("Firefox")) device_info = "Web Browser - Firefox";
+    else if (userAgent.includes("Windows")) device_info = "Web Browser - Windows";
+    else device_info = userAgent;
 
-    // Simpan aktivitas login
     await LoginActivity.create({
       nasabah_id: nasabah?.nasabah_id || null,
       waktu_login: new Date(),
       location,
       device_info,
-      status
+      status,
     });
 
-    if (!nasabah || encrypt(password) !== nasabah.password) {
+    if (!passwordValid) {
       throw new Error('Kode Akses atau Password Tidak Ditemukan');
     }
 
-    const token = jwt.sign(
-      { nasabah_id: nasabah.nasabah_id },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    if (nasabah.status !== 'AKTIF') {
+      throw new Error('Akun Anda sedang diblokir. Silakan hubungi customer service.');
+    }
 
-    const pinStatus = nasabah.pin === encrypt('') ? 'empty' : 'set';
+    const token = jwt.sign({ nasabah_id: nasabah.nasabah_id }, JWT_SECRET, { expiresIn: '1h' });
+    const decryptedPin = decrypt(nasabah.pin);
+    const pinStatus = decryptedPin === '' ? 'empty' : 'set';
 
     res.status(200).json({
       token,
       nasabah_id: nasabah.nasabah_id,
       pinStatus,
-      nama: nasabah.nama,
+      nama: decrypt(nasabah.nama),
+      status: nasabah.status,
+      saldo: nasabah.saldo
     });
 
   } catch (err) {
-    if (err instanceof Error) {
-      res.status(400).json({ message: err.message });
-    } else {
-      res.status(500).json({ message: "Internal server error" });
-    }
+    res.status(400).json({ message: err instanceof Error ? err.message : 'Terjadi kesalahan saat login' });
   }
 };
 

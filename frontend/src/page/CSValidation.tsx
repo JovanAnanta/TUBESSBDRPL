@@ -51,7 +51,7 @@ const CSValidationPage: React.FC = () => {
       }
 
       setSuccess(true);
-      setVerifiedCustomer(data.nasabah);
+      setVerifiedCustomer(data.data);
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat memverifikasi');
       setSuccess(false);

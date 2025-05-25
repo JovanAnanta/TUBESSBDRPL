@@ -275,7 +275,6 @@ const CSCustomerActivityPage: React.FC = () => {
               <div className="th-type">Tipe</div>
               <div className="th-amount">Jumlah</div>
               <div className="th-desc">Deskripsi</div>
-              <div className="th-balance">Saldo</div>
             </div>
             
             {filteredTransactions.length > 0 ? (
@@ -298,7 +297,6 @@ const CSCustomerActivityPage: React.FC = () => {
                     Rp {transaction.amount?.toLocaleString('id-ID')}
                   </div>
                   <div className="ti-desc">{transaction.description}</div>
-                  <div className="ti-balance">Rp {transaction.balance?.toLocaleString('id-ID') || 'N/A'}</div>
                 </div>
               ))
             ) : (

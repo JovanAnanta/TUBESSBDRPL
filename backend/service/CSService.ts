@@ -3,6 +3,7 @@ import { LayananPelanggan } from '../models/LayananPelanggan';
 import { Report } from '../models/Report';
 import { Nasabah } from '../models/Nasabah';
 import { Op } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 export const loginCS = async (email: string, password: string) => {
   const encryptedEmail = encrypt(email);
@@ -41,20 +42,20 @@ export const getDashboardStats = async () => {
 
 export const verifyNasabahData = async (nama: string, email: string, password: string) => {
   const encryptedEmail = encrypt(email);
-  const encryptedPassword = encrypt(password);
-
-  console.log('MENCARI NASABAH DENGAN:');
-  console.log('Nama:', nama);
-  console.log('Email (terenkripsi):', encryptedEmail);
-  console.log('Password (terenkripsi):', encryptedPassword);
-
+  const encryptedNama = encrypt(nama);
+  
   const nasabah = await Nasabah.findOne({
     where: {
-      nama,
-      email: encryptedEmail,
-      password: encryptedPassword
+      nama: encryptedNama,
+      email: encryptedEmail
     }
   });
 
-  return nasabah;
+  if (!nasabah) {
+    return null;
+  }
+
+  const isMatch = await bcrypt.compare(password, nasabah.password);
+  return isMatch ? nasabah : null;
 };
+
