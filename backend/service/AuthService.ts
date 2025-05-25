@@ -25,10 +25,11 @@ export const registerNasabah = async (data: any) => {
       throw new Error('Email already registered');
     }
 
-    const existingPassword = await Nasabah.findOne({ where: { password: encrypt(password) } });
-    if (existingPassword) {
-      throw new Error('Password already registered');
-    }
+    // Hapus pengecekan password yang sudah ada karena bcrypt hash akan selalu berbeda
+    // const existingPassword = await Nasabah.findOne({ where: { password: encrypt(password) } });
+    // if (existingPassword) {
+    //   throw new Error('Password already registered');
+    // }
 
     let noRekening = generateNomorRekeningDenganPrefix();
     while (await Nasabah.findOne({ where: { noRekening } })) {
@@ -39,19 +40,23 @@ export const registerNasabah = async (data: any) => {
     if (existingKodeAkses) {
       throw new Error('KodeAkses already registered');
     }
-  
-  const created = await Nasabah.create({
-    nama: encrypt(data.nama),
-    email: encrypt(data.email),
-    password: encrypt(data.password),
-    noRekening : encrypt(noRekening),
-    pin: encrypt(''),
-    saldo: Number(data.saldo),
-    kodeAkses: encrypt(data.kodeAkses),
-    status: 'AKTIF',
-  });
 
-  return created;
+    // Hash password menggunakan bcrypt
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+  
+    const created = await Nasabah.create({
+      nama: encrypt(data.nama),
+      email: encrypt(data.email),
+      password: hashedPassword, // Menggunakan bcrypt hash
+      noRekening : encrypt(noRekening),
+      pin: encrypt(''),
+      saldo: Number(data.saldo),
+      kodeAkses: encrypt(data.kodeAkses),
+      status: 'AKTIF',
+    });
+
+    return created;
   } catch (error) {
     throw new Error(`Registration failed: ${(error as Error).message}`);
   }
