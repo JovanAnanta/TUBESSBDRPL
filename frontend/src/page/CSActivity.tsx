@@ -2,91 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/CS.css';
 import '../style/CSActivity.css';
+import axios from 'axios';
 
-// Mock transaction data
-const MOCK_TRANSACTIONS = [
-  {
-    id: 1,
-    date: '2024-05-22',
-    time: '09:45:23',
-    type: 'DEBIT',
-    amount: 750000,
-    description: 'Transfer ke Ahmad Yusuf',
-    balance: 4250000
-  },
-  {
-    id: 2,
-    date: '2024-05-20',
-    time: '14:30:11',
-    type: 'CREDIT',
-    amount: 2000000,
-    description: 'Penerimaan dari PT Maju Bersama',
-    balance: 5000000
-  },
-  {
-    id: 3,
-    date: '2024-05-18',
-    time: '11:15:47',
-    type: 'DEBIT',
-    amount: 500000,
-    description: 'Pembayaran Tagihan Listrik',
-    balance: 3000000
-  },
-  {
-    id: 4,
-    date: '2024-05-15',
-    time: '16:22:30',
-    type: 'DEBIT',
-    amount: 1200000,
-    description: 'Penarikan ATM',
-    balance: 3500000
-  },
-  {
-    id: 5,
-    date: '2024-05-10',
-    time: '10:05:12',
-    type: 'CREDIT',
-    amount: 4700000,
-    description: 'Penerimaan Gaji',
-    balance: 4700000
-  }
-];
+// Define types for our data
+interface Transaction {
+  id?: number;
+  date: string;
+  time?: string;
+  tanggal?: string;
+  tipe: string;
+  type?: string;
+  jumlah: number;
+  amount?: number;
+  keterangan: string;
+  description?: string;
+  balance?: number;
+}
 
-// Mock login activity data
-const MOCK_LOGIN_ACTIVITIES = [
-  {
-    id: 1,
-    date: '2024-05-23',
-    time: '08:15:45',
-    device: 'Mobile App - Android',
-    location: 'Bandung, Indonesia',
-    status: 'SUCCESS'
-  },
-  {
-    id: 2,
-    date: '2024-05-21',
-    time: '19:30:22',
-    device: 'Web Browser - Chrome',
-    location: 'Jakarta, Indonesia',
-    status: 'SUCCESS'
-  },
-  {
-    id: 3,
-    date: '2024-05-20',
-    time: '07:45:10',
-    device: 'Mobile App - iOS',
-    location: 'Bandung, Indonesia',
-    status: 'SUCCESS'
-  },
-  {
-    id: 4,
-    date: '2024-05-18',
-    time: '22:10:35',
-    device: 'Web Browser - Safari',
-    location: 'Surabaya, Indonesia',
-    status: 'FAILED'
-  },
-];
+interface LoginActivity {
+  login_id: string;
+  waktu_login: string;
+  location: string;
+  device_info: string;
+  status: string;
+  id?: number;
+  date?: string;
+  time?: string;
+  device?: string;
+}
 
 type TabType = 'transactions' | 'login' | 'alerts';
 
@@ -96,6 +39,10 @@ const CSCustomerActivityPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('transactions');
   const [filterDate, setFilterDate] = useState('');
   const [filterType, setFilterType] = useState('');
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loginActivities, setLoginActivities] = useState<LoginActivity[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('cs_token');
@@ -111,18 +58,102 @@ const CSCustomerActivityPage: React.FC = () => {
     }
 
     try {
-      setCustomerData(JSON.parse(verifiedCustomer));
+      const customerInfo = JSON.parse(verifiedCustomer);
+      setCustomerData(customerInfo);
+      
+      // Fetch data when customer is loaded
+      fetchTransactions(customerInfo.nasabah_id);
+      fetchLoginActivities(customerInfo.nasabah_id);
     } catch (error) {
       console.error("Error parsing customer data:", error);
       navigate('/cs/validation');
     }
   }, [navigate]);
 
+  const fetchTransactions = async (nasabahId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('cs_token');
+      const response = await axios.get(
+        `http://localhost:3000/api/cs/activity/${nasabahId}/transactions`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data && response.data.data) {
+        // Transform API data to match our component's format
+        const formattedTransactions = response.data.data.map((item: any, index: number) => {
+          const date = item.tanggal.split('T')[0];
+          return {
+            id: index + 1,
+            date: date,
+            time: new Date().toTimeString().split(' ')[0], // Using current time as API doesn't provide time
+            type: item.tipe === 'TRANSFER' || item.tipe === 'DEBIT' || item.tipe === 'TAGIHAN' ? 'DEBIT' : 'CREDIT',
+            amount: item.jumlah,
+            description: item.keterangan,
+            balance: 0, // Balance data not provided from API
+            // Keep original API fields also to ensure we don't lose data
+            tanggal: item.tanggal,
+            tipe: item.tipe,
+            jumlah: item.jumlah,
+            keterangan: item.keterangan
+          };
+        });
+        setTransactions(formattedTransactions);
+      }
+    } catch (err) {
+      console.error("Error fetching transactions:", err);
+      setError("Gagal memuat data transaksi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchLoginActivities = async (nasabahId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('cs_token');
+      const response = await axios.get(
+        `http://localhost:3000/api/cs/activity/${nasabahId}/logins`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+
+      if (response.data && response.data.data) {
+        // Transform API data to match our component's format
+        const formattedLoginActivities = response.data.data.map((item: any, index: number) => {
+          const loginDate = new Date(item.waktu_login);
+          return {
+            login_id: item.login_id,
+            id: index + 1,
+            date: loginDate.toISOString().split('T')[0],
+            time: loginDate.toTimeString().split(' ')[0],
+            device: item.device_info || 'Unknown Device',
+            location: item.location || 'Unknown Location',
+            status: item.status,
+            waktu_login: item.waktu_login,
+            device_info: item.device_info
+          };
+        });
+        setLoginActivities(formattedLoginActivities);
+      }
+    } catch (err) {
+      console.error("Error fetching login activities:", err);
+      setError("Gagal memuat data aktivitas login.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleBack = () => {
     navigate('/cs/validation');
   };
 
-  const filteredTransactions = MOCK_TRANSACTIONS.filter(transaction => {
+  const filteredTransactions = transactions.filter(transaction => {
     let match = true;
     
     if (filterDate && !transaction.date.includes(filterDate)) {
@@ -187,7 +218,21 @@ const CSCustomerActivityPage: React.FC = () => {
         </button>
       </div>
 
-      {activeTab === 'transactions' && (
+      {isLoading && (
+        <div className="loading-indicator">
+          <i className="fas fa-spinner fa-spin"></i>
+          <p>Memuat data...</p>
+        </div>
+      )}
+
+      {error && (
+        <div className="error-message">
+          <i className="fas fa-exclamation-circle"></i>
+          <p>{error}</p>
+        </div>
+      )}
+
+      {activeTab === 'transactions' && !isLoading && (
         <div className="activity-content">
           <div className="filter-controls">
             <div className="filter-group">
@@ -238,9 +283,9 @@ const CSCustomerActivityPage: React.FC = () => {
                 <div key={transaction.id} className="transaction-item">
                   <div className="ti-date">
                     <div className="date">{transaction.date}</div>
-                    <div className="time">{transaction.time}</div>
+                    <div className="time">{transaction.time || '00:00:00'}</div>
                   </div>
-                  <div className={`ti-type ${transaction.type.toLowerCase()}`}>
+                  <div className={`ti-type ${transaction.type?.toLowerCase()}`}>
                     {transaction.type === 'CREDIT' ? (
                       <i className="fas fa-arrow-down"></i>
                     ) : (
@@ -248,12 +293,12 @@ const CSCustomerActivityPage: React.FC = () => {
                     )}
                     {transaction.type}
                   </div>
-                  <div className={`ti-amount ${transaction.type.toLowerCase()}`}>
+                  <div className={`ti-amount ${transaction.type?.toLowerCase()}`}>
                     {transaction.type === 'CREDIT' ? '+ ' : '- '}
-                    Rp {transaction.amount.toLocaleString('id-ID')}
+                    Rp {transaction.amount?.toLocaleString('id-ID')}
                   </div>
                   <div className="ti-desc">{transaction.description}</div>
-                  <div className="ti-balance">Rp {transaction.balance.toLocaleString('id-ID')}</div>
+                  <div className="ti-balance">Rp {transaction.balance?.toLocaleString('id-ID') || 'N/A'}</div>
                 </div>
               ))
             ) : (
@@ -266,7 +311,7 @@ const CSCustomerActivityPage: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'login' && (
+      {activeTab === 'login' && !isLoading && (
         <div className="activity-content">
           <div className="login-activity-list">
             <div className="login-activity-header">
@@ -276,24 +321,31 @@ const CSCustomerActivityPage: React.FC = () => {
               <div className="lh-status">Status</div>
             </div>
             
-            {MOCK_LOGIN_ACTIVITIES.map(activity => (
-              <div key={activity.id} className="login-activity-item">
-                <div className="li-date">
-                  <div className="date">{activity.date}</div>
-                  <div className="time">{activity.time}</div>
+            {loginActivities.length > 0 ? (
+              loginActivities.map(activity => (
+                <div key={activity.login_id} className="login-activity-item">
+                  <div className="li-date">
+                    <div className="date">{activity.date}</div>
+                    <div className="time">{activity.time}</div>
+                  </div>
+                  <div className="li-device">{activity.device}</div>
+                  <div className="li-location">{activity.location}</div>
+                  <div className={`li-status ${activity.status.toLowerCase()}`}>
+                    {activity.status === 'SUCCESS' ? (
+                      <i className="fas fa-check-circle"></i>
+                    ) : (
+                      <i className="fas fa-times-circle"></i>
+                    )}
+                    {activity.status}
+                  </div>
                 </div>
-                <div className="li-device">{activity.device}</div>
-                <div className="li-location">{activity.location}</div>
-                <div className={`li-status ${activity.status.toLowerCase()}`}>
-                  {activity.status === 'SUCCESS' ? (
-                    <i className="fas fa-check-circle"></i>
-                  ) : (
-                    <i className="fas fa-times-circle"></i>
-                  )}
-                  {activity.status}
-                </div>
+              ))
+            ) : (
+              <div className="no-data">
+                <i className="fas fa-search"></i>
+                <p>Tidak ada data aktivitas login</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}

@@ -49,7 +49,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ onClose }) => {
       
       setTimeout(() => {
         onClose();
-      }, 3555); // Increased to 3 seconds before closing
+      }, 3555);
 
     } catch (error) {
       toast.error(`❌ ${(error as Error).message}`, {

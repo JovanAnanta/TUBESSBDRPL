@@ -42,7 +42,6 @@ const HomePage: React.FC = () => {
           </Link>
         ))}
 
-        {/* Tombol Logout */}
         <div className="feature-link" onClick={handleLogout}>
           <div className="feature-card">
             <div className="feature-icon">🚪</div>
@@ -51,12 +50,10 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Floating Action Button untuk Report */}
       <button className="fab" onClick={() => setShowReportForm(true)}>
         📝
       </button>
 
-      {/* Report Form Modal */}
       {showReportForm && (
         <ReportForm onClose={() => setShowReportForm(false)} />
       )}

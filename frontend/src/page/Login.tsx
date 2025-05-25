@@ -3,12 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import { encrypt, decrypt } from '../../../backend/enkripsi/Encryptor';
 import "../style/Login.css";
 
-export const login = async (kodeAkses: string, password: string) => {
+export const login = async (kodeAkses: string, password: string, lat?: number, long?: number) => {
   try {
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kodeAkses, password }),
+      body: JSON.stringify({ kodeAkses, password, lat, long }),
     });
 
     if (!response.ok) {
@@ -38,21 +38,37 @@ const LoginForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    let lat: number | undefined;
+    let long: number | undefined;
+
+    if (navigator.geolocation) {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            timeout: 5000
+          });
+        });
+        lat = position.coords.latitude;
+        long = position.coords.longitude;
+      } catch (error) {
+        console.warn("Lokasi tidak diizinkan atau gagal diakses:", error);
+      }
+    }
+
     try {
-      const data = await login(formData.kodeAkses, formData.password);
+      const data = await login(formData.kodeAkses, formData.password, lat, long);
       localStorage.removeItem("cs_token");
       localStorage.removeItem('cs_name');
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("nasabahId", data.nasabah_id);
+
       if (data.pinStatus === 'empty') {
-        navigate("/user/set-pin");  // Arahkan ke halaman set PIN
+        navigate("/user/set-pin");
       } else {
         navigate("/user", { replace: true });
-
       }
 
-      localStorage.setItem("nasabahId", data.nasabah_id);
       alert(`Login berhasil! Selamat datang, ${data.nama}`);
     } catch (err: any) {
       console.error('Error on login submit:', err);
@@ -72,7 +88,7 @@ const LoginForm = () => {
     <div className="login-wrapper">
       <div className="login-card">
         <h2 className="login-heading">Welcome Back</h2>
-        
+
         <div className="role-selector">
           <button 
             className={`role-button ${role === 'nasabah' ? 'active' : ''}`}
@@ -120,7 +136,6 @@ const LoginForm = () => {
         </form>
       </div>
     </div>
-
   );
 };
 

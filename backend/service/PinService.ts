@@ -1,4 +1,3 @@
-// src/services/pinService.ts
 import { Nasabah } from '../models/Nasabah';
 import { encrypt } from '../enkripsi/Encryptor';
 

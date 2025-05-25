@@ -1,4 +1,3 @@
-// src/routes/pinRoutes.ts
 import { Router } from 'express';
 import * as PinController from '../controller/PinController';
 import { getNasabahData } from '../controller/AuthController';

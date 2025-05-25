@@ -7,7 +7,6 @@ async function request<T>(
 ): Promise<T> {
   const headers: Record<string, string> = { ...(options.headers || {}) as Record<string, string> };
 
-  // Tambahkan token jika diperlukan
   if (useAuth) {
     const token = localStorage.getItem('token');
     if (token) {
@@ -15,7 +14,6 @@ async function request<T>(
     }
   }
 
-  // Tambahkan Content-Type default jika body bukan FormData
   if (!(options.body instanceof FormData) && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
