@@ -58,9 +58,9 @@ export class Nasabah extends Model {
     declare kodeAkses: string;
 
     @Column({
-        type: DataType.ENUM('Aktif', 'Tidak Aktif'),
+        type: DataType.ENUM('AKTIF', 'TIDAK AKTIF'),
         allowNull: false,
-        defaultValue: 'Aktif',
+        defaultValue: 'AKTIF',
     })
     declare status: string;
 

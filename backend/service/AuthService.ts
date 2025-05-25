@@ -1,5 +1,9 @@
-import { encrypt } from '../enkripsi/Encryptor';
-import { Nasabah } from '../models/Nasabah';
+
+import { decrypt } from '../enkripsi/Encryptor';
+import { Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+
 
 function generateNomorRekeningDenganPrefix(prefix: string = '3480', digitTambahan: number = 6): string {
   let randomDigits = '';
@@ -35,10 +39,10 @@ export const registerNasabah = async (data: any) => {
     }
   
   const created = await Nasabah.create({
-    nama: data.nama,
+    nama: encrypt(data.nama),
     email: encrypt(data.email),
     password: encrypt(data.password),
-    noRekening,
+    noRekening : encrypt(noRekening),
     pin: encrypt(''),
     saldo: Number(data.saldo),
     kodeAkses: encrypt(data.kodeAkses),
