@@ -1,5 +1,4 @@
-import { Nasabah } from '../models/Nasabah';
-import { encrypt, decrypt } from '../enkripsi/Encryptor';
+import { decrypt } from '../enkripsi/Encryptor';
 import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
