@@ -32,7 +32,7 @@ import '../style/GantiPassword.css';
             return;
         }
 
-        const response = await fetch('/api/user/ganti-password', {
+        const response = await fetch('/api/nasabah/ganti-password', {
             method: 'POST',
             headers: {
             'Content-Type': 'application/json',
