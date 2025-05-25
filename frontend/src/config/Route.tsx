@@ -1,21 +1,29 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { TagihanComponent } from "../Components/TagihanComponent";
 import AuthLayout from "../page/AuthLayout";
-<<<<<<< HEAD
-import UserLayout from "../page/UserLayout";
-import HomePage from "../page/HomePage";
-import RegisterPage from "../page/Register";
-import LoginPage from "../page/Login";
-import PinPage from "../page/SetPinPage";
-import { MInfo } from "../page/DetailHomePage/MInfo";
-import  { MPayment }  from "../page/DetailHomePage/MPayment";
-import { MTransfer } from "../page/DetailHomePage/MTransfer";
-import { Setting } from "../page/DetailHomePage/Setting";
-import CSLogin from '../page/CSLogin';
+import CekPinPage from "../page/cekPinPage";
+import CSCustomerActivityPage from '../page/CSActivity';
 import CSHomePage from '../page/CSHomePage';
+import CSLogin from '../page/CSLogin';
 import CSReportPage from '../page/CSReportPage';
 import CSValidationPage from '../page/CSValidation';
-import CSCustomerActivityPage from '../page/CSActivity';
-import { ProtectedUser, ProtectedCS } from "./ProtectedRoute";
+import InfoSaldo from "../page/DetailHomePage/DetailMInfo/InfoSaldo";
+import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
+import TopUp from "../page/DetailHomePage/DetailMTransfer/TopUp";
+import Transfer from "../page/DetailHomePage/DetailMTransfer/Transfer";
+import { MInfo } from "../page/DetailHomePage/MInfo";
+import { MPayment } from "../page/DetailHomePage/MPayment";
+import { Mtransfer } from "../page/DetailHomePage/MTransfer";
+import { Setting } from "../page/DetailHomePage/Setting";
+import EReceipt from "../page/E-Receipt";
+import GantiPassword from "../page/GantiPassword";
+import { GantiPin } from "../page/GantiPin";
+import HomePage from "../page/HomePage";
+import LoginPage from "../page/Login";
+import RegisterPage from "../page/Register";
+import PinPage from "../page/SetPinPage";
+import UserLayout from "../page/UserLayout";
+import { ProtectedCS, ProtectedUser } from "./ProtectedRoute";
 
 const checkAuth = () => {
   const token = localStorage.getItem("token");
@@ -26,28 +34,6 @@ const checkCSAuth = () => {
   const token = localStorage.getItem("cs_token");
   return token && token.trim() !== '';
 };
-=======
-import CekPinPage from "../page/cekPinPage";
-import CSHomePage from '../page/CSHomePage';
-import CSLogin from '../page/CSLogin';
-import CSReportPage from '../page/CSReportPage';
-import InfoSaldo from "../page/DetailHomePage/DetailMInfo/InfoSaldo";
-import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
-import TopUp from "../page/DetailHomePage/DetailMTransfer/TopUp";
-import Transfer from "../page/DetailHomePage/DetailMTransfer/Transfer";
-import { MInfo } from "../page/DetailHomePage/MInfo";
-import { MPayment } from "../page/DetailHomePage/MPayment";
-import MTransfer from "../page/DetailHomePage/MTransfer";
-import { Setting } from "../page/DetailHomePage/Setting";
-import EReceipt from "../page/E-Receipt";
-import GantiPassword from '../page/GantiPassword';
-import { GantiPin } from "../page/GantiPin";
-import HomePage from "../page/HomePage";
-import LoginPage from "../page/Login";
-import RegisterPage from "../page/Register";
-import PinPage from "../page/SetPinPage";
-import UserLayout from "../page/UserLayout";
->>>>>>> origin/main
 
 
 const Routers = createBrowserRouter([
@@ -70,7 +56,6 @@ const Routers = createBrowserRouter([
   },
   {
     path: "/user",
-<<<<<<< HEAD
     element: (
       <ProtectedUser>
         <UserLayout />
@@ -79,17 +64,9 @@ const Routers = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "set-pin", element: <PinPage /> },
-      { path: "minfo", element: <MInfo /> },
-      { path: "mtransfer", element: <MTransfer /> },
-      { path: "mpayment", element: <MPayment /> },
-      { path: "settings", element: <Setting /> }
-=======
-    element: checkAuth() ? <UserLayout /> : <Navigate to="/auth/login" />,    children: [
-      { index: true, element: <HomePage /> },
-      { path: "set-pin", element: <PinPage /> },
       { path: "verify-pin", element: <CekPinPage /> },
       { path: "minfo", element: <MInfo />},
-      { path: "mtransfer", element: <MTransfer />},
+      { path: "mtransfer", element: <Mtransfer />},
       { path: "minfo/saldo", element: <InfoSaldo />},
       { path: "minfo/mutasi", element: <MutasiRekening />},
       { path: "mtransfer/transfer", element: <Transfer /> },
@@ -100,7 +77,6 @@ const Routers = createBrowserRouter([
       { path: "settings", element: <Setting /> },
       { path: "nasabah/ganti-pin", element: <GantiPin />},
       { path: "nasabah/ganti-password", element: <GantiPassword /> }
->>>>>>> origin/main
     ]
   },
   // CS Routes
