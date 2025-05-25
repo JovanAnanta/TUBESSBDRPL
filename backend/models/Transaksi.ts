@@ -1,13 +1,16 @@
 import {
-  Table, Column, Model, DataType, ForeignKey,
-  HasOne
+  Column,
+  DataType, ForeignKey,
+  HasOne,
+  Model,
+  Table
 } from "sequelize-typescript";
-import { Nasabah } from "./Nasabah";
-import { Debit } from "./Debit";
 import { Credit } from "./Credit";
-import { Transfer } from "./Transfer";
-import { Tagihan } from "./Tagihan";
+import { Debit } from "./Debit";
+import { Nasabah } from "./Nasabah";
 import { Pinjaman } from "./Pinjaman";
+import { Tagihan } from "./Tagihan";
+import { Transfer } from "./Transfer";
 
 @Table({
   tableName: "transaksi", timestamps: false
@@ -27,7 +30,6 @@ export class Transaksi extends Model {
   })
   declare nasabah_id: string;
 
-<<<<<<< HEAD
   @Column({
     type: DataType.ENUM("MASUK", "KELUAR"),
     allowNull: false
@@ -56,17 +58,4 @@ export class Transaksi extends Model {
   @HasOne(() => Pinjaman)
   declare Pinjaman?: Pinjaman | null;
 
-=======
-    @Column({
-        type: DataType.ENUM("MASUK", "KELUAR"),
-        allowNull: false
-    })
-    declare transaksiType: string;
-    
-    @Column({
-        type: DataType.DATE,
-        allowNull: false
-    })
-    declare tanggalTransaksi: Date;
->>>>>>> origin/main
 }

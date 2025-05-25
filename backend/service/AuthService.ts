@@ -1,13 +1,5 @@
-import bcrypt from "bcryptjs";
 import { encrypt } from '../enkripsi/Encryptor';
 import { Nasabah } from '../models/Nasabah';
-<<<<<<< HEAD
-import { encrypt, decrypt } from '../enkripsi/Encryptor';
-import { Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-=======
->>>>>>> origin/main
 
 function generateNomorRekeningDenganPrefix(prefix: string = '3480', digitTambahan: number = 6): string {
   let randomDigits = '';
