@@ -12,3 +12,8 @@ export const ProtectedCS = ({ children }: { children: React.ReactElement }) => {
   const token = localStorage.getItem("cs_token");
   return token ? children : <Navigate to="/cs/login" replace />;
 };
+
+export const ProtectedAdmin = ({ children }: { children: React.ReactElement }) => {
+  const token = localStorage.getItem("admin_token");
+  return token ? children : <Navigate to="/admin/login" replace />;
+};

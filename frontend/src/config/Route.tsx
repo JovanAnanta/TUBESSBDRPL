@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { TagihanComponent } from "../Components/TagihanComponent";
+import AdminLogin from "../page/AdminLogin";
 import AuthLayout from "../page/AuthLayout";
 import CekPinPage from "../page/cekPinPage";
 import CSCustomerActivityPage from '../page/CSActivity';
@@ -26,7 +27,8 @@ import LoginPage from "../page/Login";
 import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
 import UserLayout from "../page/UserLayout";
-import { ProtectedCS, ProtectedUser } from "./ProtectedRoute";
+import AdminDashboard from "../page/AdminHomepage";
+import { ProtectedAdmin, ProtectedCS, ProtectedUser } from "./ProtectedRoute";
 
 const checkAuth = () => {
   const token = localStorage.getItem("token");
@@ -35,6 +37,11 @@ const checkAuth = () => {
 
 const checkCSAuth = () => {
   const token = localStorage.getItem("cs_token");
+  return token && token.trim() !== '';
+};
+
+const checkAdminAuth = () => {
+  const token = localStorage.getItem("admin_token");
   return token && token.trim() !== '';
 };
 
@@ -134,6 +141,27 @@ const Routers = createBrowserRouter([
       <ProtectedCS>
         <CSCustomerActivityPage />
       </ProtectedCS>
+    )
+  },
+  // Admin Routes
+  {
+    path: "/admin/login",
+    element: <AdminLogin />
+  },
+  {
+    path: "/admin/dashboard",
+    element: (
+      <ProtectedAdmin>
+        <AdminDashboard />
+      </ProtectedAdmin>
+    )
+  },
+  {
+    path: "/admin",
+    element: (
+      <ProtectedAdmin>
+        <AdminDashboard />
+      </ProtectedAdmin>
     )
   }
 ]);

@@ -25,6 +25,7 @@ import tagihanRoutes from './routes/TagihanRoutes';
 import { LoginActivity } from './models/LoginActivity';
 import { Session } from './models/Session';
 import { Admin } from './models/Admin';
+import adminRoutes from './routes/AdminRoutes';
 
 const sequelize = new Sequelize({
   ...config.development,
@@ -63,6 +64,8 @@ app.use('/api/nasabah', gantiPasswordRotues);
 app.use('/api/cs', csRoutes);
 app.use('/api/cs', csReportRoutes);
 app.use('/api/cs', csActivityRoutes);
+
+app.use('/api/admin', adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
