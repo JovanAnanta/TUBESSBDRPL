@@ -3,7 +3,8 @@ import {
   DataType, ForeignKey,
   HasOne,
   Model,
-  Table
+  Table,
+  BelongsTo
 } from "sequelize-typescript";
 import { Credit } from "./Credit";
 import { Debit } from "./Debit";
@@ -65,5 +66,7 @@ export class Transaksi extends Model {
   @HasOne(() => Pinjaman)
   declare Pinjaman?: Pinjaman | null;
 
+  @BelongsTo(() => Nasabah)
+  nasabah!: Nasabah;
   
 }

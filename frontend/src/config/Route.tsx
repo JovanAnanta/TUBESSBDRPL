@@ -1,6 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { TagihanComponent } from "../Components/TagihanComponent";
+import AdminDashboard from "../page/AdminHomepage";
+import AdminLoanManagement from "../page/AdminLoanManagement";
 import AdminLogin from "../page/AdminLogin";
+import AdminUserManagement from "../page/AdminUserManagement";
 import AuthLayout from "../page/AuthLayout";
 import CekPinPage from "../page/cekPinPage";
 import CSCustomerActivityPage from '../page/CSActivity';
@@ -27,7 +30,6 @@ import PinjamanPage from "../page/Pinjaman";
 import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
 import UserLayout from "../page/UserLayout";
-import AdminDashboard from "../page/AdminHomepage";
 import { ProtectedAdmin, ProtectedCS, ProtectedUser } from "./ProtectedRoute";
 
 const checkAuth = () => {
@@ -45,8 +47,8 @@ const checkAdminAuth = () => {
   return token && token.trim() !== '';
 };
 
-
 const Routers = createBrowserRouter([
+  // Basic routes
   {
     path: "",
     element: <LoginPage />
@@ -64,6 +66,7 @@ const Routers = createBrowserRouter([
       { path: "register", element: <RegisterPage /> }
     ]
   },
+  // User routes
   {
     path: "/user",
     element: (
@@ -162,6 +165,22 @@ const Routers = createBrowserRouter([
     element: (
       <ProtectedAdmin>
         <AdminDashboard />
+      </ProtectedAdmin>
+    )
+  },
+  {
+    path: "/admin/loan-management",
+    element: (
+      <ProtectedAdmin>
+        <AdminLoanManagement />
+      </ProtectedAdmin>
+    )
+  },
+  {
+    path: "/admin/user-management",
+    element: (
+      <ProtectedAdmin>
+        <AdminUserManagement />
       </ProtectedAdmin>
     )
   }

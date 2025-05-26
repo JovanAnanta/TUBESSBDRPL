@@ -45,6 +45,6 @@ export class Pinjaman extends Model {
     declare statusPinjaman: string;
 
     @BelongsTo(() => Transaksi)
-    declare Transaksi: Transaksi;
+    declare transaksi: Transaksi;
 
 }

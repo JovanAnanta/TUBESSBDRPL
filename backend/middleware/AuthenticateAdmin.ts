@@ -20,14 +20,16 @@ const authenticateAdmin = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(401).json({ message: 'Token tidak tersedia' });
+    res.status(401).json({ message: 'Token tidak tersedia' });
+    return;
   }
 
   const token = authHeader.split(' ')[1];
 
   jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
     if (err || decoded.role !== 'admin') {
-      return res.status(403).json({ message: 'Token tidak valid atau bukan Admin' });
+      res.status(403).json({ message: 'Token tidak valid atau bukan Admin' });
+      return;
     }
 
     req.admin = {
