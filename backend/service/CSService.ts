@@ -1,8 +1,9 @@
-import { encrypt } from '../enkripsi/Encryptor';
+import { encrypt, decrypt } from '../enkripsi/Encryptor';
 import { LayananPelanggan } from '../models/LayananPelanggan';
 import { Report } from '../models/Report';
 import { Nasabah } from '../models/Nasabah';
 import { Op } from 'sequelize';
+import bcrypt from 'bcrypt';
 
 export const loginCS = async (email: string, password: string) => {
   const encryptedEmail = encrypt(email);
@@ -41,20 +42,38 @@ export const getDashboardStats = async () => {
 
 export const verifyNasabahData = async (nama: string, email: string, password: string) => {
   const encryptedEmail = encrypt(email);
-  const encryptedPassword = encrypt(password);
-
-  console.log('MENCARI NASABAH DENGAN:');
-  console.log('Nama:', nama);
-  console.log('Email (terenkripsi):', encryptedEmail);
-  console.log('Password (terenkripsi):', encryptedPassword);
-
+  const encryptedNama = encrypt(nama);
+  
   const nasabah = await Nasabah.findOne({
     where: {
-      nama,
-      email: encryptedEmail,
-      password: encryptedPassword
+      nama: encryptedNama,
+      email: encryptedEmail
     }
   });
 
-  return nasabah;
+  if (!nasabah) {
+    return null;
+  }
+
+  const isMatch = await bcrypt.compare(password, nasabah.password);
+  return isMatch ? nasabah : null;
+};
+
+export const resetNasabahPassword = async (email: string, passwordBaru: string) => {
+  const encryptedEmail = encrypt(email);
+  const nasabah = await Nasabah.findOne({ where: { email: encryptedEmail } });
+
+  if (!nasabah) {
+    throw new Error('Nasabah tidak ditemukan');
+  }
+
+  const hashedPassword = await bcrypt.hash(passwordBaru, 10);
+  nasabah.password = hashedPassword;
+
+  await nasabah.save();
+
+  return {
+    nama: decrypt(nasabah.nama),
+    email: email
+  };
 };

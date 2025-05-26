@@ -1,5 +1,4 @@
 .cs-report-container {
-  padding: 2rem;
   background-color: #f5f5f5;
   min-height: 100vh;
 }
@@ -145,7 +144,7 @@
 .back-button {
   padding: 0.5rem 1rem;
   border: none;
-  background: #333;
+  background: white;
   color: white;
   border-radius: 6px;
   cursor: pointer;
