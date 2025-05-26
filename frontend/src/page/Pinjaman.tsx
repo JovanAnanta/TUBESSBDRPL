@@ -69,7 +69,7 @@ export const PinjamanPage = () => {
       return;
     }
 
-    navigate("/verify-pin", {
+    navigate("/user//verify-pin", {
       state: {
         action: "pinjaman",
         pinjaman: {
