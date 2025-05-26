@@ -19,6 +19,7 @@ import { Session } from './models/Session';
 import { Tagihan } from './models/Tagihan';
 import { Transaksi } from './models/Transaksi';
 import { Transfer } from './models/Transfer';
+import adminRoutes from './routes/AdminRoutes';
 import csActivityRoutes from './routes/CSActivityRoutes';
 import csReportRoutes from './routes/CSReportRoutes';
 import csRoutes from './routes/CSRoutes';
@@ -65,6 +66,8 @@ app.use('/api/pinjaman', PinjamanRoutes);
 app.use('/api/cs', csRoutes);
 app.use('/api/cs', csReportRoutes);
 app.use('/api/cs', csActivityRoutes);
+
+app.use('/api/admin', adminRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

@@ -149,10 +149,6 @@ const CSCustomerActivityPage: React.FC = () => {
     }
   };
 
-  const handleBack = () => {
-    navigate('/cs/validation');
-  };
-
   const filteredTransactions = transactions.filter(transaction => {
     let match = true;
     
@@ -168,12 +164,17 @@ const CSCustomerActivityPage: React.FC = () => {
   });
 
   return (
-    <div className="cs-container activity-container">
-      <div className="cs-header activity-header">
-        <button className="back-button" onClick={handleBack}>
-          <i className="fas fa-arrow-left"></i> Kembali
+    <div className="cs-container">
+      <div className="cs-header">
+        <div>
+          <h1 className="cs-title">Aktivitas Nasabah</h1>
+          <p style={{ color: 'white', opacity: 0.9, marginTop: '0.5rem' }}>
+            Customer Service Dashboard
+          </p>
+        </div>
+        <button className="cs-logout" onClick={() => navigate('/cs/validation')}>
+          Kembali
         </button>
-        <h1>Aktivitas Nasabah</h1>
       </div>
 
       {customerData && (
@@ -275,7 +276,6 @@ const CSCustomerActivityPage: React.FC = () => {
               <div className="th-type">Tipe</div>
               <div className="th-amount">Jumlah</div>
               <div className="th-desc">Deskripsi</div>
-              <div className="th-balance">Saldo</div>
             </div>
             
             {filteredTransactions.length > 0 ? (
@@ -298,7 +298,6 @@ const CSCustomerActivityPage: React.FC = () => {
                     Rp {transaction.amount?.toLocaleString('id-ID')}
                   </div>
                   <div className="ti-desc">{transaction.description}</div>
-                  <div className="ti-balance">Rp {transaction.balance?.toLocaleString('id-ID') || 'N/A'}</div>
                 </div>
               ))
             ) : (

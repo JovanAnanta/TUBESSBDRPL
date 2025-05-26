@@ -51,7 +51,7 @@ const CSValidationPage: React.FC = () => {
       }
 
       setSuccess(true);
-      setVerifiedCustomer(data.nasabah);
+      setVerifiedCustomer(data.data);
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat memverifikasi');
       setSuccess(false);
@@ -67,17 +67,18 @@ const CSValidationPage: React.FC = () => {
     }
   };
 
-  const handleBack = () => {
-    navigate('/cs/dashboard');
-  };
-
   return (
     <div className="cs-container validation-container">
-      <div className="cs-header validation-header">
-        <button className="back-button" onClick={handleBack}>
-          <i className="fas fa-arrow-left"></i> Kembali
+      <div className="cs-header">
+        <div>
+          <h1 className="cs-title">Validasi Data Nasabah</h1>
+          <p style={{ color: 'white', opacity: 0.9, marginTop: '0.5rem' }}>
+            Customer Service Dashboard
+          </p>
+        </div>
+        <button className="cs-logout" onClick={() => navigate('/cs/dashboard')}>
+          Kembali
         </button>
-        <h1>Validasi Data Nasabah</h1>
       </div>
 
       <div className="validation-content">

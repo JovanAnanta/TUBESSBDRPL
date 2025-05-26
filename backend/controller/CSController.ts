@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { loginCS } from '../service/CSService';
 import { getDashboardStats } from '../service/CSService';
+import { encrypt, decrypt } from '../enkripsi/Encryptor';
+import { verifyNasabahData as verifyNasabahService } from '../service/CSService';
+import { resetNasabahPassword } from '../service/CSService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
@@ -37,31 +40,46 @@ export const getStats = async (req: Request, res: Response) => {
   }
 };
 
-import { verifyNasabahData as verifyNasabahService } from '../service/CSService';
 
 export const verifyNasabahData = async (req: Request, res: Response) => {
   const { nama, email, password } = req.body;
 
   try {
     const nasabah = await verifyNasabahService(nama, email, password);
-
     if (!nasabah) {
-      res.status(404).json({ message: "Data tidak cocok atau nasabah tidak ditemukan" });
+      res.status(404).json({ message: "Data nasabah tidak ditemukan atau password salah" });
       return;
     }
 
     res.status(200).json({
-      message: "Nasabah berhasil diverifikasi",
-      nasabah: {
+      message: "Verifikasi berhasil",
+      data: {
         nasabah_id: nasabah.nasabah_id,
-        nama: nasabah.nama,
-        email: email,
+        nama: decrypt(nasabah.nama),
+        email: decrypt(nasabah.email),
+        noRekening: decrypt(nasabah.noRekening),
         saldo: nasabah.saldo,
-        noRekening: nasabah.noRekening
       }
     });
-  } catch (err) {
-    console.error("Verifikasi nasabah gagal:", err);
-    res.status(500).json({ message: "Terjadi kesalahan server saat verifikasi" });
+  } catch (error) {
+    res.status(500).json({ message: "Terjadi kesalahan pada server" });
+  }
+};
+
+export const resetPasswordNasabah = async (req: Request, res: Response) => {
+  try {
+    const { email, passwordBaru } = req.body;
+
+    if (!email || !passwordBaru) {
+      res.status(400).json({ message: 'Email dan password baru wajib diisi' });
+      return;
+    }
+
+    const updated = await resetNasabahPassword(email, passwordBaru);
+    res.status(200).json({ message: 'Password berhasil direset', data: updated });
+    return;
+  } catch (err: any) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ message: err.message });
   }
 };

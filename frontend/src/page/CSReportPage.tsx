@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/CSReport.css';
+import '../style/CS.css';
 
 interface Report {
   report_id: string;
@@ -71,43 +72,44 @@ const CSReportPage: React.FC = () => {
   );
 
   return (
-    <div className="cs-report-container">
-      <div className="cs-report-header">
-        <div className="header-top">
-          <button 
-            className="back-button"
-            onClick={() => navigate('/cs/dashboard')}
-          >
-            ← Kembali
-          </button>
-          <h1>Kelola Laporan Nasabah</h1>
+    <div className="cs-container">
+      <div className="cs-header">
+        <div>
+          <h1 className="cs-title">Kelola Laporan Nasabah</h1>
+          <p style={{ color: 'white', opacity: 0.9, marginTop: '0.5rem' }}>
+            Customer Service Dashboard
+          </p>
         </div>
-        <div className="cs-report-filters">
-          <button 
-            className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
-            onClick={() => setFilter('ALL')}
-          >
-            Semua
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'DIPROSES' ? 'active' : ''}`}
-            onClick={() => setFilter('DIPROSES')}
-          >
-            Diproses
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'DITERIMA' ? 'active' : ''}`}
-            onClick={() => setFilter('DITERIMA')}
-          >
-            Diterima
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'DIABAIKAN' ? 'active' : ''}`}
-            onClick={() => setFilter('DIABAIKAN')}
-          >
-            Diabaikan
-          </button>
-        </div>
+        <button className="cs-logout" onClick={() => navigate('/cs/dashboard')}>
+          Kembali
+        </button>
+      </div>
+
+      <div className="cs-report-filters">
+        <button 
+          className={`filter-btn ${filter === 'ALL' ? 'active' : ''}`}
+          onClick={() => setFilter('ALL')}
+        >
+          Semua
+        </button>
+        <button 
+          className={`filter-btn ${filter === 'DIPROSES' ? 'active' : ''}`}
+          onClick={() => setFilter('DIPROSES')}
+        >
+          Diproses
+        </button>
+        <button 
+          className={`filter-btn ${filter === 'DITERIMA' ? 'active' : ''}`}
+          onClick={() => setFilter('DITERIMA')}
+        >
+          Diterima
+        </button>
+        <button 
+          className={`filter-btn ${filter === 'DIABAIKAN' ? 'active' : ''}`}
+          onClick={() => setFilter('DIABAIKAN')}
+        >
+          Diabaikan
+        </button>
       </div>
 
       {loading ? (
