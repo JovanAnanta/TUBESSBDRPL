@@ -30,6 +30,10 @@ export default {
         type: Sequelize.DATE,
         allowNull: false,
       },
+      statusPinjaman: {
+        type: Sequelize.ENUM("ACCEPTED", "PENDING", "REJECTED"),
+        allowNull: false,
+      },
     });
   },
 

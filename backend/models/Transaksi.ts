@@ -42,6 +42,13 @@ export class Transaksi extends Model {
   })
   declare tanggalTransaksi: Date;
 
+  @Column
+({
+    type: DataType.STRING,
+    allowNull: false
+  })
+  declare keterangan: string;
+
   // Relasi ke child tables
   @HasOne(() => Debit)
   declare Debit?: Debit | null;

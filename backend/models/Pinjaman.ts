@@ -34,4 +34,11 @@ export class Pinjaman extends Model {
     })
     declare tanggalJatuhTempo: Date;
 
+    @Column({
+        type: DataType.ENUM("ACCEPTED", "PENDING", "REJECTED"),
+        allowNull: false
+    })
+    declare statusPinjaman: string;
+
+    
 }

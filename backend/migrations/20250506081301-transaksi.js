@@ -28,6 +28,10 @@ export default {
         type: sequelize.DATE,
         allowNull: false,
       },
+      keterangan: {
+        type: sequelize.STRING,
+        allowNull: false,
+      },
     });
   },
 
