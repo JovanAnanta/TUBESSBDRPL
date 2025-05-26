@@ -361,3 +361,149 @@
 .error-message i {
   font-size: 1.2rem;
 }
+
+/* Add these styles to your CSActivity.css file */
+
+.date-range-filter {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #FF6B6B;
+}
+
+.date-range-filter h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.date-range-inputs {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.date-input-group {
+  flex: 1;
+}
+
+.date-input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #555;
+}
+
+.date-input-group input {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.date-range-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-action-btn {
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.filter-action-btn.apply {
+  background-color: #FF6B6B;
+  color: white;
+  flex: 1;
+}
+
+.filter-action-btn.apply:hover:not(:disabled) {
+  background-color: #ff5252;
+}
+
+.filter-action-btn.apply:disabled {
+  background-color: #ffcccb;
+  cursor: not-allowed;
+}
+
+.filter-action-btn.reset {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.filter-action-btn.reset:hover {
+  background-color: #dee2e6;
+}
+
+/* Transaction type colors */
+.ti-type.transfer {
+  color: #ff9800;
+}
+
+.ti-type.tagihan {
+  color: #9c27b0;
+}
+
+.ti-type.pinjaman {
+  color: #2196f3;
+}
+
+.ti-type.topup {
+  color: #4caf50;
+}
+
+.filter-group input[type="text"] {
+  min-width: 200px;
+  padding: 8px 12px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.filter-group input[type="text"]:focus {
+  outline: none;
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.1);
+}
+
+/* Transaction type colors */
+.ti-type.masuk {
+  color: #0f9d58;
+}
+
+.ti-type.keluar {
+  color: #d93025;
+}
+
+/* Add these emoji styles */
+.transaction-item .ti-type::before,
+.login-activity-item .li-status::before {
+  margin-right: 6px;
+  font-size: 1.2em;
+}
+
+/* Additional styling for date time display */
+.ti-date {
+  display: flex;
+  flex-direction: column;
+}
+
+.ti-date .time {
+  color: #5f6368;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+/* Transaction description highlight when searched */
+.ti-desc mark {
+  background-color: #fffde7;
+  padding: 2px;
+  border-radius: 2px;
+}

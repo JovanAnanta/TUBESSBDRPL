@@ -165,154 +165,171 @@ const CSResetPassword: React.FC = () => {
         </button>
       </div>
 
-      <div className="reset-password-container">
-        <div className="form-header">
-          <div className="form-icon">🔑</div>
-          <h2 className="reset-password-title">Reset Password Nasabah</h2>
-          <p className="form-description">
-            {step === 1 
-              ? "Fitur ini digunakan untuk mereset password nasabah yang mengalami kesulitan akses. Harap verifikasi identitas nasabah terlebih dahulu."
-              : "Nasabah terverifikasi. Silakan masukkan password baru untuk akun ini."
-            }
-          </p>
-        </div>
-        
-        {step === 1 ? (
-          <>
-            <div className="step-indicator">
-              <div className="step active">1. Verifikasi Nasabah</div>
-              <div className="step">2. Reset Password</div>
+      <div className="validation-content">
+        <div className="reset-password-container">
+          <div className="reset-password-inner">
+            <div className="form-header">
+              <div className="form-icon">🔑</div>
+              <h2 className="reset-password-title">Reset Password Nasabah</h2>
+              <p className="form-description">
+                {step === 1 
+                  ? "Fitur ini digunakan untuk mereset password nasabah yang mengalami kesulitan akses. Harap verifikasi identitas nasabah terlebih dahulu."
+                  : "Nasabah terverifikasi. Silakan masukkan password baru untuk akun ini."
+                }
+              </p>
             </div>
             
-            <form className="reset-password-form" onSubmit={handleVerification}>
-              <div className="form-group">
-                <label htmlFor="email">Email Nasabah:</label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Masukkan email nasabah"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="nama">Nama Nasabah:</label>
-                <input
-                  type="text"
-                  id="nama"
-                  value={nama}
-                  onChange={(e) => setNama(e.target.value)}
-                  placeholder="Masukkan nama lengkap nasabah"
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="noRekening">Nomor Rekening:</label>
-                <input
-                  type="text"
-                  id="noRekening"
-                  value={noRekening}
-                  onChange={(e) => setNoRekening(e.target.value)}
-                  placeholder="Masukkan nomor rekening nasabah"
-                  required
-                />
-              </div>
-              
-              <button 
-                type="submit" 
-                className="reset-password-button" 
-                disabled={isLoading}
-              >
-                {isLoading ? "Memverifikasi..." : "Verifikasi Nasabah"}
-              </button>
-            </form>
-          </>
-        ) : (
-          <>
-            <div className="step-indicator">
-              <div className="step completed">1. Verifikasi Nasabah</div>
-              <div className="step active">2. Reset Password</div>
-            </div>
-            
-            {verifiedUser && (
-              <div className="verified-user-info">
-                <h3>Data Nasabah:</h3>
-                <div className="user-info-item">
-                  <span className="info-label">Nama:</span>
-                  <span className="info-value">{verifiedUser.nama}</span>
+            {step === 1 ? (
+              <>
+                <div className="step-indicator">
+                  <div className="step active">1. Verifikasi Nasabah</div>
+                  <div className="step">2. Reset Password</div>
                 </div>
-                <div className="user-info-item">
-                  <span className="info-label">Email:</span>
-                  <span className="info-value">{verifiedUser.email}</span>
-                </div>
-                <div className="user-info-item">
-                  <span className="info-label">No. Rekening:</span>
-                  <span className="info-value">{verifiedUser.noRekening}</span>
-                </div>
-              </div>
-            )}
-            
-            <form className="reset-password-form" onSubmit={handleResetPassword}>
-              <div className="form-group">
-                <label htmlFor="passwordBaru">Password Baru:</label>
-                <div className="password-field">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="passwordBaru"
-                    value={passwordBaru}
-                    onChange={(e) => setPasswordBaru(e.target.value)}
-                    placeholder="Masukkan password baru"
-                    required
-                  />
+                
+                <form className="reset-password-form" onSubmit={handleVerification}>
+                  <div className="form-group">
+                    <label htmlFor="email">
+                      <i className="fas fa-envelope"></i> Email Nasabah
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Masukkan email nasabah"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="nama">
+                      <i className="fas fa-user"></i> Nama Nasabah
+                    </label>
+                    <input
+                      type="text"
+                      id="nama"
+                      value={nama}
+                      onChange={(e) => setNama(e.target.value)}
+                      placeholder="Masukkan nama lengkap nasabah"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="noRekening">
+                      <i className="fas fa-credit-card"></i> Nomor Rekening
+                    </label>
+                    <input
+                      type="text"
+                      id="noRekening"
+                      value={noRekening}
+                      onChange={(e) => setNoRekening(e.target.value)}
+                      placeholder="Masukkan nomor rekening nasabah"
+                      required
+                    />
+                  </div>
+                  
+                  {error && <div className="error-message">{error}</div>}
+                  {message && <div className="success-message">{message}</div>}
+                  
                   <button 
-                    type="button" 
-                    className="password-toggle" 
-                    onClick={() => setShowPassword(!showPassword)}
+                    type="submit" 
+                    className="reset-password-button" 
+                    disabled={isLoading}
                   >
-                    {showPassword ? "🙈" : "👁️"}
+                    {isLoading ? "Memverifikasi..." : "Verifikasi Nasabah"}
                   </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <div className="step-indicator">
+                  <div className="step completed">1. Verifikasi Nasabah</div>
+                  <div className="step active">2. Reset Password</div>
                 </div>
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="confirmPassword">Konfirmasi Password:</label>
-                <div className="password-field">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Konfirmasi password baru"
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-actions">
-                <button 
-                  type="button" 
-                  className="back-button" 
-                  onClick={() => setStep(1)}
-                >
-                  Kembali
-                </button>
-                <button 
-                  type="submit" 
-                  className="reset-password-button" 
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Memproses..." : "Reset Password"}
-                </button>
-              </div>
-            </form>
-          </>
-        )}
-        
-        {message && <p className="success-message">{message}</p>}
-        {error && <p className="error-message">{error}</p>}
+                
+                {verifiedUser && (
+                  <div className="verified-user-info">
+                    <h3>Data Nasabah:</h3>
+                    <div className="user-info-item">
+                      <span className="info-label">Nama:</span>
+                      <span className="info-value">{verifiedUser.nama}</span>
+                    </div>
+                    <div className="user-info-item">
+                      <span className="info-label">Email:</span>
+                      <span className="info-value">{verifiedUser.email}</span>
+                    </div>
+                    <div className="user-info-item">
+                      <span className="info-label">No. Rekening:</span>
+                      <span className="info-value">{verifiedUser.noRekening}</span>
+                    </div>
+                  </div>
+                )}
+                
+                <form className="reset-password-form" onSubmit={handleResetPassword}>
+                  <div className="form-group">
+                    <label htmlFor="passwordBaru">
+                      <i className="fas fa-lock"></i> Password Baru
+                    </label>
+                    <div className="password-field">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="passwordBaru"
+                        value={passwordBaru}
+                        onChange={(e) => setPasswordBaru(e.target.value)}
+                        placeholder="Masukkan password baru"
+                        required
+                      />
+                      <button 
+                        type="button" 
+                        className="password-toggle" 
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? "🙈" : "👁️"}
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="confirmPassword">
+                      <i className="fas fa-lock"></i> Konfirmasi Password
+                    </label>
+                    <div className="password-field">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="confirmPassword"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Konfirmasi password baru"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  {error && <div className="error-message">{error}</div>}
+                  {message && <div className="success-message">{message}</div>}
+                  
+                  <div className="form-actions">
+                    <button 
+                      type="button" 
+                      className="back-button" 
+                      onClick={() => setStep(1)}
+                    >
+                      <i className="fas fa-arrow-left"></i> Kembali
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="reset-password-button" 
+                      disabled={isLoading}
+                    >
+                      {isLoading ? "Memproses..." : "Reset Password"}
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

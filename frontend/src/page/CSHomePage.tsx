@@ -11,6 +11,8 @@ const CSHomePage: React.FC = () => {
     pendingValidations: 0,
     totalCustomers: 0
   });
+  // Track if a customer has been validated
+  const [validatedCustomer, setValidatedCustomer] = useState<any>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('cs_token');
@@ -21,6 +23,30 @@ const CSHomePage: React.FC = () => {
 
     const name = localStorage.getItem('cs_name');
     setCsName(name || 'Customer Service');
+
+    // Check if there's a verified customer
+    const checkVerifiedCustomer = () => {
+      const verifiedCustomer = localStorage.getItem('verified_customer');
+      if (verifiedCustomer) {
+        try {
+          const customerData = JSON.parse(verifiedCustomer);
+          setValidatedCustomer(customerData);
+        } catch (error) {
+          console.error("Error parsing verified customer data:", error);
+          // Clear invalid data
+          localStorage.removeItem('verified_customer');
+          setValidatedCustomer(null);
+        }
+      } else {
+        setValidatedCustomer(null);
+      }
+    };
+
+    // Check initially
+    checkVerifiedCustomer();
+
+    // Set interval to check periodically
+    const intervalId = setInterval(checkVerifiedCustomer, 2000);
 
     const fetchStats = async () => {
       try {
@@ -40,13 +66,29 @@ const CSHomePage: React.FC = () => {
     };
 
     fetchStats();
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('cs_token');
     localStorage.removeItem('cs_name');
+    localStorage.removeItem('verified_customer'); // Also clear any validated customer
     localStorage.removeItem('token');
     navigate('/cs/login');
+  };
+
+  // Handle feature card clicks with validation check
+  const handleFeatureClick = (path: string, requiresValidation: boolean) => {
+    if (requiresValidation && !validatedCustomer) {
+      // Show alert and redirect to validation page
+      alert('Silakan validasi nasabah terlebih dahulu sebelum mengakses fitur ini.');
+      navigate('/cs/validation');
+    } else {
+      // Normal navigation
+      navigate(path);
+    }
   };
 
   const statsDisplay = [
@@ -61,25 +103,29 @@ const CSHomePage: React.FC = () => {
       icon: '🔑',
       title: 'Reset Password',
       description: 'Reset password nasabah yang mengalami kesulitan akses akun',
-      path: '/cs/reset-password'
+      path: '/cs/reset-password',
+      requiresValidation: false
     },
     {
       icon: '📊',
       title: 'Aktivitas Nasabah',
       description: 'Pantau dan tinjau riwayat transaksi dan aktivitas nasabah',
-      path: '/cs/validation'
+      path: '/cs/customer-activity',
+      requiresValidation: true
     },
     {
       icon: '✅',
       title: 'Validasi Nasabah',
       description: 'Validasi data nasabah untuk keamanan dan keperluan layanan',
-      path: '/cs/validation'
+      path: '/cs/validation',
+      requiresValidation: false
     },
     {
       icon: '📝',
       title: 'Kelola Laporan',
       description: 'Tangani dan resolve laporan serta keluhan dari nasabah',
-      path: '/cs/reports'
+      path: '/cs/reports',
+      requiresValidation: false
     }
   ];
 
@@ -97,6 +143,29 @@ const CSHomePage: React.FC = () => {
         </button>
       </div>
 
+      {validatedCustomer && (
+        <div className="cs-validated-customer">
+          <div className="validated-customer-info">
+            <div className="validated-icon">✅</div>
+            <div>
+              <h3>Nasabah Tervalidasi</h3>
+              <p>
+                {validatedCustomer.nama} - {validatedCustomer.noRekening}
+              </p>
+            </div>
+          </div>
+          <button 
+            className="clear-validation-btn"
+            onClick={() => {
+              localStorage.removeItem('verified_customer');
+              setValidatedCustomer(null);
+            }}
+          >
+            Hapus Validasi
+          </button>
+        </div>
+      )}
+
       <div className="cs-stats">
         {statsDisplay.map((stat, index) => (
           <div key={index} className="cs-stat-card">
@@ -110,12 +179,18 @@ const CSHomePage: React.FC = () => {
         {features.map((feature, index) => (
           <div
             key={index}
-            className="cs-card"
-            onClick={() => navigate(feature.path)}
+            className={`cs-card ${feature.requiresValidation && !validatedCustomer ? 'cs-card-disabled' : ''}`}
+            onClick={() => handleFeatureClick(feature.path, feature.requiresValidation)}
           >
             <div className="cs-card-icon">{feature.icon}</div>
             <h3 className="cs-card-title">{feature.title}</h3>
             <p className="cs-card-description">{feature.description}</p>
+            
+            {feature.requiresValidation && (
+              <div className={`validation-indicator ${validatedCustomer ? 'available' : 'required'}`}>
+                {validatedCustomer ? 'Tersedia' : 'Perlu Validasi Nasabah'}
+              </div>
+            )}
           </div>
         ))}
       </div>

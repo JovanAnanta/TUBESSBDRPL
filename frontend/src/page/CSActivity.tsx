@@ -6,17 +6,13 @@ import axios from 'axios';
 
 // Define types for our data
 interface Transaction {
-  id?: number;
-  date: string;
-  time?: string;
-  tanggal?: string;
+  transaksi_id: string;
+  tanggal: string;
+  waktu?: string;
   tipe: string;
-  type?: string;
   jumlah: number;
-  amount?: number;
   keterangan: string;
-  description?: string;
-  balance?: number;
+  status?: string;
 }
 
 interface LoginActivity {
@@ -25,10 +21,6 @@ interface LoginActivity {
   location: string;
   device_info: string;
   status: string;
-  id?: number;
-  date?: string;
-  time?: string;
-  device?: string;
 }
 
 type TabType = 'transactions' | 'login' | 'alerts';
@@ -37,12 +29,18 @@ const CSCustomerActivityPage: React.FC = () => {
   const navigate = useNavigate();
   const [customerData, setCustomerData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<TabType>('transactions');
-  const [filterDate, setFilterDate] = useState('');
   const [filterType, setFilterType] = useState('');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loginActivities, setLoginActivities] = useState<LoginActivity[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [dateRangeFilter, setDateRangeFilter] = useState({
+    startDate: '',
+    endDate: ''
+  });
+  
+  // For direct keterangan filtering
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('cs_token');
@@ -83,29 +81,49 @@ const CSCustomerActivityPage: React.FC = () => {
       );
 
       if (response.data && response.data.data) {
-        // Transform API data to match our component's format
-        const formattedTransactions = response.data.data.map((item: any, index: number) => {
-          const date = item.tanggal.split('T')[0];
-          return {
-            id: index + 1,
-            date: date,
-            time: new Date().toTimeString().split(' ')[0], // Using current time as API doesn't provide time
-            type: item.tipe === 'TRANSFER' || item.tipe === 'DEBIT' || item.tipe === 'TAGIHAN' ? 'DEBIT' : 'CREDIT',
-            amount: item.jumlah,
-            description: item.keterangan,
-            balance: 0, // Balance data not provided from API
-            // Keep original API fields also to ensure we don't lose data
-            tanggal: item.tanggal,
-            tipe: item.tipe,
-            jumlah: item.jumlah,
-            keterangan: item.keterangan
-          };
-        });
-        setTransactions(formattedTransactions);
+        setTransactions(response.data.data);
       }
     } catch (err) {
       console.error("Error fetching transactions:", err);
       setError("Gagal memuat data transaksi.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTransactionsByDateRange = async (nasabahId: string, startDate: string, endDate: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const token = localStorage.getItem('cs_token');
+      
+      console.log('Sending date range request:', { startDate, endDate });
+      
+      const response = await axios.post(
+        `http://localhost:3000/api/cs/activity/${nasabahId}/transactions/dateRange`,
+        { 
+          startDate: startDate, 
+          endDate: endDate 
+        },
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data && response.data.data) {
+        console.log('Received transactions:', response.data.data.length);
+        setTransactions(response.data.data);
+      } else {
+        console.log('No transactions found or invalid response format');
+        setTransactions([]);
+      }
+    } catch (err: any) {
+      console.error("Error fetching transactions by date range:", err);
+      setError(`Gagal memuat data transaksi berdasarkan rentang tanggal: ${err.response?.data?.message || err.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -124,22 +142,7 @@ const CSCustomerActivityPage: React.FC = () => {
       );
 
       if (response.data && response.data.data) {
-        // Transform API data to match our component's format
-        const formattedLoginActivities = response.data.data.map((item: any, index: number) => {
-          const loginDate = new Date(item.waktu_login);
-          return {
-            login_id: item.login_id,
-            id: index + 1,
-            date: loginDate.toISOString().split('T')[0],
-            time: loginDate.toTimeString().split(' ')[0],
-            device: item.device_info || 'Unknown Device',
-            location: item.location || 'Unknown Location',
-            status: item.status,
-            waktu_login: item.waktu_login,
-            device_info: item.device_info
-          };
-        });
-        setLoginActivities(formattedLoginActivities);
+        setLoginActivities(response.data.data);
       }
     } catch (err) {
       console.error("Error fetching login activities:", err);
@@ -149,19 +152,61 @@ const CSCustomerActivityPage: React.FC = () => {
     }
   };
 
+  const handleDateRangeFilter = () => {
+    if (customerData && dateRangeFilter.startDate && dateRangeFilter.endDate) {
+      fetchTransactionsByDateRange(
+        customerData.nasabah_id,
+        dateRangeFilter.startDate,
+        dateRangeFilter.endDate
+      );
+    }
+  };
+
+  const resetDateFilter = () => {
+    setDateRangeFilter({
+      startDate: '',
+      endDate: ''
+    });
+    
+    if (customerData) {
+      fetchTransactions(customerData.nasabah_id);
+    }
+  };
+
   const filteredTransactions = transactions.filter(transaction => {
     let match = true;
     
-    if (filterDate && !transaction.date.includes(filterDate)) {
+    // Filter by transaction type (MASUK/KELUAR)
+    if (filterType && transaction.tipe !== filterType) {
       match = false;
     }
     
-    if (filterType && transaction.type !== filterType) {
+    // Filter by search term in keterangan
+    if (searchTerm && !transaction.keterangan.toLowerCase().includes(searchTerm.toLowerCase())) {
       match = false;
     }
     
     return match;
   });
+
+  // Format currency for display
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { 
+      day: '2-digit', 
+      month: 'long', 
+      year: 'numeric' 
+    };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+  };
 
   return (
     <div className="cs-container">
@@ -172,7 +217,7 @@ const CSCustomerActivityPage: React.FC = () => {
             Customer Service Dashboard
           </p>
         </div>
-        <button className="cs-logout" onClick={() => navigate('/cs/validation')}>
+        <button className="cs-logout" onClick={() => navigate('/cs/dashboard')}>
           Kembali
         </button>
       </div>
@@ -180,7 +225,7 @@ const CSCustomerActivityPage: React.FC = () => {
       {customerData && (
         <div className="customer-profile">
           <div className="customer-avatar">
-            <i className="fas fa-user-circle"></i>
+            👤
           </div>
           <div className="customer-info">
             <h2>{customerData.nama}</h2>
@@ -191,7 +236,7 @@ const CSCustomerActivityPage: React.FC = () => {
               </div>
               <div className="detail">
                 <span className="detail-label">Saldo</span>
-                <span className="detail-value">Rp {customerData.saldo?.toLocaleString('id-ID') || 0}</span>
+                <span className="detail-value">{formatCurrency(customerData.saldo || 0)}</span>
               </div>
             </div>
           </div>
@@ -203,49 +248,79 @@ const CSCustomerActivityPage: React.FC = () => {
           className={`tab-button ${activeTab === 'transactions' ? 'active' : ''}`}
           onClick={() => setActiveTab('transactions')}
         >
-          <i className="fas fa-exchange-alt"></i> Transaksi
+          💰 Transaksi
         </button>
         <button 
           className={`tab-button ${activeTab === 'login' ? 'active' : ''}`}
           onClick={() => setActiveTab('login')}
         >
-          <i className="fas fa-sign-in-alt"></i> Aktivitas Login
+          🔐 Aktivitas Login
         </button>
         <button 
           className={`tab-button ${activeTab === 'alerts' ? 'active' : ''}`}
           onClick={() => setActiveTab('alerts')}
         >
-          <i className="fas fa-exclamation-triangle"></i> Notifikasi Penting
+          🔔 Notifikasi Penting
         </button>
       </div>
 
       {isLoading && (
         <div className="loading-indicator">
-          <i className="fas fa-spinner fa-spin"></i>
+          <div>⏳</div>
           <p>Memuat data...</p>
         </div>
       )}
 
       {error && (
         <div className="error-message">
-          <i className="fas fa-exclamation-circle"></i>
+          <div>⚠️</div>
           <p>{error}</p>
         </div>
       )}
 
       {activeTab === 'transactions' && !isLoading && (
         <div className="activity-content">
-          <div className="filter-controls">
-            <div className="filter-group">
-              <label htmlFor="date-filter">Filter Tanggal:</label>
-              <input
-                type="date"
-                id="date-filter"
-                value={filterDate}
-                onChange={(e) => setFilterDate(e.target.value)}
-              />
+          {/* Date Range Filter */}
+          <div className="date-range-filter">
+            <h3>Filter Rentang Tanggal</h3>
+            <div className="date-range-inputs">
+              <div className="date-input-group">
+                <label htmlFor="start-date">Dari Tanggal:</label>
+                <input
+                  type="date"
+                  id="start-date"
+                  value={dateRangeFilter.startDate}
+                  onChange={(e) => setDateRangeFilter({...dateRangeFilter, startDate: e.target.value})}
+                />
+              </div>
+              <div className="date-input-group">
+                <label htmlFor="end-date">Sampai Tanggal:</label>
+                <input
+                  type="date"
+                  id="end-date"
+                  value={dateRangeFilter.endDate}
+                  onChange={(e) => setDateRangeFilter({...dateRangeFilter, endDate: e.target.value})}
+                />
+              </div>
             </div>
-            
+            <div className="date-range-actions">
+              <button 
+                className="filter-action-btn apply"
+                disabled={!dateRangeFilter.startDate || !dateRangeFilter.endDate}
+                onClick={handleDateRangeFilter}
+              >
+                Terapkan Filter
+              </button>
+              <button 
+                className="filter-action-btn reset"
+                onClick={resetDateFilter}
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div className="filter-controls">
             <div className="filter-group">
               <label htmlFor="type-filter">Jenis Transaksi:</label>
               <select
@@ -254,16 +329,27 @@ const CSCustomerActivityPage: React.FC = () => {
                 onChange={(e) => setFilterType(e.target.value)}
               >
                 <option value="">Semua</option>
-                <option value="DEBIT">Debit</option>
-                <option value="CREDIT">Kredit</option>
+                <option value="MASUK">Masuk</option>
+                <option value="KELUAR">Keluar</option>
               </select>
+            </div>
+            
+            <div className="filter-group">
+              <label htmlFor="search-filter">Cari:</label>
+              <input
+                type="text"
+                id="search-filter"
+                placeholder="Cari keterangan..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
             
             <button 
               className="filter-reset"
               onClick={() => {
-                setFilterDate('');
                 setFilterType('');
+                setSearchTerm('');
               }}
             >
               Reset Filter
@@ -272,7 +358,7 @@ const CSCustomerActivityPage: React.FC = () => {
 
           <div className="transaction-list">
             <div className="transaction-header">
-              <div className="th-date">Tanggal & Waktu</div>
+              <div className="th-date">Tanggal</div>
               <div className="th-type">Tipe</div>
               <div className="th-amount">Jumlah</div>
               <div className="th-desc">Deskripsi</div>
@@ -280,29 +366,26 @@ const CSCustomerActivityPage: React.FC = () => {
             
             {filteredTransactions.length > 0 ? (
               filteredTransactions.map(transaction => (
-                <div key={transaction.id} className="transaction-item">
+                <div key={transaction.transaksi_id} className="transaction-item">
                   <div className="ti-date">
-                    <div className="date">{transaction.date}</div>
-                    <div className="time">{transaction.time || '00:00:00'}</div>
-                  </div>
-                  <div className={`ti-type ${transaction.type?.toLowerCase()}`}>
-                    {transaction.type === 'CREDIT' ? (
-                      <i className="fas fa-arrow-down"></i>
-                    ) : (
-                      <i className="fas fa-arrow-up"></i>
+                    <div className="date">{formatDate(transaction.tanggal)}</div>
+                    {transaction.waktu && (
+                      <div className="time">{transaction.waktu}</div>
                     )}
-                    {transaction.type}
                   </div>
-                  <div className={`ti-amount ${transaction.type?.toLowerCase()}`}>
-                    {transaction.type === 'CREDIT' ? '+ ' : '- '}
-                    Rp {transaction.amount?.toLocaleString('id-ID')}
+                  <div className={`ti-type ${transaction.tipe.toLowerCase()}`}>
+                    {transaction.tipe === 'MASUK' ? '⬇️' : '⬆️'} {transaction.tipe}
                   </div>
-                  <div className="ti-desc">{transaction.description}</div>
+                  <div className={`ti-amount ${transaction.tipe === 'MASUK' ? 'credit' : 'debit'}`}>
+                    {transaction.tipe === 'MASUK' ? '+ ' : '- '}
+                    {formatCurrency(transaction.jumlah)}
+                  </div>
+                  <div className="ti-desc">{transaction.keterangan}</div>
                 </div>
               ))
             ) : (
               <div className="no-data">
-                <i className="fas fa-search"></i>
+                <div>🔍</div>
                 <p>Tidak ada transaksi yang sesuai dengan filter</p>
               </div>
             )}
@@ -321,27 +404,28 @@ const CSCustomerActivityPage: React.FC = () => {
             </div>
             
             {loginActivities.length > 0 ? (
-              loginActivities.map(activity => (
-                <div key={activity.login_id} className="login-activity-item">
-                  <div className="li-date">
-                    <div className="date">{activity.date}</div>
-                    <div className="time">{activity.time}</div>
+              loginActivities.map(activity => {
+                const loginDate = new Date(activity.waktu_login);
+                const formattedDate = loginDate.toISOString().split('T')[0];
+                const formattedTime = loginDate.toTimeString().split(' ')[0];
+                
+                return (
+                  <div key={activity.login_id} className="login-activity-item">
+                    <div className="li-date">
+                      <div className="date">{formatDate(formattedDate)}</div>
+                      <div className="time">{formattedTime}</div>
+                    </div>
+                    <div className="li-device">{activity.device_info || "Unknown"}</div>
+                    <div className="li-location">{activity.location || "Unknown"}</div>
+                    <div className={`li-status ${activity.status.toLowerCase()}`}>
+                      {activity.status === 'SUCCESS' ? '✅' : '❌'} {activity.status}
+                    </div>
                   </div>
-                  <div className="li-device">{activity.device}</div>
-                  <div className="li-location">{activity.location}</div>
-                  <div className={`li-status ${activity.status.toLowerCase()}`}>
-                    {activity.status === 'SUCCESS' ? (
-                      <i className="fas fa-check-circle"></i>
-                    ) : (
-                      <i className="fas fa-times-circle"></i>
-                    )}
-                    {activity.status}
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="no-data">
-                <i className="fas fa-search"></i>
+                <div>🔍</div>
                 <p>Tidak ada data aktivitas login</p>
               </div>
             )}
@@ -352,7 +436,7 @@ const CSCustomerActivityPage: React.FC = () => {
       {activeTab === 'alerts' && (
         <div className="activity-content alerts-content">
           <div className="no-alerts">
-            <i className="fas fa-bell-slash"></i>
+            <div>🔕</div>
             <h3>Tidak Ada Notifikasi Penting</h3>
             <p>Tidak ada notifikasi penting atau peringatan keamanan untuk nasabah ini.</p>
           </div>

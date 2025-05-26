@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 export async function up(queryInterface, Sequelize) {
-  const nasabahId = "006b8ce5-46a0-4057-8e96-4b87a4e7fd2e";
+  const nasabahId = "439845cc-1c79-42a8-ae4b-797b576354ba";
   const transaksiAirId = uuidv4();
   const transaksiListrikId = uuidv4();
 
