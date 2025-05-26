@@ -2,19 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import '../style/EReceipt.css';
 
-interface EReceiptData {
-  transaksi_id: string;
-  tanggalTransaksi: string;
-  transaksiType: 'MASUK' | 'KELUAR';
-  nominal: number;
-  jenis: string;
-  keterangan?: string;
-  detail?: any;
-}
-
 const EReceipt: React.FC = () => {
   const { transaksiId } = useParams<{ transaksiId: string }>();
-  const [data, setData] = useState<EReceiptData | null>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +19,7 @@ const EReceipt: React.FC = () => {
         });
         if (!res.ok) throw new Error('Gagal mengambil data e-receipt');
         const result = await res.json();
-        setData(result.data || result); // tergantung response backend
+        setData(result.data || result); // data: { transaksi, credit, debit, transfers }
       } catch (err: any) {
         setError(err.message || 'Terjadi kesalahan');
       }
@@ -54,102 +44,63 @@ const EReceipt: React.FC = () => {
           </div>
           
           <div className="ereceipt-content">
-            <div className="ereceipt-info-grid">
+            {/* Ringkasan Transaksi */}
+            <div className="ereceipt-section">
+              <h3>Transaksi</h3>
               <div className="ereceipt-info-item">
-                <span className="ereceipt-info-label">📅 Tanggal:</span>
-                <span className="ereceipt-info-value">
-                  {new Date(data.tanggalTransaksi).toLocaleString('id-ID')}
-                </span>
+                <span className="ereceipt-info-label">ID Transaksi:</span>
+                <span className="ereceipt-info-value">{data.transaksi.transaksi_id}</span>
               </div>
-              
               <div className="ereceipt-info-item">
-                <span className="ereceipt-info-label">🏷️ Jenis:</span>
-                <span className="ereceipt-info-value ereceipt-jenis">
-                  {data.jenis}
-                </span>
+                <span className="ereceipt-info-label">Tanggal:</span>
+                <span className="ereceipt-info-value">{new Date(data.transaksi.tanggalTransaksi).toLocaleString('id-ID')}</span>
               </div>
-              
               <div className="ereceipt-info-item">
-                <span className="ereceipt-info-label">📊 Status:</span>
-                <span className={`ereceipt-info-value ereceipt-status ${data.transaksiType === 'MASUK' ? 'ereceipt-masuk' : 'ereceipt-keluar'}`}>
-                  {data.transaksiType === 'MASUK' ? '📈 Masuk' : '📉 Keluar'}
-                </span>
+                <span className="ereceipt-info-label">Tipe:</span>
+                <span className="ereceipt-info-value">{data.transaksi.transaksiType === 'MASUK' ? '🟢 Masuk' : '🔴 Keluar'}</span>
               </div>
-              
-              <div className="ereceipt-info-item ereceipt-nominal-item">
-                <span className="ereceipt-info-label">💰 Nominal:</span>
-                <span className={`ereceipt-nominal ${data.transaksiType === 'MASUK' ? 'ereceipt-nominal-masuk' : 'ereceipt-nominal-keluar'}`}>
-                  {data.transaksiType === 'MASUK' ? '+' : '-'} Rp {data.nominal.toLocaleString('id-ID')}
-                </span>
+              <div className="ereceipt-info-item">
+                <span className="ereceipt-info-label">Keterangan:</span>
+                <span className="ereceipt-info-value">{data.transaksi.keterangan}</span>
               </div>
             </div>
 
-            {/* Keterangan: use detail.berita for TRANSFER, otherwise data.keterangan */}
-            {(data.jenis === 'TRANSFER' ? data.detail?.berita : data.keterangan) && (
-              <div className="ereceipt-keterangan">
-                <span className="ereceipt-info-label">💬 Keterangan:</span>
-                <p className="ereceipt-keterangan-text">
-                  {data.jenis === 'TRANSFER' ? data.detail.berita : data.keterangan}
-                </p>
-              </div>
-            )}
-
-            {/* Detail spesifik per jenis transaksi */}
-            {data.detail && data.jenis.toLowerCase().includes('transfer') && (
-              <div className="ereceipt-detail-section">
-                <h3 className="ereceipt-detail-title">📋 Detail Transfer</h3>
-                <div className="ereceipt-detail-grid">
-                  <div className="ereceipt-detail-item">
-                    <span className="ereceipt-detail-label">
-                      {data.transaksiType === 'MASUK' ? 'Dari Rekening:' : 'Ke Rekening:'}
-                    </span>
-                    <span className="ereceipt-detail-value">
-                      {data.transaksiType === 'MASUK' ? data.detail.fromRekening : data.detail.toRekening}
-                    </span>
-                  </div>
-                  {data.detail.berita && (
-                    <div className="ereceipt-detail-item">
-                      <span className="ereceipt-detail-label">Berita:</span>
-                      <span className="ereceipt-detail-value">{data.detail.berita}</span>
-                    </div>
-                  )}
+            {/* Detail Saldo */}
+            {data.credit && (
+              <div className="ereceipt-section">
+                <h3>Penambahan Saldo</h3>
+                <div className="ereceipt-info-item">
+                  <span className="ereceipt-info-label">Jumlah Masuk:</span>
+                  <span className="ereceipt-info-value">Rp {Number(data.credit.jumlahSaldoBertambah).toLocaleString('id-ID')}</span>
                 </div>
               </div>
             )}
-
-            {data.jenis === 'TAGIHAN' && data.detail && (
-              <div className="ereceipt-detail-section">
-                <h3 className="ereceipt-detail-title">📋 Detail Tagihan</h3>
-                <div className="ereceipt-detail-grid">
-                  <div className="ereceipt-detail-item">
-                    <span className="ereceipt-detail-label">Nomor Tagihan:</span>
-                    <span className="ereceipt-detail-value">{data.detail.nomorTagihan}</span>
-                  </div>
-                  <div className="ereceipt-detail-item">
-                    <span className="ereceipt-detail-label">Tipe Tagihan:</span>
-                    <span className="ereceipt-detail-value">{data.detail.statusTagihanType}</span>
-                  </div>
+            {data.debit && (
+              <div className="ereceipt-section">
+                <h3>Pengurangan Saldo</h3>
+                <div className="ereceipt-info-item">
+                  <span className="ereceipt-info-label">Jumlah Keluar:</span>
+                  <span className="ereceipt-info-value">Rp {Number(data.debit.jumlahSaldoBerkurang).toLocaleString('id-ID')}</span>
                 </div>
               </div>
             )}
-
-            {data.jenis === 'PINJAMAN' && data.detail && (
-              <div className="ereceipt-detail-section">
-                <h3 className="ereceipt-detail-title">📋 Detail Pinjaman</h3>
-                <div className="ereceipt-detail-grid">
-                  <div className="ereceipt-detail-item">
-                    <span className="ereceipt-detail-label">Jumlah per Bulan:</span>
-                    <span className="ereceipt-detail-value">
-                      Rp {data.detail.jumlahPerBulan?.toLocaleString('id-ID')}
-                    </span>
-                  </div>
-                  <div className="ereceipt-detail-item">
-                    <span className="ereceipt-detail-label">Jatuh Tempo:</span>
-                    <span className="ereceipt-detail-value">
-                      {new Date(data.detail.tanggalJatuhTempo).toLocaleDateString('id-ID')}
-                    </span>
-                  </div>
+            {data.transfers && data.transfers.length > 0 && (
+              <div className="ereceipt-section">
+                <h3>Detail Transfer</h3>
+                <div className="ereceipt-info-item">
+                  <span className="ereceipt-info-label">Dari:</span>
+                  <span className="ereceipt-info-value">{data.transfers[0].fromRekening}</span>
                 </div>
+                <div className="ereceipt-info-item">
+                  <span className="ereceipt-info-label">Ke:</span>
+                  <span className="ereceipt-info-value">{data.transfers[0].toRekening}</span>
+                </div>
+                {data.transfers[0].berita && (
+                  <div className="ereceipt-info-item">
+                    <span className="ereceipt-info-label">Catatan:</span>
+                    <span className="ereceipt-info-value">{data.transfers[0].berita}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

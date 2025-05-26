@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import cron from 'node-cron';
 import express from 'express';
+import cron from 'node-cron';
 import { Sequelize } from 'sequelize-typescript';
 import config from './config/config.json';
 import authRoutes from './routes/AuthRoutes';
@@ -28,6 +28,7 @@ import gantiPasswordRotues from './routes/GantiPasswordRoutes';
 import gantiPinRoutes from './routes/GantiPinRoutes';
 import PinjamanRoutes from './routes/PinjamanRoutes';
 import tagihanRoutes from './routes/TagihanRoutes';
+import { PinjamanService } from './service/PinjamanService';
 
 const sequelize = new Sequelize({
   ...config.development,
@@ -59,7 +60,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/report', reportRoutes);
-app.use('/api/tagihan', tagihanRoutes);
+app.use('/api', tagihanRoutes);
 app.use('/api/nasabah', gantiPinRoutes);
 app.use('/api/nasabah', gantiPasswordRotues);
 app.use('/api/pinjaman', PinjamanRoutes);

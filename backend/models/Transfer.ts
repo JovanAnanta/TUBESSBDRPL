@@ -21,9 +21,16 @@ export class Transfer extends Model {
 
     @Column({
         type: DataType.STRING,
-        allowNull: false,
+        allowNull: true,
     })
-    declare noRekening: string;
+    declare fromRekening: string;
+
+    // akun penerima
+    @Column({
+        type: DataType.STRING,
+        allowNull: true,
+    })
+    declare toRekening: string;
 
     @Column({
         type: DataType.STRING,
