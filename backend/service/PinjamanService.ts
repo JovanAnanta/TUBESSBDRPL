@@ -1,11 +1,24 @@
-import { Pinjaman } from "../models/Pinjaman";
 import { v4 as uuidv4 } from "uuid";
+import { Pinjaman } from "../models/Pinjaman";
+import { Transaksi } from "../models/Transaksi";
+
 function addMonths(date: Date, months: number) {
   const d = new Date(date);
-  d.setMonth(d.getMonth() + months);
+  const targetMonth = d.getMonth() + months;
+  d.setMonth(targetMonth);
+
+  if (d.getMonth() !== targetMonth % 12) {
+    d.setDate(0); // Fix month overflow (e.g. Jan 31 + 1 month)
+  }
   return d;
 }
-//pinjaman
+
+const tempoMapping: Record<string, number> = {
+  "6BULAN": 6,
+  "12BULAN": 12,
+  "24BULAN": 24,
+};
+
 export class PinjamanService {
   static async getAll() {
     return await Pinjaman.findAll();
@@ -15,27 +28,32 @@ export class PinjamanService {
     return await Pinjaman.findByPk(id);
   }
 
-  static async create(data: any) {
-    // Pastikan transaksi_id ada dan valid
-    if (!data.transaksi_id) {
-      throw new Error("transaksi_id is required");
+  static async create(data: any, transaksiData: any) {
+    if (!transaksiData.nasabah_id) {
+      throw new Error("nasabah_id is required in transaksiData");
     }
 
-    const tempoMapping: Record<string, number> = {
-      "6BULAN": 6,
-      "12BULAN": 12,
-      "24BULAN": 24,
+    // Create transaksi first
+    const transaksi = await Transaksi.create({
+      ...transaksiData,
+      tanggalTransaksi: new Date(),
+    });
+
+    // Calculate jatuh tempo date
+    const bulan = tempoMapping[data.statusJatuhTempo] || 6;
+    const tanggalJatuhTempo = addMonths(new Date(), bulan);
+
+    // Create pinjaman linked to transaksi
+    const pinjamanData = {
+      ...data,
+      pinjaman_id: uuidv4(),
+      transaksi_id: transaksi.transaksi_id,
+      tanggalJatuhTempo,
     };
 
-    const bulan = tempoMapping[data.statusJatuhTempo] || 6;
-    data.tanggalJatuhTempo = addMonths(new Date(), bulan);
+    const pinjaman = await Pinjaman.create(pinjamanData);
 
-    // Status pinjaman aktif secara default
-    if (!data.status) {
-      data.status = "active";
-    }
-
-    return await Pinjaman.create(data);
+    return { transaksi, pinjaman };
   }
 
   static async update(id: string, data: any) {

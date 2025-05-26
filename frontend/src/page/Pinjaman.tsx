@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../style/Pinjaman.css";
 
 interface PinjamanData {
   pinjaman_id?: string;
   transaksi_id?: string;
   statusJatuhTempo: "6BULAN" | "12BULAN" | "24BULAN";
-  jumlahPerBulan: number;
+  jumlahPinjaman: number;
   tanggalJatuhTempo?: string; // otomatis di backend
 }
 
@@ -13,11 +14,12 @@ export const PinjamanPage = () => {
   const [pinjamans, setPinjamans] = useState<PinjamanData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  // jumlahPerBulan bisa number atau string kosong untuk input yang bisa dikosongkan
-  const [formData, setFormData] = useState<{ statusJatuhTempo: string; jumlahPerBulan: number | "" }>({
+  // jumlahPinjaman bisa number atau string kosong untuk input yang bisa dikosongkan
+  const [formData, setFormData] = useState<{ statusJatuhTempo: string; jumlahPinjaman: number | "" }>({
     statusJatuhTempo: "6BULAN",
-    jumlahPerBulan: 0,
+    jumlahPinjaman: 0,
   });
 
   useEffect(() => {
@@ -37,19 +39,19 @@ export const PinjamanPage = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
-    if (name === "jumlahPerBulan") {
+    if (name === "jumlahPinjaman") {
       // Jika input kosong, set string kosong supaya bisa dikosongkan
       if (value === "") {
         setFormData(prev => ({
           ...prev,
-          jumlahPerBulan: "",
+          jumlahPinjaman: "",
         }));
       } else {
         // Jika ada input, konversi ke number dan pastikan minimal 0
         const numValue = Number(value);
         setFormData(prev => ({
           ...prev,
-          jumlahPerBulan: numValue >= 0 ? numValue : 0,
+          jumlahPinjaman: numValue >= 0 ? numValue : 0,
         }));
       }
     } else {
@@ -64,12 +66,23 @@ export const PinjamanPage = () => {
     e.preventDefault();
     setError(null);
 
-    // Jika jumlahPerBulan masih kosong, konversi ke 0 saat submitj
-  const submitData = {
-  statusJatuhTempo: formData.statusJatuhTempo,
-  jumlahPerBulan: formData.jumlahPerBulan === "" ? 0 : formData.jumlahPerBulan,
-};
+    const nasabah_id = localStorage.getItem("nasabahId");
+    if (!nasabah_id) {
+      setError("Nasabah ID tidak ditemukan. Silakan login terlebih dahulu.");
+      return;
+    }
 
+    const submitData = {
+      pinjaman: {
+        statusJatuhTempo: formData.statusJatuhTempo,
+        jumlahPinjaman: formData.jumlahPinjaman === "" ? 0 : formData.jumlahPinjaman,
+      },
+      transaksi: {
+        nasabah_id: nasabah_id,
+        transaksiType: "KELUAR",
+        tanggalTransaksi: new Date(),
+      },
+    };
 
     fetch("http://localhost:3000/api/pinjaman", {
       method: "POST",
@@ -79,19 +92,21 @@ export const PinjamanPage = () => {
       .then(async (res) => {
         if (!res.ok) {
           const err = await res.json();
-          throw new Error(err.error || "Gagal membuat pinjaman");
+          throw new Error(err.message || "Gagal membuat pinjaman");
         }
         return res.json();
       })
-      .then((newPinjaman) => {
-        setPinjamans((prev) => [...prev, newPinjaman]);
+      .then((data) => {
+        setPinjamans((prev) => [...prev, data.pinjaman]);
         setFormData({
           statusJatuhTempo: "6BULAN",
-          jumlahPerBulan: 0,
+          jumlahPinjaman: 0,
         });
       })
       .catch((err) => setError(err.message));
   };
+
+
 
   if (loading) return <p>Loading...</p>;
 
@@ -119,8 +134,8 @@ export const PinjamanPage = () => {
           <label>Jumlah Per Bulan:</label><br />
           <input
             type="number"
-            name="jumlahPerBulan"
-            value={formData.jumlahPerBulan}
+            name="jumlahPinjaman"
+            value={formData.jumlahPinjaman}
             onChange={handleChange}
             placeholder="Masukkan jumlah per bulan"
             min={0}
@@ -132,11 +147,17 @@ export const PinjamanPage = () => {
           Tambah Pinjaman
         </button>
       </form>
+      <button
+            className="tagihan-back-button"
+            onClick={() => navigate('/user/mpayment')}
+        >
+            Kembali
+        </button>
 
       <ul>
         {pinjamans.map((p) => (
           <li key={p.pinjaman_id}>
-            {p.pinjaman_id} - {p.statusJatuhTempo} - {p.jumlahPerBulan} - {p.tanggalJatuhTempo}
+            {p.pinjaman_id} - {p.statusJatuhTempo} - {p.jumlahPinjaman} - {p.tanggalJatuhTempo}
           </li>
         ))}
       </ul>
