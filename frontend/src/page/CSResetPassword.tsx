@@ -4,13 +4,17 @@ import '../style/CSResetPassword.css';
 
 const CSResetPassword: React.FC = () => {
   const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
+  const [nama, setNama] = useState('');
+  const [noRekening, setNoRekening] = useState('');
   const [passwordBaru, setPasswordBaru] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [verifiedUser, setVerifiedUser] = useState<any>(null);
 
   // Check if CS is authenticated
   useEffect(() => {
@@ -20,8 +24,8 @@ const CSResetPassword: React.FC = () => {
     }
   }, [navigate]);
 
-  const validateForm = () => {
-    if (!email || !passwordBaru || !confirmPassword) {
+  const validateVerificationForm = () => {
+    if (!email || !nama || !noRekening) {
       setError('Semua field harus diisi');
       return false;
     }
@@ -32,25 +36,74 @@ const CSResetPassword: React.FC = () => {
       return false;
     }
 
+    return true;
+  };
+
+  const validatePasswordForm = () => {
+    if (!passwordBaru || !confirmPassword) {
+      setError('Kedua field password harus diisi');
+      return false;
+    }
+
     if (passwordBaru.length < 3) {
       setError('Password minimal 3 karakter');
       return false;
     }
 
     if (passwordBaru !== confirmPassword) {
-      setError('Password tidak cocok');
+      setError('Password baru dan konfirmasi tidak cocok');
       return false;
     }
 
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleVerification = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
     setError('');
 
-    if (!validateForm()) return;
+    if (!validateVerificationForm()) return;
+    
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem('cs_token');
+      const response = await fetch('http://localhost:3000/api/cs/verify-nasabah', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          email,
+          nama,
+          noRekening 
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Gagal memverifikasi nasabah');
+      }
+
+      setVerifiedUser(data.data);
+      setMessage('Verifikasi berhasil. Silakan masukkan password baru.');
+      setStep(2);
+    } catch (err: any) {
+      setError(err.message || 'Data nasabah tidak ditemukan atau tidak sesuai');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
+
+    if (!validatePasswordForm()) return;
     
     setIsLoading(true);
 
@@ -62,7 +115,12 @@ const CSResetPassword: React.FC = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ email, passwordBaru }),
+        body: JSON.stringify({ 
+          email,
+          nama,
+          noRekening,
+          passwordBaru 
+        }),
       });
 
       const data = await response.json();
@@ -72,14 +130,20 @@ const CSResetPassword: React.FC = () => {
       }
 
       setMessage(data.message || 'Password berhasil direset');
+      
+      // Clear form fields
       setEmail('');
+      setNama('');
+      setNoRekening('');
       setPasswordBaru('');
       setConfirmPassword('');
+      setVerifiedUser(null);
+      setStep(1);
       
       // Auto redirect after success
       setTimeout(() => {
         navigate('/cs/dashboard');
-      }, 2000);
+      }, 3000);
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat mereset password');
     } finally {
@@ -106,67 +170,146 @@ const CSResetPassword: React.FC = () => {
           <div className="form-icon">🔑</div>
           <h2 className="reset-password-title">Reset Password Nasabah</h2>
           <p className="form-description">
-            Fitur ini digunakan untuk mereset password nasabah yang mengalami kesulitan akses.
-            Pastikan identitas nasabah sudah diverifikasi sebelum melakukan reset.
+            {step === 1 
+              ? "Fitur ini digunakan untuk mereset password nasabah yang mengalami kesulitan akses. Harap verifikasi identitas nasabah terlebih dahulu."
+              : "Nasabah terverifikasi. Silakan masukkan password baru untuk akun ini."
+            }
           </p>
         </div>
         
-        <form className="reset-password-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email Nasabah:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Masukkan email nasabah"
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="passwordBaru">Password Baru:</label>
-            <div className="password-field">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="passwordBaru"
-                value={passwordBaru}
-                onChange={(e) => setPasswordBaru(e.target.value)}
-                placeholder="Masukkan password baru"
-                required
-              />
+        {step === 1 ? (
+          <>
+            <div className="step-indicator">
+              <div className="step active">1. Verifikasi Nasabah</div>
+              <div className="step">2. Reset Password</div>
+            </div>
+            
+            <form className="reset-password-form" onSubmit={handleVerification}>
+              <div className="form-group">
+                <label htmlFor="email">Email Nasabah:</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Masukkan email nasabah"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="nama">Nama Nasabah:</label>
+                <input
+                  type="text"
+                  id="nama"
+                  value={nama}
+                  onChange={(e) => setNama(e.target.value)}
+                  placeholder="Masukkan nama lengkap nasabah"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="noRekening">Nomor Rekening:</label>
+                <input
+                  type="text"
+                  id="noRekening"
+                  value={noRekening}
+                  onChange={(e) => setNoRekening(e.target.value)}
+                  placeholder="Masukkan nomor rekening nasabah"
+                  required
+                />
+              </div>
+              
               <button 
-                type="button" 
-                className="password-toggle" 
-                onClick={() => setShowPassword(!showPassword)}
+                type="submit" 
+                className="reset-password-button" 
+                disabled={isLoading}
               >
-                {showPassword ? "🙈" : "👁️"}
+                {isLoading ? "Memverifikasi..." : "Verifikasi Nasabah"}
               </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <div className="step-indicator">
+              <div className="step completed">1. Verifikasi Nasabah</div>
+              <div className="step active">2. Reset Password</div>
             </div>
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Konfirmasi Password:</label>
-            <div className="password-field">
-              <input
-                type={showPassword ? "text" : "password"}
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Konfirmasi password baru"
-                required
-              />
-            </div>
-          </div>
-          
-          <button 
-            type="submit" 
-            className="reset-password-button" 
-            disabled={isLoading}
-          >
-            {isLoading ? "Memproses..." : "Reset Password"}
-          </button>
-        </form>
+            
+            {verifiedUser && (
+              <div className="verified-user-info">
+                <h3>Data Nasabah:</h3>
+                <div className="user-info-item">
+                  <span className="info-label">Nama:</span>
+                  <span className="info-value">{verifiedUser.nama}</span>
+                </div>
+                <div className="user-info-item">
+                  <span className="info-label">Email:</span>
+                  <span className="info-value">{verifiedUser.email}</span>
+                </div>
+                <div className="user-info-item">
+                  <span className="info-label">No. Rekening:</span>
+                  <span className="info-value">{verifiedUser.noRekening}</span>
+                </div>
+              </div>
+            )}
+            
+            <form className="reset-password-form" onSubmit={handleResetPassword}>
+              <div className="form-group">
+                <label htmlFor="passwordBaru">Password Baru:</label>
+                <div className="password-field">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="passwordBaru"
+                    value={passwordBaru}
+                    onChange={(e) => setPasswordBaru(e.target.value)}
+                    placeholder="Masukkan password baru"
+                    required
+                  />
+                  <button 
+                    type="button" 
+                    className="password-toggle" 
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "🙈" : "👁️"}
+                  </button>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="confirmPassword">Konfirmasi Password:</label>
+                <div className="password-field">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Konfirmasi password baru"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="form-actions">
+                <button 
+                  type="button" 
+                  className="back-button" 
+                  onClick={() => setStep(1)}
+                >
+                  Kembali
+                </button>
+                <button 
+                  type="submit" 
+                  className="reset-password-button" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Memproses..." : "Reset Password"}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
         
         {message && <p className="success-message">{message}</p>}
         {error && <p className="error-message">{error}</p>}

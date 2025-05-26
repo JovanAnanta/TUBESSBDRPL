@@ -59,21 +59,58 @@ export const verifyNasabahData = async (nama: string, email: string, password: s
   return isMatch ? nasabah : null;
 };
 
-export const resetNasabahPassword = async (email: string, passwordBaru: string) => {
-  const encryptedEmail = encrypt(email);
-  const nasabah = await Nasabah.findOne({ where: { email: encryptedEmail } });
 
-  if (!nasabah) {
-    throw new Error('Nasabah tidak ditemukan');
+export const verifyNasabahForReset = async (nama: string, email: string, noRekening: string) => {
+  try {
+    const nasabahs = await Nasabah.findAll();
+    
+    for (const nasabah of nasabahs) {
+      // Check if all three fields match
+      const decryptedNama = decrypt(nasabah.nama);
+      const decryptedEmail = decrypt(nasabah.email);
+      const decryptedNoRekening = decrypt(nasabah.noRekening);
+      
+      if (
+        decryptedNama.toLowerCase() === nama.toLowerCase() &&
+        decryptedEmail.toLowerCase() === email.toLowerCase() &&
+        decryptedNoRekening === noRekening
+      ) {
+        return nasabah;
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('Error verifying nasabah:', error);
+    throw error;
   }
+};
 
-  const hashedPassword = await bcrypt.hash(passwordBaru, 10);
-  nasabah.password = hashedPassword;
-
-  await nasabah.save();
-
-  return {
-    nama: decrypt(nasabah.nama),
-    email: email
-  };
+export const resetNasabahPassword = async (
+  email: string, 
+  nama: string, 
+  noRekening: string, 
+  newPassword: string
+) => {
+  try {
+    // First verify the nasabah
+    const nasabah = await verifyNasabahForReset(nama, email, noRekening);
+    
+    if (!nasabah) {
+      return null;
+    }
+    
+    // Hash the new password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    
+    // Update the password
+    nasabah.password = hashedPassword;
+    await nasabah.save();
+    
+    return nasabah;
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    throw error;
+  }
 };
