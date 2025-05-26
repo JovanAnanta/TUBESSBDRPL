@@ -12,7 +12,7 @@ export const getSaldoInfo = async (req: Request, res: Response): Promise<void> =
             });
             return;
         }
-
+        
         const saldoInfo = await mutasiService.getSaldoInfo(nasabahId);
         
         if (!saldoInfo) {

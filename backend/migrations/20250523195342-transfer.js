@@ -18,9 +18,13 @@ export default {
         },
         onDelete: "CASCADE",
       },
-      noRekening: {
+      fromRekening: {
         type: Sequelize.STRING,
-        allowNull: false,
+        allowNull: true,
+      },
+      toRekening: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       berita: {
         type: Sequelize.STRING,

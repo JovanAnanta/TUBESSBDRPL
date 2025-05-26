@@ -51,98 +51,107 @@ export const getSaldoInfo = async (nasabahId: string): Promise<SaldoInfo | null>
 
 export const getMutasiRekening = async (
     nasabahId: string,
-    // limit and offset no longer used, kept for signature compatibility
     _limit?: number,
     _offset?: number,
     startDate?: Date,
     endDate?: Date
 ): Promise<{ transactions: MutasiData[]; totalCount: number }> => {
     try {
-        // Validasi nasabah
         const nasabah = await Nasabah.findOne({ where: { nasabah_id: nasabahId } });
-        if (!nasabah) {
-            throw new Error('Nasabah tidak ditemukan');
-        }
+        if (!nasabah) throw new Error('Nasabah tidak ditemukan');
 
-        // Build filter kondisi
         const whereCondition: any = { nasabah_id: nasabahId };
-        
-        if (startDate && endDate) {
-            // include full endDate day
-            const endOfDay = new Date(endDate);
-            endOfDay.setHours(23, 59, 59, 999);
-            whereCondition.tanggalTransaksi = {
-                [Op.between]: [startDate, endOfDay]
-            };
-        } else if (startDate) {
-            whereCondition.tanggalTransaksi = {
-                [Op.gte]: startDate
-            };
-        } else if (endDate) {
-            // include full endDate day
-            const endOfDay = new Date(endDate);
-            endOfDay.setHours(23, 59, 59, 999);
-            whereCondition.tanggalTransaksi = {
-                [Op.lte]: endOfDay
-            };
+        if (startDate || endDate) {
+            const range: any = {};
+            if (startDate) range[Op.gte] = startDate;
+            if (endDate) {
+                const endOfDay = new Date(endDate);
+                endOfDay.setHours(23, 59, 59, 999);
+                range[Op.lte] = endOfDay;
+            }
+            whereCondition.tanggalTransaksi = range;
         }
-
-        // Fetch all transactions in date range (ignore pagination)
+        
         const transaksis = await Transaksi.findAll({
             where: whereCondition,
+            include: [
+                { model: Credit, required: false },
+                { model: Debit, required: false },
+                { model: Transfer, required: false },
+                { model: Tagihan, required: false },
+                { model: Pinjaman, required: false }
+            ],
             order: [['tanggalTransaksi', 'DESC']]
         });
+        
+        const transactions = transaksis.map((trx) => {
+            const credit = (trx as any).Credit as Credit | null;
+            const debit = (trx as any).Debit as Debit | null;
+            const transfer = (trx as any).Transfer as Transfer | null;
+            const tagihan = (trx as any).Tagihan as any;
+            const pinjaman = (trx as any).Pinjaman as any;
 
-        // Map each transaction to MutasiData by querying related tables
-        const mapped = await Promise.all(
-            transaksis.map(async (trx, index) => {
-                const credit = await Credit.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Credit | null;
-                const debit = await Debit.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Debit | null;
-                const transfer = await Transfer.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Transfer | null;
-                const tagihan = await Tagihan.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Tagihan | null;
-                const pinjaman = await Pinjaman.findOne({ where: { transaksi_id: trx.transaksi_id } }) as Pinjaman | null;
+            let nominal = 0;
+            // Gunakan langsung keterangan dari objek Transaksi jika sudah ada
+            let keterangan = trx.keterangan || ''; // Asumsi 'keterangan' ada di model Transaksi
 
-                let nominal = 0;
-                let keterangan = '';
-                // Prioritas dengan cek transaksiType: outgoing/incoming transfer, top-up, tagihan, pinjaman
-                if (trx.transaksiType === 'MASUK' && transfer && credit && credit.jumlahSaldoBertambah > 0) {
+            if (trx.transaksiType === 'MASUK') {
+                if (credit) {
                     nominal = credit.jumlahSaldoBertambah;
-                    keterangan = 'Transfer Masuk';
-                } else if (trx.transaksiType === 'KELUAR' && transfer && debit && debit.jumlahSaldoBerkurang > 0) {
-                    nominal = debit.jumlahSaldoBerkurang;
-                    keterangan = 'Transfer Keluar';
-                } else if (credit && credit.jumlahSaldoBertambah > 0) {
-                    nominal = credit.jumlahSaldoBertambah;
-                    keterangan = 'Top-up';
-                } else if (tagihan && debit) {
-                    nominal = debit.jumlahSaldoBerkurang;
-                    keterangan = `Tagihan ${tagihan.statusTagihanType}`;
-                } else if (pinjaman && debit) {
-                    nominal = debit.jumlahSaldoBerkurang;
-                    keterangan = `Pinjaman ${pinjaman.statusJatuhTempo}`;
                 } else {
-                    nominal = 0;
-                    keterangan = trx.transaksiType === 'MASUK' ? 'Masuk' : 'Keluar';
+                    nominal = 0; // Fallback jika tidak ada credit
                 }
+            } else { // KELUAR
+                if (debit) {
+                    nominal = debit.jumlahSaldoBerkurang;
+                } else {
+                    nominal = 0; // Fallback jika tidak ada debit
+                }
+            }
+            
+            // Jika Anda ingin tetap menambahkan detail seperti masking nomor rekening,
+            // Anda bisa menambahkannya HANYA JIKA keterangan dari DB belum cukup detail.
+            // Contoh:
+            if (keterangan === 'TRANSFER KELUAR' && transfer && transfer.toRekening) {
+                try {
+                    const toAccount = decrypt(transfer.toRekening);
+                    const maskedToAccount = toAccount.slice(0, 4) + '****' + toAccount.slice(-4);
+                    keterangan = `TRANSFER KELUAR ke ${maskedToAccount}`;
+                } catch (error) {
+                    // Jika dekripsi gagal, tetap gunakan keterangan asli
+                    keterangan = 'TRANSFER KELUAR'; 
+                }
+            } else if (keterangan === 'TRANSFER MASUK' && transfer && transfer.fromRekening) {
+                try {
+                    const fromAccount = decrypt(transfer.fromRekening);
+                    const maskedFromAccount = fromAccount.slice(0, 4) + '****' + fromAccount.slice(-4);
+                    keterangan = `TRANSFER MASUK dari ${maskedFromAccount}`;
+                } catch (error) {
+                    // Jika dekripsi gagal, tetap gunakan keterangan asli
+                    keterangan = 'TRANSFER MASUK';
+                }
+            }
+            // Logika untuk Tagihan dan Pinjaman juga bisa disesuaikan
+            else if (tagihan && debit) {
+                keterangan = `PEMBAYARAN ${tagihan.statusTagihanType} - ${tagihan.nomorTagihan}`;
+            } else if (pinjaman && debit) {
+                keterangan = `PINJAMAN ${pinjaman.statusJatuhTempo} - ${pinjaman.jumlahPerBulan?.toLocaleString('id-ID') || ''}`;
+            }
 
-                // Simulasi saldo setelah transaksi (ganti sesuai kebutuhan)
-                const saldoSetelahTransaksi = nasabah.saldo + index * 10000;
 
-                return {
-                    transaksi_id: trx.transaksi_id,
-                    tanggalTransaksi: trx.tanggalTransaksi,
-                    transaksiType: trx.transaksiType as 'MASUK' | 'KELUAR',
-                    nominal,
-                    keterangan,
-                    saldoSetelahTransaksi
-                };
-            })
-        );
+            let saldoSetelahTransaksi = nasabah.saldo;
+            
+            return {
+                transaksi_id: trx.transaksi_id,
+                tanggalTransaksi: trx.tanggalTransaksi,
+                transaksiType: trx.transaksiType as 'MASUK' | 'KELUAR',
+                nominal,
+                keterangan, // Gunakan keterangan yang sudah diolah atau dari DB
+                saldoSetelahTransaksi
+            };
+        });
 
-        return {
-            transactions: mapped,
-            totalCount: mapped.length
-        };
+        return { transactions, totalCount: transactions.length };
     } catch (error) {
         console.error('Error in getMutasiRekening:', error);
         throw new Error('Gagal mengambil mutasi rekening');
