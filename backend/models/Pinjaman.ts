@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Transaksi } from "./Transaksi";
 
 @Table({
@@ -44,5 +44,7 @@ export class Pinjaman extends Model {
     })
     declare statusPinjaman: string;
 
-    
+    @BelongsTo(() => Transaksi)
+    declare Transaksi: Transaksi;
+
 }

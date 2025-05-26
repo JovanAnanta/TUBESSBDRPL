@@ -1,5 +1,6 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import cron from 'node-cron';
 import express from 'express';
 import { Sequelize } from 'sequelize-typescript';
 import config from './config/config.json';
@@ -68,6 +69,16 @@ app.use('/api/cs', csReportRoutes);
 app.use('/api/cs', csActivityRoutes);
 
 app.use('/api/admin', adminRoutes);
+
+cron.schedule('0 0 1 * *', async () => {
+  console.log("Running monthly saldo deduction for pinjaman...");
+  try {
+    await PinjamanService.processMonthlyDeduction();
+    console.log("Monthly saldo deduction completed.");
+  } catch (error) {
+    console.error("Error running monthly saldo deduction:", error);
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

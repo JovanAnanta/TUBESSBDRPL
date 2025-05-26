@@ -7,7 +7,8 @@ interface PinjamanData {
   transaksi_id?: string;
   statusJatuhTempo: "6BULAN" | "12BULAN" | "24BULAN";
   jumlahPinjaman: number;
-  tanggalJatuhTempo?: string; // otomatis di backend
+  tanggalJatuhTempo?: string;
+  statusPinjaman: "PENDING" | "ACCEPTED" | "REJECTED";
 }
 
 export const PinjamanPage = () => {
@@ -16,10 +17,9 @@ export const PinjamanPage = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // jumlahPinjaman bisa number atau string kosong untuk input yang bisa dikosongkan
   const [formData, setFormData] = useState<{ statusJatuhTempo: string; jumlahPinjaman: number | "" }>({
     statusJatuhTempo: "6BULAN",
-    jumlahPinjaman: 0,
+    jumlahPinjaman: "",
   });
 
   useEffect(() => {
@@ -36,26 +36,30 @@ export const PinjamanPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  // Check if user has active pinjaman (PENDING or ACCEPTED)
+  const nasabah_id = localStorage.getItem("nasabahId");
+  const userActivePinjaman = pinjamans.find(
+    (p) => p.statusPinjaman !== "REJECTED" && p.transaksi_id && p.statusPinjaman !== undefined
+  );
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     if (name === "jumlahPinjaman") {
-      // Jika input kosong, set string kosong supaya bisa dikosongkan
       if (value === "") {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           jumlahPinjaman: "",
         }));
       } else {
-        // Jika ada input, konversi ke number dan pastikan minimal 0
         const numValue = Number(value);
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           jumlahPinjaman: numValue >= 0 ? numValue : 0,
         }));
       }
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [name]: value,
       }));
@@ -66,9 +70,13 @@ export const PinjamanPage = () => {
     e.preventDefault();
     setError(null);
 
-    const nasabah_id = localStorage.getItem("nasabahId");
     if (!nasabah_id) {
       setError("Nasabah ID tidak ditemukan. Silakan login terlebih dahulu.");
+      return;
+    }
+
+    if (userActivePinjaman) {
+      setError("Anda hanya dapat memiliki satu pinjaman aktif. Silakan tunggu hingga pinjaman selesai.");
       return;
     }
 
@@ -81,6 +89,7 @@ export const PinjamanPage = () => {
         nasabah_id: nasabah_id,
         transaksiType: "KELUAR",
         tanggalTransaksi: new Date(),
+        keterangan: "Pengajuan pinjaman",
       },
     };
 
@@ -100,13 +109,11 @@ export const PinjamanPage = () => {
         setPinjamans((prev) => [...prev, data.pinjaman]);
         setFormData({
           statusJatuhTempo: "6BULAN",
-          jumlahPinjaman: 0,
+          jumlahPinjaman: "",
         });
       })
       .catch((err) => setError(err.message));
   };
-
-
 
   if (loading) return <p>Loading...</p>;
 
@@ -115,53 +122,75 @@ export const PinjamanPage = () => {
       <h1>Daftar Pinjaman</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
-        <div>
-          <label>Lama Tempo Bayar:</label><br />
-          <select
-            name="statusJatuhTempo"
-            value={formData.statusJatuhTempo}
-            onChange={handleChange}
-            required
-          >
-            <option value="6BULAN">6 Bulan</option>
-            <option value="12BULAN">12 Bulan</option>
-            <option value="24BULAN">24 Bulan</option>
-          </select>
-        </div>
+      {userActivePinjaman ? (
+        <p style={{ color: "blue" }}>
+          Anda memiliki pinjaman aktif dengan status: <b>{userActivePinjaman.statusPinjaman}</b>. Anda tidak dapat mengajukan pinjaman baru sampai yang ini selesai.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
+          <div>
+            <label>Lama Tempo Bayar:</label>
+            <br />
+            <select name="statusJatuhTempo" value={formData.statusJatuhTempo} onChange={handleChange} required>
+              <option value="6BULAN">6 Bulan</option>
+              <option value="12BULAN">12 Bulan</option>
+              <option value="24BULAN">24 Bulan</option>
+            </select>
+          </div>
 
-        <div>
-          <label>Jumlah Per Bulan:</label><br />
-          <input
-            type="number"
-            name="jumlahPinjaman"
-            value={formData.jumlahPinjaman}
-            onChange={handleChange}
-            placeholder="Masukkan jumlah per bulan"
-            min={0}
-            step={1}
-          />
-        </div>
+          <div>
+            <label>Jumlah Pinjaman:</label>
+            <br />
+            <input
+              type="number"
+              name="jumlahPinjaman"
+              value={formData.jumlahPinjaman}
+              onChange={handleChange}
+              placeholder="Masukkan jumlah pinjaman"
+              min={1}
+              step={1}
+              required
+            />
+          </div>
 
-        <button type="submit" style={{ marginTop: 10 }}>
-          Tambah Pinjaman
-        </button>
-      </form>
-      <button
-            className="tagihan-back-button"
-            onClick={() => navigate('/user/mpayment')}
-        >
-            Kembali
-        </button>
+          <p>
+            <i>
+              Bunga pinjaman: 3% per tahun <br />
+              Cicilan per bulan akan dihitung secara otomatis setelah pinjaman diterima oleh admin.
+            </i>
+          </p>
+
+          <button type="submit" style={{ marginTop: 10 }}>
+            Ajukan Pinjaman
+          </button>
+        </form>
+      )}
 
       <ul>
         {pinjamans.map((p) => (
           <li key={p.pinjaman_id}>
-            {p.pinjaman_id} - {p.statusJatuhTempo} - {p.jumlahPinjaman} - {p.tanggalJatuhTempo}
+            <b>ID:</b> {p.pinjaman_id} | <b>Jatuh Tempo:</b> {p.statusJatuhTempo} | <b>Jumlah:</b> {p.jumlahPinjaman.toLocaleString()} | <b>Status:</b>{" "}
+            <span
+              style={{
+                color:
+                  p.statusPinjaman === "PENDING"
+                    ? "orange"
+                    : p.statusPinjaman === "ACCEPTED"
+                    ? "green"
+                    : "red",
+              }}
+            >
+              {p.statusPinjaman}
+            </span>{" "}
+            | <b>Tanggal Jatuh Tempo:</b> {p.tanggalJatuhTempo ? new Date(p.tanggalJatuhTempo).toLocaleDateString() : "-"}
           </li>
         ))}
       </ul>
+      <button className="tagihan-back-button" onClick={() => navigate("/user/mpayment")}>
+        Kembali
+      </button>
     </div>
   );
 };
+
 export default PinjamanPage;

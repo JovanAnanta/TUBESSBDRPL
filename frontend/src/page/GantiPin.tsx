@@ -48,24 +48,34 @@ import "../style/GantiPin.css";
         </button>
         <h2>Ganti PIN</h2>
         <form onSubmit={handleSubmit} className="ganti-pin-form">
-            <input
+        <input
             type="password"
             placeholder="PIN Lama"
             value={oldPin}
-            onChange={(e) => setOldPin(e.target.value)}
+            onChange={(e) => {
+            const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
+            setOldPin(onlyNums);
+            }}
+            inputMode="numeric"
+            pattern="[0-9]*"
             required
-            />
-            <input
+        />
+        <input
             type="password"
             placeholder="PIN Baru"
             value={newPin}
-            onChange={(e) => setNewPin(e.target.value)}
+            onChange={(e) => {
+            const onlyNums = e.target.value.replace(/\D/g, "");
+            setNewPin(onlyNums);
+            }}
+            inputMode="numeric"
+            pattern="[0-9]*"
             required
-            />
-            <button type="submit" disabled={loading}>
+        />
+        <button type="submit" disabled={loading}>
             {loading ? "Memproses..." : "Ganti PIN"}
-            </button>
-            {message && <p className="ganti-pin-message">{message}</p>}
+        </button>
+        {message && <p className="ganti-pin-message">{message}</p>}
         </form>
         </div>
     );

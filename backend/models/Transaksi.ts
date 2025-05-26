@@ -65,4 +65,5 @@ export class Transaksi extends Model {
   @HasOne(() => Pinjaman)
   declare Pinjaman?: Pinjaman | null;
 
+  
 }
