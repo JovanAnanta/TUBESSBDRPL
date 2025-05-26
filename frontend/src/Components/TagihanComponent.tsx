@@ -1,5 +1,6 @@
     import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { navigateWithPinVerification } from '../utils/pinUtils';
 
     export enum TagihanType {
     AIR = "AIR",
@@ -48,13 +49,14 @@ import { useNavigate, useParams } from "react-router-dom";
         e.preventDefault();
 
         // Navigasi ke halaman cek PIN dengan membawa data pembayaran tagihan
-        navigate('/user/verify-pin', {
-            state: {
+        navigateWithPinVerification(navigate, {
+            message: `Masukkan PIN untuk bayar tagihan ${upperType}`,
+            redirectTo: '/user/success',
+            data: {
             action: 'tagihan',
             statusTagihanType: upperType,
             nomorTagihan: formData.nomorTagihan,
             amount: parseFloat(formData.jumlahBayar),
-            redirectTo: '/user/mpayment'
             }
         });
     };

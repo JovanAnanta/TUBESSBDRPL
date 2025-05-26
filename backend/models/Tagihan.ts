@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Transaksi } from "./Transaksi";
 
 @Table({
@@ -30,4 +30,7 @@ export class Tagihan extends Model {
         allowNull: false
     })
     declare nomorTagihan: string;
+    
+    @BelongsTo(() => Transaksi)
+    declare transaksi: Transaksi;
 }

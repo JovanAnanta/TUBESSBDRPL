@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { Debit } from '../models/Debit';
 import { Nasabah } from '../models/Nasabah';
 import { Tagihan } from '../models/Tagihan';
@@ -23,56 +24,81 @@ export const bayarTagihan = async (
         throw new Error("Nomor tagihan LISTRIK harus dimulai dengan 'PLN'");
     }
 
-    const nasabah = await Nasabah.findByPk(nasabah_id);
-    if (!nasabah) throw new Error("Nasabah tidak ditemukan");
+    try {
+        const nasabah = await Nasabah.findByPk(nasabah_id);
+        if (!nasabah) throw new Error("Nasabah tidak ditemukan");
 
-    if (nasabah.saldo < jumlahBayar) throw new Error("Saldo tidak mencukupi");
+        if (nasabah.saldo < jumlahBayar) throw new Error("Saldo tidak mencukupi");
 
-    // Cek apakah tagihan dengan nomorTagihan dan tipe ada dan belum dibayar
-    const tagihan = await Tagihan.findOne({
-        where: {
-            statusTagihanType,
-            nomorTagihan
-        },
-        include: [
-            {
-                model: Transaksi,
-                where: { nasabah_id }
+        const tagihan = await Tagihan.findOne({
+            where: {
+                statusTagihanType,
+                nomorTagihan
+            },
+            include: [
+                {
+                    model: Transaksi,
+                    where: { nasabah_id }
+                }
+            ]
+        });
+
+        if (!tagihan) {
+            throw new Error("Tagihan tidak ditemukan");
+        }
+
+        const debitExists = await Debit.findOne({
+            where: { transaksi_id: tagihan.transaksi_id }
+        });
+        if (debitExists) {
+            throw new Error("Tagihan sudah dibayar");
+        }
+
+        // Tentukan keterangan
+        const keterangan = statusTagihanType === "AIR" ? "TAGIHAN AIR" : "TAGIHAN LISTRIK";
+
+        console.log("Saldo sebelum bayar:", nasabah.saldo);
+        nasabah.saldo -= jumlahBayar;
+        console.log("Saldo setelah dikurangi:", nasabah.saldo);
+        await nasabah.save();
+        console.log("Saldo nasabah sudah disimpan");
+
+        const transaksi = await Transaksi.findOne({
+            include: [
+                {
+                    model: Tagihan,
+                    where: {
+                        statusTagihanType,
+                        nomorTagihan
+                    }
+                }
+            ],
+            where: { 
+                nasabah_id,
+                keterangan: statusTagihanType === "AIR" ? "TAGIHAN AIR" : "TAGIHAN LISTRIK"
             }
-        ]
-    });
+        });
 
-    if (!tagihan) {
-        throw new Error("Tagihan tidak ditemukan");
+        if (!transaksi || !transaksi.Tagihan) {
+            throw new Error("Tagihan tidak ditemukan");
+        }
+        console.log("Transaksi baru dibuat:", transaksi.transaksi_id);
+
+        const debit = await Debit.create({
+            debit_id: uuidv4(),
+            transaksi_id: transaksi.transaksi_id,
+            jumlahSaldoBerkurang: jumlahBayar
+        });
+        console.log("Debit baru dibuat:", debit.debit_id);
+
+        return { 
+            status: "success", 
+            message: `Pembayaran tagihan ${statusTagihanType} berhasil`,
+            transaksi_id: transaksi.transaksi_id,
+            saldoSekarang: nasabah.saldo
+        };
+    } catch (error: any) {
+        console.error("Error in bayarTagihan:", error);
+        throw error; // Re-throw the error to be caught by the controller
     }
-
-    const debitExists = await Debit.findOne({
-        where: { transaksi_id: tagihan.transaksi_id }
-    });
-    if (debitExists) {
-        throw new Error("Tagihan sudah dibayar");
-    }
-
-    // Tentukan keterangan
-    const keterangan = statusTagihanType === "AIR" ? "TAGIHAN AIR" : "TAGIHAN LISTRIK";
-
-    // Buat transaksi pembayaran baru
-    const transaksi = await Transaksi.create({
-        nasabah_id,
-        transaksiType: "KELUAR",
-        tanggalTransaksi: new Date(),
-        keterangan
-    });
-
-    // Update saldo nasabah
-    nasabah.saldo -= jumlahBayar;
-    await nasabah.save();
-
-    // Buat debit untuk transaksi pembayaran
-    await Debit.create({
-        transaksi_id: transaksi.transaksi_id,
-        jumlahSaldoBerkurang: jumlahBayar
-    });
-
-    return { status: "success", message: `Pembayaran tagihan ${statusTagihanType} berhasil` };
 };

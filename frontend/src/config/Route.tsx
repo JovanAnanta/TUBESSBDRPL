@@ -5,6 +5,7 @@ import AdminLoanManagement from "../page/AdminLoanManagement";
 import AdminLogin from "../page/AdminLogin";
 import AdminUserManagement from "../page/AdminUserManagement";
 import AuthLayout from "../page/AuthLayout";
+import BerhasilTagihanPinjaman from "../page/BerhasilTagihanPinjaman";
 import CekPinPage from "../page/cekPinPage";
 import CSCustomerActivityPage from '../page/CSActivity';
 import CSHomePage from '../page/CSHomePage';
@@ -92,6 +93,7 @@ const Routers = createBrowserRouter([
       { path: "nasabah/ganti-pin", element: <GantiPin />},
       { path: "nasabah/ganti-password", element: <GantiPassword /> },
       { path: "mpayment/pinjaman", element: <PinjamanPage /> },
+      { path: "success", element : <BerhasilTagihanPinjaman /> }
     ]
   },
   // CS Routes

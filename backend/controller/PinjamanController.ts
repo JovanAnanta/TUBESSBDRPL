@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import * as pinService from '../service/PinService';
 import { PinjamanService } from "../service/PinjamanService";
 
 export class PinjamanController {
@@ -29,10 +30,26 @@ export class PinjamanController {
     try {
       const pinjamanData = req.body.pinjaman;
       const transaksiData = req.body.transaksi;
+      const pin = req.body.pin;
 
       if (!pinjamanData || !transaksiData) {
         res.status(400).json({ message: "Pinjaman and Transaksi data required" });
         return;
+      }
+
+      const nasabahId = transaksiData.nasabah_id;
+      if (!nasabahId) {
+        return res.status(401).json({ message: "User tidak terautentikasi" });
+      }
+
+      // Verify PIN before processing loan application
+      if (!pin) {
+        return res.status(400).json({ message: "PIN diperlukan untuk transaksi ini" });
+      }
+      
+      const verifyResult = await pinService.verifyPin(nasabahId, pin);
+      if (!verifyResult.success) {
+        return res.status(401).json({ message: verifyResult.message || "PIN tidak valid" });
       }
 
       const result = await PinjamanService.create(pinjamanData, transaksiData);
@@ -46,7 +63,6 @@ export class PinjamanController {
       res.status(400).json({ message: error.message || "Error creating pinjaman" });
     }
   }
-
 
   static async update(req: Request, res: Response) {
     try {

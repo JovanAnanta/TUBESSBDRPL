@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style/Pinjaman.css";
+import { navigateWithPinVerification } from "../utils/pinUtils";
 
 interface PinjamanData {
   pinjaman_id?: string;
@@ -69,8 +70,10 @@ export const PinjamanPage = () => {
       return;
     }
 
-    navigate("/user//verify-pin", {
-      state: {
+    navigateWithPinVerification(navigate, {
+      message: "Masukkan PIN untuk konfirmasi pengajuan pinjaman",
+      redirectTo: "/user/success",
+      data: {
         action: "pinjaman",
         pinjaman: {
           statusJatuhTempo: formData.statusJatuhTempo,
@@ -80,11 +83,11 @@ export const PinjamanPage = () => {
           nasabah_id,
           transaksiType: "KELUAR",
           tanggalTransaksi: new Date(),
-          keterangan: "Pengajuan pinjaman",
-        },
-        redirectTo: "/user/mpayment",
-      },
+          keterangan: "PINJAMAN",
+        }
+      }
     });
+
   };
 
   if (loading) return <p>Loading...</p>;

@@ -57,9 +57,10 @@ export class PinjamanService {
     }
 
     const transaksi = await Transaksi.create({
-      ...transaksiData,
-      tanggalTransaksi: new Date(),
+        ...transaksiData,
+        tanggalTransaksi: new Date(),
     });
+    console.log("Transaksi created:", transaksi.transaksi_id);
 
     const bulan = tempoMapping[data.statusJatuhTempo] || 6;
     const tanggalJatuhTempo = addMonths(new Date(), bulan);
@@ -67,17 +68,22 @@ export class PinjamanService {
     const totalPinjaman = data.jumlahPinjaman * (1 + BUNGA);
 
     const pinjamanData = {
-      ...data,
-      pinjaman_id: uuidv4(),
-      transaksi_id: transaksi.transaksi_id,
-      tanggalJatuhTempo,
-      jumlahPinjaman: totalPinjaman,
-      statusPinjaman: "PENDING",
+        ...data,
+        pinjaman_id: uuidv4(),
+        transaksi_id: transaksi.transaksi_id,
+        tanggalJatuhTempo,
+        jumlahPinjaman: totalPinjaman,
+        statusPinjaman: "PENDING",
     };
 
     const pinjaman = await Pinjaman.create(pinjamanData);
+    console.log("Pinjaman created:", pinjaman.pinjaman_id);
 
-    return { transaksi, pinjaman };
+    return { 
+        transaksi, 
+        pinjaman,
+        message: "Pengajuan pinjaman berhasil dibuat dan menunggu persetujuan"
+    };
   }
 
   static async update(id: string, data: any) {
