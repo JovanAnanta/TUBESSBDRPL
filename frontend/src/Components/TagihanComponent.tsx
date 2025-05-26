@@ -48,7 +48,7 @@ import { useNavigate, useParams } from "react-router-dom";
         e.preventDefault();
 
         // Navigasi ke halaman cek PIN dengan membawa data pembayaran tagihan
-        navigate('/verify-pin', {
+        navigate('/user/verify-pin', {
             state: {
             action: 'tagihan',
             statusTagihanType: upperType,
