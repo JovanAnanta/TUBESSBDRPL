@@ -36,7 +36,6 @@ export const PinjamanPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Check if user has active pinjaman (PENDING or ACCEPTED)
   const nasabah_id = localStorage.getItem("nasabahId");
   const userActivePinjaman = pinjamans.find(
     (p) => p.statusPinjaman !== "REJECTED" && p.transaksi_id && p.statusPinjaman !== undefined
@@ -44,25 +43,15 @@ export const PinjamanPage = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-
     if (name === "jumlahPinjaman") {
       if (value === "") {
-        setFormData((prev) => ({
-          ...prev,
-          jumlahPinjaman: "",
-        }));
+        setFormData((prev) => ({ ...prev, jumlahPinjaman: "" }));
       } else {
         const numValue = Number(value);
-        setFormData((prev) => ({
-          ...prev,
-          jumlahPinjaman: numValue >= 0 ? numValue : 0,
-        }));
+        setFormData((prev) => ({ ...prev, jumlahPinjaman: numValue >= 0 ? numValue : 0 }));
       }
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -80,39 +69,22 @@ export const PinjamanPage = () => {
       return;
     }
 
-    const submitData = {
-      pinjaman: {
-        statusJatuhTempo: formData.statusJatuhTempo,
-        jumlahPinjaman: formData.jumlahPinjaman === "" ? 0 : formData.jumlahPinjaman,
+    navigate("/verify-pin", {
+      state: {
+        action: "pinjaman",
+        pinjaman: {
+          statusJatuhTempo: formData.statusJatuhTempo,
+          jumlahPinjaman: formData.jumlahPinjaman === "" ? 0 : formData.jumlahPinjaman,
+        },
+        transaksi: {
+          nasabah_id,
+          transaksiType: "KELUAR",
+          tanggalTransaksi: new Date(),
+          keterangan: "Pengajuan pinjaman",
+        },
+        redirectTo: "/user/mpayment",
       },
-      transaksi: {
-        nasabah_id: nasabah_id,
-        transaksiType: "KELUAR",
-        tanggalTransaksi: new Date(),
-        keterangan: "Pengajuan pinjaman",
-      },
-    };
-
-    fetch("http://localhost:3000/api/pinjaman", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(submitData),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.message || "Gagal membuat pinjaman");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setPinjamans((prev) => [...prev, data.pinjaman]);
-        setFormData({
-          statusJatuhTempo: "6BULAN",
-          jumlahPinjaman: "",
-        });
-      })
-      .catch((err) => setError(err.message));
+    });
   };
 
   if (loading) return <p>Loading...</p>;
@@ -169,7 +141,8 @@ export const PinjamanPage = () => {
       <ul>
         {pinjamans.map((p) => (
           <li key={p.pinjaman_id}>
-            <b>ID:</b> {p.pinjaman_id} | <b>Jatuh Tempo:</b> {p.statusJatuhTempo} | <b>Jumlah:</b> {p.jumlahPinjaman.toLocaleString()} | <b>Status:</b>{" "}
+            <b>ID:</b> {p.pinjaman_id} | <b>Jatuh Tempo:</b> {p.statusJatuhTempo} | <b>Jumlah:</b>{" "}
+            {p.jumlahPinjaman.toLocaleString()} | <b>Status:</b>{" "}
             <span
               style={{
                 color:
@@ -186,6 +159,7 @@ export const PinjamanPage = () => {
           </li>
         ))}
       </ul>
+
       <button className="tagihan-back-button" onClick={() => navigate("/user/mpayment")}>
         Kembali
       </button>

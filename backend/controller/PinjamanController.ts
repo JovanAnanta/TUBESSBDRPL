@@ -25,7 +25,7 @@ export class PinjamanController {
     }
   }
 
-  static async create(req: Request, res: Response) {  // <-- no 'export' here
+  static async create(req: Request, res: Response) {
     try {
       const pinjamanData = req.body.pinjaman;
       const transaksiData = req.body.transaksi;
@@ -38,17 +38,15 @@ export class PinjamanController {
       const result = await PinjamanService.create(pinjamanData, transaksiData);
 
       res.status(201).json({
-        message: "Pinjaman and Transaksi created successfully",
+        message: "Pinjaman created and pending approval",
         transaksi: result.transaksi,
         pinjaman: result.pinjaman,
       });
-      return;
     } catch (error: any) {
-      console.error("Pinjaman creation error:", error);
-      res.status(500).json({ message: "Error creating pinjaman", error: error.message });
-      return;
+      res.status(400).json({ message: error.message || "Error creating pinjaman" });
     }
   }
+
 
   static async update(req: Request, res: Response) {
     try {
