@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { Transaksi } from "./Transaksi";
 
 @Table({
@@ -6,7 +6,11 @@ import { Transaksi } from "./Transaksi";
 })
 export class Pinjaman extends Model {
 
-    @Column({ primaryKey: true, type: DataType.UUID })
+    @Column({
+        primaryKey: true,
+        type: DataType.UUID,
+        defaultValue: DataType.UUIDV4,
+    })
     declare pinjaman_id: string;
 
     @ForeignKey(() => Transaksi)
@@ -26,7 +30,7 @@ export class Pinjaman extends Model {
         type: DataType.DOUBLE,
         allowNull: false
     })
-    declare jumlahPerBulan: number;
+    declare jumlahPinjaman: number;
 
     @Column({
         type: DataType.DATE,
@@ -40,5 +44,7 @@ export class Pinjaman extends Model {
     })
     declare statusPinjaman: string;
 
-    
+    @BelongsTo(() => Transaksi)
+    declare Transaksi: Transaksi;
+
 }

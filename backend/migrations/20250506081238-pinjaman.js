@@ -22,7 +22,7 @@ export default {
         type: Sequelize.ENUM('6BULAN', '12BULAN', '24BULAN'),
         allowNull: false,
       },
-      jumlahPerBulan: {
+      jumlahPinjaman: {
         type: Sequelize.DOUBLE,
         allowNull: false,
       },

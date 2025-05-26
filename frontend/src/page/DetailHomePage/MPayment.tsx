@@ -21,6 +21,13 @@ export const MPayment = () => {
       description: "Bayar tagihan listrik PLN",
       type: "listrik",
     },
+    {
+      title: "Pinjaman",
+      icon: "💰",
+      path: `/user/mpayment/pinjaman`,
+      description: "Lihat dan bayar pinjaman",
+      type: "pinjaman",
+    },
   ];
 
   return (

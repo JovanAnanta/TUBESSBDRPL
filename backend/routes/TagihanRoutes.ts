@@ -1,10 +1,9 @@
-import { Router } from "express";
-import * as tagihanController from "../controller/TagihanController";
-import authenticateToken from "../middleware/AuthenticateToken";
+import express from 'express';
+import { bayarTagihan } from '../controller/TagihanController';
+import authenticateToken from '../middleware/AuthenticateToken';
 
-const router = Router();
+const router = express.Router();
 
-router.post("/bayar", authenticateToken, tagihanController.bayarTagihan);
-router.get("/riwayat", authenticateToken, tagihanController.getRiwayatTagihan);
+router.post('/tagihan/:type', authenticateToken, bayarTagihan);
 
 export default router;

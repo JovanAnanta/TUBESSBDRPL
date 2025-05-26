@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../style/Pinjaman.css";
 
 interface PinjamanData {
   pinjaman_id?: string;
   transaksi_id?: string;
   statusJatuhTempo: "6BULAN" | "12BULAN" | "24BULAN";
-  jumlahPerBulan: number;
-  tanggalJatuhTempo?: string; // otomatis di backend
+  jumlahPinjaman: number;
+  tanggalJatuhTempo?: string;
+  statusPinjaman: "PENDING" | "ACCEPTED" | "REJECTED";
 }
 
 export const PinjamanPage = () => {
   const [pinjamans, setPinjamans] = useState<PinjamanData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  // jumlahPerBulan bisa number atau string kosong untuk input yang bisa dikosongkan
-  const [formData, setFormData] = useState<{ statusJatuhTempo: string; jumlahPerBulan: number | "" }>({
+  const [formData, setFormData] = useState<{ statusJatuhTempo: string; jumlahPinjaman: number | "" }>({
     statusJatuhTempo: "6BULAN",
-    jumlahPerBulan: 0,
+    jumlahPinjaman: "",
   });
 
   useEffect(() => {
@@ -34,29 +36,22 @@ export const PinjamanPage = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const nasabah_id = localStorage.getItem("nasabahId");
+  const userActivePinjaman = pinjamans.find(
+    (p) => p.statusPinjaman !== "REJECTED" && p.transaksi_id && p.statusPinjaman !== undefined
+  );
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-
-    if (name === "jumlahPerBulan") {
-      // Jika input kosong, set string kosong supaya bisa dikosongkan
+    if (name === "jumlahPinjaman") {
       if (value === "") {
-        setFormData(prev => ({
-          ...prev,
-          jumlahPerBulan: "",
-        }));
+        setFormData((prev) => ({ ...prev, jumlahPinjaman: "" }));
       } else {
-        // Jika ada input, konversi ke number dan pastikan minimal 0
         const numValue = Number(value);
-        setFormData(prev => ({
-          ...prev,
-          jumlahPerBulan: numValue >= 0 ? numValue : 0,
-        }));
+        setFormData((prev) => ({ ...prev, jumlahPinjaman: numValue >= 0 ? numValue : 0 }));
       }
     } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -64,33 +59,32 @@ export const PinjamanPage = () => {
     e.preventDefault();
     setError(null);
 
-    // Jika jumlahPerBulan masih kosong, konversi ke 0 saat submitj
-  const submitData = {
-  statusJatuhTempo: formData.statusJatuhTempo,
-  jumlahPerBulan: formData.jumlahPerBulan === "" ? 0 : formData.jumlahPerBulan,
-};
+    if (!nasabah_id) {
+      setError("Nasabah ID tidak ditemukan. Silakan login terlebih dahulu.");
+      return;
+    }
 
+    if (userActivePinjaman) {
+      setError("Anda hanya dapat memiliki satu pinjaman aktif. Silakan tunggu hingga pinjaman selesai.");
+      return;
+    }
 
-    fetch("http://localhost:3000/api/pinjaman", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(submitData),
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || "Gagal membuat pinjaman");
-        }
-        return res.json();
-      })
-      .then((newPinjaman) => {
-        setPinjamans((prev) => [...prev, newPinjaman]);
-        setFormData({
-          statusJatuhTempo: "6BULAN",
-          jumlahPerBulan: 0,
-        });
-      })
-      .catch((err) => setError(err.message));
+    navigate("/verify-pin", {
+      state: {
+        action: "pinjaman",
+        pinjaman: {
+          statusJatuhTempo: formData.statusJatuhTempo,
+          jumlahPinjaman: formData.jumlahPinjaman === "" ? 0 : formData.jumlahPinjaman,
+        },
+        transaksi: {
+          nasabah_id,
+          transaksiType: "KELUAR",
+          tanggalTransaksi: new Date(),
+          keterangan: "Pengajuan pinjaman",
+        },
+        redirectTo: "/user/mpayment",
+      },
+    });
   };
 
   if (loading) return <p>Loading...</p>;
@@ -100,47 +94,77 @@ export const PinjamanPage = () => {
       <h1>Daftar Pinjaman</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
-        <div>
-          <label>Lama Tempo Bayar:</label><br />
-          <select
-            name="statusJatuhTempo"
-            value={formData.statusJatuhTempo}
-            onChange={handleChange}
-            required
-          >
-            <option value="6BULAN">6 Bulan</option>
-            <option value="12BULAN">12 Bulan</option>
-            <option value="24BULAN">24 Bulan</option>
-          </select>
-        </div>
+      {userActivePinjaman ? (
+        <p style={{ color: "blue" }}>
+          Anda memiliki pinjaman aktif dengan status: <b>{userActivePinjaman.statusPinjaman}</b>. Anda tidak dapat mengajukan pinjaman baru sampai yang ini selesai.
+        </p>
+      ) : (
+        <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
+          <div>
+            <label>Lama Tempo Bayar:</label>
+            <br />
+            <select name="statusJatuhTempo" value={formData.statusJatuhTempo} onChange={handleChange} required>
+              <option value="6BULAN">6 Bulan</option>
+              <option value="12BULAN">12 Bulan</option>
+              <option value="24BULAN">24 Bulan</option>
+            </select>
+          </div>
 
-        <div>
-          <label>Jumlah Per Bulan:</label><br />
-          <input
-            type="number"
-            name="jumlahPerBulan"
-            value={formData.jumlahPerBulan}
-            onChange={handleChange}
-            placeholder="Masukkan jumlah per bulan"
-            min={0}
-            step={1}
-          />
-        </div>
+          <div>
+            <label>Jumlah Pinjaman:</label>
+            <br />
+            <input
+              type="number"
+              name="jumlahPinjaman"
+              value={formData.jumlahPinjaman}
+              onChange={handleChange}
+              placeholder="Masukkan jumlah pinjaman"
+              min={1}
+              step={1}
+              required
+            />
+          </div>
 
-        <button type="submit" style={{ marginTop: 10 }}>
-          Tambah Pinjaman
-        </button>
-      </form>
+          <p>
+            <i>
+              Bunga pinjaman: 3% per tahun <br />
+              Cicilan per bulan akan dihitung secara otomatis setelah pinjaman diterima oleh admin.
+            </i>
+          </p>
+
+          <button type="submit" style={{ marginTop: 10 }}>
+            Ajukan Pinjaman
+          </button>
+        </form>
+      )}
 
       <ul>
         {pinjamans.map((p) => (
           <li key={p.pinjaman_id}>
-            {p.pinjaman_id} - {p.statusJatuhTempo} - {p.jumlahPerBulan} - {p.tanggalJatuhTempo}
+            <b>ID:</b> {p.pinjaman_id} | <b>Jatuh Tempo:</b> {p.statusJatuhTempo} | <b>Jumlah:</b>{" "}
+            {p.jumlahPinjaman.toLocaleString()} | <b>Status:</b>{" "}
+            <span
+              style={{
+                color:
+                  p.statusPinjaman === "PENDING"
+                    ? "orange"
+                    : p.statusPinjaman === "ACCEPTED"
+                    ? "green"
+                    : "red",
+              }}
+            >
+              {p.statusPinjaman}
+            </span>{" "}
+            | <b>Tanggal Jatuh Tempo:</b> {p.tanggalJatuhTempo ? new Date(p.tanggalJatuhTempo).toLocaleDateString() : "-"}
           </li>
         ))}
       </ul>
+
+      <button className="tagihan-back-button" onClick={() => navigate("/user/mpayment")}>
+        Kembali
+      </button>
     </div>
   );
 };
+
 export default PinjamanPage;

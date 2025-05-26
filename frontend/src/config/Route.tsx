@@ -10,7 +10,6 @@ import CSReportPage from '../page/CSReportPage';
 import CSResetPassword from '../page/CSResetPassword';
 import CSValidationPage from '../page/CSValidation';
 import InfoSaldo from "../page/DetailHomePage/DetailMInfo/InfoSaldo";
-import MutasiRekening from "../page/DetailHomePage/DetailMInfo/MutasiRekening";
 import MutasiDatePage from "../page/DetailHomePage/DetailMInfo/MutasiDatePage";
 import MutasiListPage from "../page/DetailHomePage/DetailMInfo/MutasiListPage";
 import TopUp from "../page/DetailHomePage/DetailMTransfer/TopUp";
@@ -24,6 +23,7 @@ import GantiPassword from "../page/GantiPassword";
 import { GantiPin } from "../page/GantiPin";
 import HomePage from "../page/HomePage";
 import LoginPage from "../page/Login";
+import PinjamanPage from "../page/Pinjaman";
 import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
 import UserLayout from "../page/UserLayout";
@@ -87,7 +87,8 @@ const Routers = createBrowserRouter([
       { path: "mpayment/:type", element: <TagihanComponent /> },
       { path: "settings", element: <Setting /> },
       { path: "nasabah/ganti-pin", element: <GantiPin />},
-      { path: "nasabah/ganti-password", element: <GantiPassword /> }
+      { path: "nasabah/ganti-password", element: <GantiPassword /> },
+      { path: "mpayment/pinjaman", element: <PinjamanPage /> },
     ]
   },
   // CS Routes

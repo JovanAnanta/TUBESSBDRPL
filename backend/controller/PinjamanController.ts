@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { PinjamanService } from "../service/PinjamanService";
-//cvssf
+
 export class PinjamanController {
   static async getAll(req: Request, res: Response) {
     try {
@@ -24,41 +24,29 @@ export class PinjamanController {
       res.status(500).json({ error: "Internal server error", details: error });
     }
   }
+
   static async create(req: Request, res: Response) {
     try {
-      const { statusJatuhTempo, jumlahPerBulan } = req.body;
+      const pinjamanData = req.body.pinjaman;
+      const transaksiData = req.body.transaksi;
 
-      if (
-        !statusJatuhTempo ||
-        jumlahPerBulan === undefined ||
-        jumlahPerBulan === null
-      ) {
-        res.status(400).json({
-          error: "Field statusJatuhTempo dan jumlahPerBulan wajib diisi",
-        });
+      if (!pinjamanData || !transaksiData) {
+        res.status(400).json({ message: "Pinjaman and Transaksi data required" });
         return;
       }
 
-      if (typeof jumlahPerBulan !== "number" || jumlahPerBulan < 0) {
-        res
-          .status(400)
-          .json({ error: "jumlahPerBulan harus berupa angka >= 0" });
-        return;
-      }
+      const result = await PinjamanService.create(pinjamanData, transaksiData);
 
-      const pinjaman = await PinjamanService.create({
-        statusJatuhTempo,
-        jumlahPerBulan,
+      res.status(201).json({
+        message: "Pinjaman created and pending approval",
+        transaksi: result.transaksi,
+        pinjaman: result.pinjaman,
       });
-
-      res.status(201).json(pinjaman);
-      return;
-    } catch (error) {
-      console.error("Error create pinjaman:", error);
-      res.status(500).json({ error: "Internal server error" });
-      return;
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Error creating pinjaman" });
     }
   }
+
 
   static async update(req: Request, res: Response) {
     try {
@@ -86,4 +74,5 @@ export class PinjamanController {
     }
   }
 }
+
 export default PinjamanController;
