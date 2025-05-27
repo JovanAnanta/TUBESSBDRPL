@@ -1,5 +1,6 @@
 /* Layout */
 .login-wrapper {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -122,4 +123,37 @@
   text-decoration: underline;
   margin-top: 1rem;
   cursor: pointer;
+}
+
+
+.info-banking-button {
+  position: fixed;   /* Tetap di posisi yang sama bahkan saat scroll */
+  bottom: 20px;      /* Jarak dari bawah viewport */
+  right: 20px;       /* Jarak dari kanan viewport */
+  padding: 10px 18px;/* Padding di dalam tombol */
+  background-color: #007bff; /* Warna latar tombol (contoh: biru) */
+  color: white;      /* Warna teks tombol */
+  border: none;        /* Hilangkan border default */
+  border-radius: 8px; /* Sudut tombol yang membulat */
+  text-decoration: none; /* Hilangkan garis bawah default pada link */
+  font-size: 14px;     /* Ukuran font */
+  font-weight: 500;  /* Ketebalan font */
+  cursor: pointer;     /* Ubah cursor menjadi tangan saat hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Bayangan halus untuk efek kedalaman */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Transisi halus untuk hover */
+  z-index: 1000;       /* Pastikan tombol selalu di atas elemen lain */
+  display: flex;       /* Untuk alignment ikon dan teks jika ada */
+  align-items: center; /* Pusatkan item secara vertikal */
+  gap: 8px;            /* Jarak antara ikon (jika ada) dan teks */
+}
+
+.info-banking-button:hover {
+  background-color: #0056b3; /* Warna latar saat tombol di-hover (biru lebih gelap) */
+  transform: translateY(-2px); /* Sedikit mengangkat tombol saat hover */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Bayangan lebih jelas saat hover */
+}
+
+.info-banking-button:active {
+  background-color: #004085; /* Warna latar saat tombol ditekan */
+  transform: translateY(0);  /* Kembalikan posisi y */
 }

@@ -31,6 +31,7 @@ import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
 import UserLayout from "../page/UserLayout";
 import { ProtectedAdmin, ProtectedCS, ProtectedUser } from "./ProtectedRoute";
+import InformationBanking from "../page/InformationBanking";
 
 const checkAuth = () => {
   const token = localStorage.getItem("token");
@@ -52,6 +53,10 @@ const Routers = createBrowserRouter([
   {
     path: "",
     element: <LoginPage />
+  },
+  {
+    path: "info-layanan",
+    element: <InformationBanking />
   },
   {
     path: "/",
