@@ -1,128 +1,612 @@
-/* Pinjaman.css */
-
 .pinjaman-container {
-  min-height: 100vh;
-  background: linear-gradient(to right, #f0f4f8, #dfeefc);
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Typography */
+.pinjaman-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.icon {
+  margin-right: 0.5rem;
+}
+
+h2 {
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* Cards */
+.pinjaman-card {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.new-loan {
+  background: linear-gradient(to right, #e6f7ff, #f0fff4);
+  border-left: 4px solid #2196f3;
+}
+
+.pending-loan {
+  background: linear-gradient(to right, #fff9e6, #fffde7);
+  border-left: 4px solid #ff9800;
+}
+
+.loan-status {
+  border-left: 4px solid #9c27b0;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.status-icon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+/* Form Elements */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #2196f3;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.4rem;
+  color: #666;
+}
+
+/* Simulation Box */
+.simulasi-box {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 1.2rem;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.simulasi-empty {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 1.2rem;
+  border-radius: 8px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #666;
+}
+
+.simulasi-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+
+.highlight {
+  font-weight: 600;
+}
+
+.divider {
+  border-bottom: 1px solid #eee;
+  margin: 0.8rem 0;
+}
+
+.simulasi-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  margin-top: 0.7rem;
+}
+
+.total-amount {
+  color: #2196f3;
+  font-size: 1.2rem;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-success,
+.btn-secondary {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #1976d2;
+}
+
+.btn-success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #388e3c;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background-color: #d5d5d5;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Pinjaman Details */
+.pinjaman-details {
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
+.pinjaman-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.label {
+  color: #666;
+}
+
+.value {
+  font-weight: 600;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background-color: #fff3e0;
+  color: #ff9800;
+}
+
+.status-badge.accepted {
+  background-color: #e8f5e9;
+  color: #4caf50;
+}
+
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #f44336;
+}
+
+/* Stepper */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 2rem 0;
+}
+
+.step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  box-sizing: border-box;
+  flex: 1;
 }
 
-h1 {
-  font-size: 2.4rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
+.step-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.step.active .step-icon {
+  background-color: #9c27b0;
+  color: white;
+}
+
+.step-label {
+  font-size: 0.85rem;
   text-align: center;
+  color: #666;
 }
 
-/* Error message */
-p[style*="color: red"] {
-  background-color: #ffe6e6;
-  border-left: 4px solid #e74c3c;
-  padding: 0.8rem 1rem;
-  margin-bottom: 1rem;
-  color: #c0392b;
-  border-radius: 6px;
+.step.active .step-label {
+  color: #000;
+  font-weight: 500;
 }
 
-/* Form styling */
-form {
-  background-color: #ffffff;
+.connector {
+  flex: 1;
+  height: 2px;
+  background-color: #e0e0e0;
+  margin: 0 0.5rem;
+  position: relative;
+  top: -15px;
+}
+
+.step.active + .connector {
+  background-color: #9c27b0;
+}
+
+/* Section divider and header */
+.section-divider {
+  border-top: 1px solid #eee;
+  margin: 2rem 0;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  color: #666;
+  border: 1px dashed #ccc;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
   padding: 2rem;
-  border-radius: 12px;
-  max-width: 450px;
-  width: 100%;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  margin-bottom: 2rem;
-  transition: transform 0.3s;
 }
 
-form:hover {
-  transform: translateY(-2px);
+.loading-spinner div {
+  width: 12px;
+  height: 12px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background-color: #2196f3;
+  animation: loading 1.4s infinite ease-in-out both;
 }
 
-form div {
-  margin-bottom: 1.2rem;
+.loading-spinner div:nth-child(1) { animation-delay: -0.32s; }
+.loading-spinner div:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loading {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
 }
 
-label {
-  display: block;
-  font-weight: 600;
-  color: #34495e;
-  margin-bottom: 0.4rem;
-  font-size: 0.95rem;
+/* Tagihan cards */
+.tagihan-container {
+  margin-top: 1rem;
 }
 
-input[type="number"],
-select {
-  width: 100%;
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 1rem;
-  background-color: #f9fafb;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-input[type="number"]:focus,
-select:focus {
-  outline: none;
-  border-color: #3498db;
-  box-shadow: 0 0 6px rgba(52, 152, 219, 0.3);
-  background-color: #ffffff;
-}
-
-/* Button primary */
-button[type="submit"],
-.tagihan-back-button {
-  background-color: #3498db;
-  color: #ffffff;
-  padding: 0.7rem 1.4rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  width: 100%;
-  max-width: 450px;
-  transition: background-color 0.3s ease, transform 0.2s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-button[type="submit"]:hover,
-.tagihan-back-button:hover {
-  background-color: #2b7cb8;
-  transform: translateY(-1px);
-}
-
-.tagihan-back-button {
+.tagihan-group {
   margin-bottom: 2rem;
 }
 
-/* Daftar pinjaman */
-ul {
-  list-style-type: none;
-  padding: 0;
-  width: 100%;
-  max-width: 700px;
+.tagihan-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
-ul li {
-  background-color: #ffffff;
-  padding: 1rem 1.2rem;
-  margin-bottom: 0.75rem;
-  border-left: 5px solid #3498db;
+.tagihan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tagihan-card {
+  position: relative;
+  padding: 1.2rem;
   border-radius: 8px;
-  color: #2c3e50;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  transition: background-color 0.3s;
-  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
 }
 
-ul li:hover {
-  background-color: #f0f9ff;
+.tagihan-card:hover {
+  transform: translateY(-4px);
+}
+
+.tagihan-card.paid {
+  border-left: 5px solid #4caf50;
+  background-color: #e8f5e9;
+}
+
+.tagihan-card.unpaid {
+  border-left: 5px solid #ff9800;
+  background-color: #fff8e1;
+}
+
+.tagihan-card.overdue {
+  border-left: 5px solid #f44336;
+  background-color: #ffebee;
+}
+
+.overdue-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #f44336;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transform: rotate(15deg);
+}
+
+.tagihan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.status-pill {
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-pill.paid {
+  background-color: #4caf50;
+  color: white;
+}
+
+.status-pill.unpaid {
+  background-color: #ff9800;
+  color: white;
+}
+
+.tagihan-detail {
+  margin-bottom: 0.8rem;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.detail-value {
+  font-weight: 500;
+}
+
+.detail-value.amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+/* Alerts */
+.alert {
+  padding: 1rem;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.alert.warning {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.alert.info {
+  background-color: #cfe8ff;
+  border-left: 4px solid #2196f3;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  width: 90%;
+  max-width: 500px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+}
+
+.modal h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 1rem;
+}
+
+.modal-content {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 1rem 0;
+}
+
+.confirmation-details {
+  background-color: #f5f5f5;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+
+/* Notifications */
+.notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 1rem;
+  border-radius: 6px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 300px;
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification.success {
+  background-color: #e8f5e9;
+  border-left: 4px solid #4caf50;
+}
+
+.notification.error {
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+}
+
+.notification.warning {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+}
+
+.notification.info {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .stepper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .step {
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .step-icon {
+    margin-bottom: 0;
+    margin-right: 1rem;
+  }
+  
+  .connector {
+    width: 2px;
+    height: 20px;
+    margin: 0 0 0 18px;
+    position: static;
+  }
 }
