@@ -201,18 +201,44 @@ const CekPinPage: React.FC = () => {
                     if (!response.ok) {
                         throw new Error(resJson.message || 'Pembayaran tagihan gagal');
                     }
-                    navigate(additionalData?.redirectTo || '/user/success', {
-                        state: {
-                            message: resJson.message || 'Tagihan berhasil dibayar!',
-                            delay: 3000,
-                        },
-                    });
+                    // Redirect to e-receipt page with transaksiId
+                    const transaksiId = resJson.data?.transaksi_id;
+                    navigate(`/user/e-receipt/${transaksiId}`);
                 } catch (error: any) {
                     console.error("Error processing tagihan:", error);
-                    setError(error.message || "Pembayaran tagihan gagal");
+                    // Handle PIN error with attempt count
                     if (error.message.includes("PIN tidak valid") || error.message.includes("PIN salah")) {
                         const newAttempts = attempts + 1;
                         setAttempts(newAttempts);
+                        if (newAttempts >= maxAttempts) {
+                            // Block user via API
+                            setError('Akun Anda telah diblokir karena terlalu banyak percobaan PIN yang salah.');
+                            try {
+                                const token = localStorage.getItem('token');
+                                const nasabahId = localStorage.getItem('nasabahId');
+                                await fetch('http://localhost:3000/api/user/blockAccount', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`
+                                    },
+                                    body: JSON.stringify({ nasabahId })
+                                });
+                            } catch (blockErr) {
+                                console.error('Error blocking account:', blockErr);
+                            }
+                            // Logout after delay
+                            setTimeout(() => {
+                                localStorage.removeItem('token');
+                                localStorage.removeItem('nasabahId');
+                                navigate('/auth/login');
+                            }, 3000);
+                        } else {
+                            setError(`PIN salah! Sisa percobaan: ${maxAttempts - newAttempts}`);
+                        }
+                    } else {
+                        // Other errors
+                        setError(error.message || "Pembayaran tagihan gagal");
                     }
                 }
                 return;

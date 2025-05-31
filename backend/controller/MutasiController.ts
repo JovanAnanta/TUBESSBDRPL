@@ -61,7 +61,9 @@ export const getMutasiRekening = async (req: Request, res: Response): Promise<vo
         let parsedEndDate: Date | undefined;
         
         if (startDate) {
-            parsedStartDate = new Date(startDate as string);
+            // Use only date part to avoid TZ offset issues
+            const sd = (startDate as string).split('T')[0];
+            parsedStartDate = new Date(sd);
             if (isNaN(parsedStartDate.getTime())) {
                 res.status(400).json({
                     success: false,
@@ -72,7 +74,9 @@ export const getMutasiRekening = async (req: Request, res: Response): Promise<vo
         }
         
         if (endDate) {
-            parsedEndDate = new Date(endDate as string);
+            // Use only date part to include full day
+            const ed = (endDate as string).split('T')[0];
+            parsedEndDate = new Date(ed);
             if (isNaN(parsedEndDate.getTime())) {
                 res.status(400).json({
                     success: false,

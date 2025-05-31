@@ -77,7 +77,14 @@ const EReceipt: React.FC = () => {
             )}
             {data.debit && (
               <div className="ereceipt-section">
+                {data.tagihan?.nomorTagihan && (
+                 <div className="ereceipt-info-item">
+                   <span className="ereceipt-info-label">Nomor Tagihan:</span>
+                   <span className="ereceipt-info-value">{data.tagihan.nomorTagihan}</span>
+                 </div>
+                )}
                 <h3>Pengurangan Saldo</h3>
+                {/* Tampilkan nomor tagihan jika tersedia */}
                 <div className="ereceipt-info-item">
                   <span className="ereceipt-info-label">Jumlah Keluar:</span>
                   <span className="ereceipt-info-value">Rp {Number(data.debit.jumlahSaldoBerkurang).toLocaleString('id-ID')}</span>

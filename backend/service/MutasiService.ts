@@ -6,7 +6,7 @@ import { Debit } from '../models/Debit';
 import { Tagihan } from '../models/Tagihan';
 import { Pinjaman } from '../models/Pinjaman';
 import { decrypt } from '../enkripsi/Encryptor';
-import { Op } from 'sequelize';
+import { Op, fn, col, where as seqWhere } from 'sequelize';
 
 export interface MutasiData {
     transaksi_id: string;
@@ -60,18 +60,24 @@ export const getMutasiRekening = async (
         const nasabah = await Nasabah.findOne({ where: { nasabah_id: nasabahId } });
         if (!nasabah) throw new Error('Nasabah tidak ditemukan');
 
-        const whereCondition: any = { nasabah_id: nasabahId };
-        if (startDate || endDate) {
-            const range: any = {};
-            if (startDate) range[Op.gte] = startDate;
-            if (endDate) {
-                const endOfDay = new Date(endDate);
-                endOfDay.setHours(23, 59, 59, 999);
-                range[Op.lte] = endOfDay;
-            }
-            whereCondition.tanggalTransaksi = range;
+        // Filter by nasabah_id and optional date range on date part only
+        let whereCondition: any;
+        if (startDate && endDate) {
+            const sd = (new Date(startDate)).toISOString().split('T')[0];
+            const ed = (new Date(endDate)).toISOString().split('T')[0];
+            // Filter records where DATE(tanggalTransaksi) between sd and ed
+            whereCondition = {
+                nasabah_id: nasabahId,
+                [Op.and]: [
+                    seqWhere(fn('DATE', col('tanggalTransaksi')), {
+                        [Op.between]: [sd, ed]
+                    })
+                ]
+            };
+        } else {
+            whereCondition = { nasabah_id: nasabahId };
         }
-        
+
         const transaksis = await Transaksi.findAll({
             where: whereCondition,
             include: [
@@ -81,7 +87,9 @@ export const getMutasiRekening = async (
                 { model: Tagihan, required: false },
                 { model: Pinjaman, required: false }
             ],
-            order: [['tanggalTransaksi', 'DESC']]
+            order: [['tanggalTransaksi', 'DESC']],
+            limit: _limit,
+            offset: _offset
         });
         
         const transactions = transaksis.map((trx) => {

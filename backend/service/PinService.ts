@@ -31,10 +31,14 @@ export const setPinNasabah = async (nasabahId: string, pin: string): Promise<Nas
 
 export const verifyPin = async (nasabahId: string, inputPin: string): Promise<PinVerificationResult> => {
     try {
-        // Cek apakah user sedang diblokir
         const attemptKey = `pin_attempts_${nasabahId}`;
+        // If account has been reactivated in DB, clear previous attempts
+        const nasabahDb = await Nasabah.findOne({ where: { nasabah_id: nasabahId } });
+        if (nasabahDb && nasabahDb.status === 'AKTIF') {
+            pinAttempts.delete(attemptKey);
+        }
+        // Cek apakah user sedang diblokir di memory
         const currentAttempt = pinAttempts.get(attemptKey);
-        
         if (currentAttempt && currentAttempt.count >= MAX_ATTEMPTS) {
             const timeSinceBlock = Date.now() - currentAttempt.timestamp;
             if (timeSinceBlock < BLOCK_DURATION) {
@@ -131,6 +135,9 @@ export const blockAccount = async (nasabahId: string): Promise<{ success: boolea
 
         nasabah.status = 'TIDAK AKTIF';
         await nasabah.save();
+        // Reset in-memory attempts so reactivation works immediately
+        const attemptKey = `pin_attempts_${nasabahId}`;
+        pinAttempts.delete(attemptKey);
 
         return {
             success: true,

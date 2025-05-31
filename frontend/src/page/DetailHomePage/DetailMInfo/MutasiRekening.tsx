@@ -19,6 +19,7 @@ const MutasiRekening: React.FC = () => {
   const [offset, setOffset] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+  const { startDate, endDate, pinVerified } = location.state || {};
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -29,20 +30,31 @@ const MutasiRekening: React.FC = () => {
       return;
     }
 
-    // Cek apakah user sudah melalui PIN verification
-    const pinVerified = location.state?.pinVerified;
+    // Pastikan user sudah verifikasi PIN
     if (!pinVerified) {
       navigate('/user/minfo');
       return;
     }
     
-    fetchMutasiData(nasabahId, token);
+    // Fetch mutasi dengan filter tanggal jika ada
+    fetchMutasiData(nasabahId, token, false, startDate, endDate);
   }, [navigate, location]);
 
-  const fetchMutasiData = async (nasabahId: string, token: string, loadMore = false) => {
+  const fetchMutasiData = async (
+    nasabahId: string,
+    token: string,
+    loadMore = false,
+    startDate?: string,
+    endDate?: string
+  ) => {
     try {
       const currentOffset = loadMore ? offset : 0;
-      const response = await fetch(`/api/user/mutasi/${nasabahId}?limit=20&offset=${currentOffset}`, {
+      // Build query with optional date filters
+      let query = `?limit=20&offset=${currentOffset}`;
+      if (startDate && endDate) {
+        query += `&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+      }
+      const response = await fetch(`/api/user/mutasi/${nasabahId}${query}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

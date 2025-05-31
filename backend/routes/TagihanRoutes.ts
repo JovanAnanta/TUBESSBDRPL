@@ -1,9 +1,16 @@
 import express from 'express';
-import { bayarTagihan } from '../controller/TagihanController';
 import authenticateToken from '../middleware/AuthenticateToken';
+import { TagihanController } from '../controller/TagihanController';
 
 const router = express.Router();
 
-router.post('/tagihan/:type', authenticateToken, bayarTagihan);
+// Route untuk pembayaran tagihan air
+router.post('/tagihan/air', authenticateToken, TagihanController.bayarTagihanAir);
+
+// Route untuk pembayaran tagihan listrik  
+router.post('/tagihan/listrik', authenticateToken, TagihanController.bayarTagihanListrik);
+
+// Route untuk mendapatkan dummy amount tagihan (untuk testing)
+router.get('/tagihan/:type/amount/:nomorTagihan', authenticateToken, TagihanController.getBillAmount);
 
 export default router;

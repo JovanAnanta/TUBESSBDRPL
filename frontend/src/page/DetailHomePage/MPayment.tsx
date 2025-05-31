@@ -4,20 +4,18 @@ import "../../style/MPayment.css";
 
 export const MPayment = () => {
 
-  const navigate = useNavigate();
-
-  const paymentOptions = [
+  const navigate = useNavigate();  const paymentOptions = [
     {
       title: "Tagihan Air",
       icon: "💧",
-      path: `/user/mpayment/air`,
+      path: `/user/tagihan/air`,
       description: "Bayar tagihan air PDAM",
       type: "air",
     },
     {
       title: "Tagihan Listrik",
       icon: "⚡",
-      path: `/user/mpayment/listrik`,
+      path: `/user/tagihan/listrik`,
       description: "Bayar tagihan listrik PLN",
       type: "listrik",
     },
