@@ -1,12 +1,18 @@
-import { Router } from "express";
-import { PinjamanController } from "../controller/PinjamanController";
+import express from 'express';
+import { ajukanPinjaman } from '../controller/PinjamanController';
+import authenticateToken from '../middleware/AuthenticateToken';
+import { getTagihanPinjaman } from '../controller/PinjamanController';
+import { bayarTagihan } from "../controller/PinjamanController";
+import { claimPinjaman } from '../controller/PinjamanController';
+import { getPinjamanStatus } from "../controller/PinjamanController";
 
-const router = Router();
-//routes
-router.get("/", PinjamanController.getAll);
-router.get("/:id", PinjamanController.getById);
-router.post("/", PinjamanController.create);
-router.put("/:id", PinjamanController.update);
-router.delete("/:id", PinjamanController.delete);
+const router = express.Router();
+
+router.post('/ajukan', authenticateToken, ajukanPinjaman);
+router.get('/tagihan', authenticateToken, getTagihanPinjaman);
+router.post("/tagihan/:id/bayar", authenticateToken, bayarTagihan);
+router.post('/claim/:pinjaman_id', authenticateToken, claimPinjaman);
+router.get("/status", authenticateToken, getPinjamanStatus);
+
 
 export default router;

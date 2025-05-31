@@ -24,35 +24,41 @@ const AdminDashboard: React.FC = () => {
     setAdminName(name || 'Administrator');
 
     // Fetch dashboard stats
-    const fetchStats = async () => {
-      try {
-        const pendingResponse = await fetch('http://localhost:3000/api/admin/pinjaman/daftar', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        const usersResponse = await fetch('http://localhost:3000/api/admin/nasabah', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+const fetchStats = async () => {
+  try {
+    const token = localStorage.getItem('admin_token');
 
-        if (pendingResponse.ok && usersResponse.ok) {
-          const pendingData = await pendingResponse.json();
-          const userData = await usersResponse.json();
-          
-          setStats({
-            pendingLoans: pendingData.data.filter((loan: any) => loan.statusPinjaman === 'PENDING').length,
-            approvedLoans: pendingData.data.filter((loan: any) => loan.statusPinjaman === 'ACCEPTED').length,
-            totalUsers: userData.data.length,
-            blockedUsers: userData.data.filter((user: any) => user.status === 'TIDAK AKTIF').length
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch dashboard stats:", error);
-      }
-    };
+    const [pendingResponse, approvedResponse, usersResponse] = await Promise.all([
+      fetch('http://localhost:3000/api/admin/pinjaman/daftar', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch('http://localhost:3000/api/admin/approved-count', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }),
+      fetch('http://localhost:3000/api/admin/nasabah', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+    ]);
+
+    if (pendingResponse.ok && approvedResponse.ok && usersResponse.ok) {
+      const pendingData = await pendingResponse.json();
+      const approvedData = await approvedResponse.json();
+      const userData = await usersResponse.json();
+
+      setStats({
+        pendingLoans: pendingData.data.length,
+        approvedLoans: approvedData.totalApproved, // ✅ ambil dari backend
+        totalUsers: userData.data.length,
+        blockedUsers: userData.data.filter((user: any) => user.status === 'TIDAK AKTIF').length
+      });
+    } else {
+      console.error("Some response not OK", pendingResponse.status, approvedResponse.status, usersResponse.status);
+    }
+  } catch (error) {
+    console.error("Failed to fetch dashboard stats:", error);
+  }
+};
+
 
     fetchStats();
   }, [navigate]);

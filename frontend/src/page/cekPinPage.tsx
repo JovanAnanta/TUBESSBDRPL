@@ -218,40 +218,54 @@ const CekPinPage: React.FC = () => {
                 return;
             }
 
-            // **ACTION: PINJAMAN**
-            if (additionalData?.action === 'pinjaman') {
-                const { pinjaman, transaksi } = additionalData;
-                try {
-                    const resPinjaman = await fetch("http://localhost:3000/api/pinjaman", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({ pinjaman, transaksi, pin }),
-                    });
+// **ACTION: AJUKAN PINJAMAN**
+if (additionalData?.action === 'ajukanPinjaman') {
+    const { jumlahPinjaman, statusJatuhTempo } = additionalData;
+    
+    const response = await fetch("http://localhost:3000/api/pinjaman/ajukan", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+            jumlahPinjaman, 
+            statusJatuhTempo 
+        })
+    });
 
-                    const resJson = await resPinjaman.json();
-                    if (!resPinjaman.ok) {
-                        throw new Error(resJson.message || "Pengajuan pinjaman gagal");
-                    }
+    const resData = await response.json();
+    if (!response.ok) {
+        throw new Error(resData.message || 'Gagal mengajukan pinjaman');
+    }
 
-                    navigate(additionalData?.redirectTo || '/user/success', {
-                        state: {
-                            message: resJson.message || 'Pengajuan pinjaman berhasil!',
-                            delay: 3000,
-                        },
-                    });
-                } catch (error: any) {
-                    console.error("Error processing pinjaman:", error);
-                    setError(error.message || "Pengajuan pinjaman gagal");
-                    if (error.message.includes("PIN tidak valid") || error.message.includes("PIN salah")) {
-                        const newAttempts = attempts + 1;
-                        setAttempts(newAttempts);
-                    }
-                }
-                return;
-            }
+    alert('Pengajuan pinjaman berhasil dikirim! Menunggu persetujuan admin.');
+    navigate('/user/mpayment');
+    return;
+}
+
+// **ACTION: BAYAR TAGIHAN PINJAMAN**
+if (additionalData?.action === 'bayarTagihanPinjaman') {
+    const { tagihanId, jumlahTagihan } = additionalData;
+    
+    const response = await fetch(`http://localhost:3000/api/pinjaman/tagihan/${tagihanId}/bayar`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ id: tagihanId })
+    });
+
+    const resData = await response.json();
+    if (!response.ok) {
+        throw new Error(resData.message || 'Gagal membayar tagihan pinjaman');
+    }
+
+    alert('Pembayaran tagihan berhasil!');
+    navigate('/user/mpayment');
+    return;
+}
 
             // Bukan aksi topup, transfer, atau mutasi: hanya verifikasi PIN
             const verifyRes = await fetch('/api/user/verifyPin', {

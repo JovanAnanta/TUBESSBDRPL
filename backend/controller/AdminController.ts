@@ -5,6 +5,7 @@ import { decrypt } from '../enkripsi/Encryptor';
 import { getPendingPinjamanService, konfirmasiPinjamanService } from '../service/AdminService';
 import { ubahStatusNasabahService } from '../service/AdminService';
 import { getAllNasabahService } from '../service/AdminService';
+import { getApprovedPinjamanCount, getAllPinjamanService} from '../service/AdminService';
 
 const JWT_SECRET = "your_jwt_secret_key";
 
@@ -18,15 +19,14 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     res.status(200).json({
       token,
-      nama: decrypt(admin.nama),
-      email
+      nama: admin.nama,
+      email: admin.email
     });
   } catch (err: any) {
     console.error("Admin login error:", err);
     res.status(400).json({ message: err.message });
   }
 };
-
 
 export const getPendingPinjaman = async (req: Request, res: Response) => {
   try {
@@ -97,5 +97,23 @@ export const ubahStatusNasabah = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     res.status(400).json({ message: err.message });
+  }
+};
+
+export const getApprovedCount = async (req: Request, res: Response) => {
+  try {
+    const totalApproved = await getApprovedPinjamanCount();
+    res.status(200).json({ totalApproved });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getAllPinjaman = async (req: Request, res: Response) => {
+  try {
+    const data = await getAllPinjamanService();
+    res.status(200).json({ data });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
   }
 };

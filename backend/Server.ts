@@ -28,7 +28,7 @@ import gantiPasswordRotues from './routes/GantiPasswordRoutes';
 import gantiPinRoutes from './routes/GantiPinRoutes';
 import PinjamanRoutes from './routes/PinjamanRoutes';
 import tagihanRoutes from './routes/TagihanRoutes';
-import { PinjamanService } from './service/PinjamanService';
+import { TagihanPinjaman } from './models/TagihanPinjaman';
 
 const sequelize = new Sequelize({
   ...config.development,
@@ -46,6 +46,7 @@ const sequelize = new Sequelize({
     LoginActivity,
     Session,
     Admin,
+    TagihanPinjaman,
   ]
 });
 
@@ -70,16 +71,6 @@ app.use('/api/cs', csReportRoutes);
 app.use('/api/cs', csActivityRoutes);
 
 app.use('/api/admin', adminRoutes);
-
-cron.schedule('0 0 1 * *', async () => {
-  console.log("Running monthly saldo deduction for pinjaman...");
-  try {
-    await PinjamanService.processMonthlyDeduction();
-    console.log("Monthly saldo deduction completed.");
-  } catch (error) {
-    console.error("Error running monthly saldo deduction:", error);
-  }
-});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
