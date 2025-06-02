@@ -22,6 +22,7 @@ const Transfer: React.FC = () => {
     const [toAccount, setToAccount] = useState<string>('');
     const [amount, setAmount] = useState<string>('');
     const [note, setNote] = useState<string>('');
+    const [isValidatingAccount, setIsValidatingAccount] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -33,36 +34,50 @@ const Transfer: React.FC = () => {
         } else {
           navigate('/auth/login'); // jika tidak ada token, redirect
         }
-      }, []);
-
-    const handleSubmit = (e: React.FormEvent) => {
+      }, []);    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+        setIsValidatingAccount(true);
+        
         const token = localStorage.getItem('token');
         const nasabahId = localStorage.getItem('nasabahId');
         if (!token || !nasabahId) {
             setError('User tidak ditemukan. Silakan login ulang.');
+            setIsValidatingAccount(false);
             return;
         }
+
         // Parse amount
         const rawAmount = Number(amount.replace(/\./g, ''));
         if (isNaN(rawAmount) || rawAmount <= 0) {
             setError('Jumlah tidak valid');
+            setIsValidatingAccount(false);
             return;
         }
+
         // Cek saldo cukup
         if (nasabah && rawAmount > nasabah.saldo) {
             setError('Saldo tidak mencukupi');
+            setIsValidatingAccount(false);
             return;
         }
+
+        // Validasi rekening tujuan
+        const isValidRecipient = await validateRecipientAccount(toAccount, token);
+        if (!isValidRecipient) {
+            setIsValidatingAccount(false);
+            return;
+        }
+
+        setIsValidatingAccount(false);
+        
         // Navigate to PIN verification before transfer
         navigateWithPinVerification(navigate, {
             redirectTo: '/user/mtransfer/transfer',
             message: 'Masukkan PIN untuk konfirmasi transfer',
             data: { action: 'transfer', toRekening: toAccount.replace(/-/g, ''), amount: rawAmount, note }
         });
-    };    
-
-    const fetchNasabahData = async (token: string) => {
+    };    const fetchNasabahData = async (token: string) => {
     try {
       const response = await fetch('http://localhost:3000/api/user/getDataNasabah', {
         method: 'GET',
@@ -80,6 +95,43 @@ const Transfer: React.FC = () => {
     } catch (error) {
       setError('Terjadi kesalahan saat mengambil data nasabah');
       console.error('Error:', error);
+    }
+  };
+
+  const validateRecipientAccount = async (accountNumber: string, token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/user/validateAccount/${accountNumber}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          setError('Rekening tujuan tidak ditemukan');
+        } else {
+          setError('Gagal memvalidasi rekening tujuan');
+        }
+        return false;
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        // Cek apakah transfer ke rekening sendiri
+        if (data.data.noRekening === nasabah?.noRekening) {
+          setError('Tidak dapat transfer ke rekening sendiri');
+          return false;
+        }
+        return true;
+      } else {
+        setError('Rekening tujuan tidak valid');
+        return false;
+      }
+    } catch (error) {
+      setError('Terjadi kesalahan saat memvalidasi rekening');
+      console.error('Error:', error);
+      return false;
     }
   };
 
@@ -191,14 +243,13 @@ const formatCurrency = (value: string) => {
                             <div className="transfer-error">
                                 ⚠️ {error}
                             </div>
-                        )}
-
-                        <button
+                        )}                        <button
                             type="submit"
                             className="transfer-submit-btn"
+                            disabled={isValidatingAccount}
                         >
                             <span className="transfer-btn-text">
-                                ✅ Konfirmasi Transfer
+                                {isValidatingAccount ? '🔍 Memvalidasi Rekening...' : '✅ Konfirmasi Transfer'}
                             </span>
                         </button>
                     </form>
