@@ -23,7 +23,6 @@ export const topUp = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        // Validasi amount
         if (typeof amount !== 'number' || amount <= 0) {
             res.status(400).json({
                 success: false,

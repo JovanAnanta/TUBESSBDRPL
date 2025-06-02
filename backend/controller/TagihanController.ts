@@ -138,18 +138,10 @@ export class TagihanController {
         }
     }
 
-    /**
-     * Cek kelayakan pembayaran tagihan
-     * GET /api/tagihan/cek-kelayakan/:type/:nomorTagihan
-     */    static async cekKelayakanBayar(req: Request, res: Response): Promise<void> {
+    static async cekKelayakanBayar(req: Request, res: Response): Promise<void> {
         try {
             const nasabahId = (req as any).user?.id;
             const { type, nomorTagihan } = req.params;
-
-            console.log('=== Cek Kelayakan Controller ===');
-            console.log('nasabahId:', nasabahId);
-            console.log('type:', type);
-            console.log('nomorTagihan:', nomorTagihan);
 
             // Validasi input
             if (!nasabahId) {

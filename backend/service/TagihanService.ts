@@ -370,15 +370,25 @@ export class TagihanService {
      * Validasi format nomor tagihan
      */
     static validateNomorTagihan(nomorTagihan: string, type: 'AIR' | 'LISTRIK'): boolean {
-        if (!nomorTagihan || typeof nomorTagihan !== 'string') return false;
+        console.log('=== Validasi Nomor Tagihan ===');
+        console.log('Input:', nomorTagihan);
+        console.log('Type:', type);
+        
+        if (!nomorTagihan || typeof nomorTagihan !== 'string') {
+            console.log('Error: Nomor tagihan kosong atau bukan string');
+            return false;
+        }
         
         const upperCaseNumber = nomorTagihan.trim().toUpperCase();
+        console.log('Uppercase:', upperCaseNumber);
         
         // Validasi prefix restrictions
         if (type === 'AIR' && upperCaseNumber.startsWith('PLN')) {
+            console.log('Error: PLN prefix untuk tagihan air');
             return false; // PLN prefix not allowed for water bills
         }
         if (type === 'LISTRIK' && upperCaseNumber.startsWith('PDAM')) {
+            console.log('Error: PDAM prefix untuk tagihan listrik');
             return false; // PDAM prefix not allowed for electricity bills
         }
         
@@ -387,21 +397,30 @@ export class TagihanService {
         // Strip valid prefixes
         if (type === 'LISTRIK' && /^PLN/i.test(cleanNumber)) {
             cleanNumber = cleanNumber.replace(/^PLN/i, '');
+            console.log('After removing PLN:', cleanNumber);
         }
         if (type === 'AIR' && /^PDAM/i.test(cleanNumber)) {
             cleanNumber = cleanNumber.replace(/^PDAM/i, '');
+            console.log('After removing PDAM:', cleanNumber);
         }
         
         // Remove any spaces
         cleanNumber = cleanNumber.replace(/\s+/g, '');
+        console.log('After removing spaces:', cleanNumber);
         
         // Must be numeric
-        if (!/^\d+$/.test(cleanNumber)) return false;
+        if (!/^\d+$/.test(cleanNumber)) {
+            console.log('Error: Bukan numeric');
+            return false;
+        }
         
         // Minimum length 8 digits for both types, max 15
         const minLength = 8;
         const maxLength = 15;
-        return cleanNumber.length >= minLength && cleanNumber.length <= maxLength;
+        const isValidLength = cleanNumber.length >= minLength && cleanNumber.length <= maxLength;
+        console.log('Length:', cleanNumber.length, 'Valid?', isValidLength);
+        
+        return isValidLength;
     }
 
     /**
