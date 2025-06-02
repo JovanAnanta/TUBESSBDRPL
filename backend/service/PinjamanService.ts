@@ -1,161 +1,171 @@
-import { v4 as uuidv4 } from "uuid";
-import { Nasabah } from "../models/Nasabah";
 import { Pinjaman } from "../models/Pinjaman";
 import { Transaksi } from "../models/Transaksi";
+import { encrypt, decrypt } from "../enkripsi/Encryptor";
+import moment from "moment";
+import { TagihanPinjaman } from "../models/TagihanPinjaman";
+import { Nasabah } from "../models/Nasabah";
+import { Debit } from "../models/Debit";
 
-function addMonths(date: Date, months: number) {
-  const d = new Date(date);
-  const targetMonth = d.getMonth() + months;
-  d.setMonth(targetMonth);
+// ✅ 1. AJUKAN PINJAMAN
+export const ajukanPinjamanService = async (
+  nasabah_id: string,
+  jumlahPinjaman: number,
+  statusJatuhTempo: "6BULAN" | "12BULAN" | "24BULAN"
+) => {
+  const transaksi = await Transaksi.create({
+    nasabah_id,
+    transaksiType: "MASUK", // ✅ benar
+    tanggalTransaksi: new Date(),
+    keterangan: "PINJAMAN"     // ✅ ditambahkan
+  });
 
-  if (d.getMonth() !== targetMonth % 12) {
-    d.setDate(0);
-  }
-  return d;
-}
+  const bulan =
+    statusJatuhTempo === "6BULAN" ? 6 :
+    statusJatuhTempo === "12BULAN" ? 12 : 24;
 
-const tempoMapping: Record<string, number> = {
-  "6BULAN": 6,
-  "12BULAN": 12,
-  "24BULAN": 24,
+  const pinjaman = await Pinjaman.create({
+    transaksi_id: transaksi.transaksi_id,
+    jumlahPinjaman,
+    statusJatuhTempo,
+    tanggalJatuhTempo: moment().add(bulan, 'months').toDate(),
+    statusPinjaman: "PENDING"
+  });
+
+  return pinjaman;
 };
 
-const BUNGA = 0.03;
-
-function monthDiff(d1: Date, d2: Date) {
-  let months = (d2.getFullYear() - d1.getFullYear()) * 12;
-  months += d2.getMonth() - d1.getMonth();
-  return months;
-}
-
-export class PinjamanService {
-  static async getAll() {
-    return await Pinjaman.findAll();
-  }
-
-  static async getById(id: string) {
-    return await Pinjaman.findByPk(id);
-  }
-
-  static async create(data: any, transaksiData: any) {
-    if (!transaksiData.nasabah_id) {
-      throw new Error("nasabah_id is required in transaksiData");
+// ✅ 2. GET TAGIHAN USER
+export const getTagihanPinjamanByUser = async (nasabah_id: string) => {
+  const transaksiPinjaman = await Transaksi.findAll({
+    where: {
+      nasabah_id,
+      transaksiType: "MASUK",
+      keterangan: "PINJAMAN"
     }
+  });
 
-    const activePinjaman = await Pinjaman.findOne({
-      where: {
-        statusPinjaman: ["PENDING", "ACCEPTED"],
-      },
-      include: [{
-        model: Transaksi,
-        where: { nasabah_id: transaksiData.nasabah_id }
-      }]
-    });
+  const transaksiIds = transaksiPinjaman.map(tx => tx.transaksi_id);
 
-    if (activePinjaman) {
-      throw new Error("User already has an active pinjaman.");
+  const pinjamans = await Pinjaman.findAll({
+    where: {
+      transaksi_id: transaksiIds
     }
+  });
 
-    const transaksi = await Transaksi.create({
-        ...transaksiData,
-        tanggalTransaksi: new Date(),
-    });
-    console.log("Transaksi created:", transaksi.transaksi_id);
+  const pinjamanIds = pinjamans.map(p => p.pinjaman_id);
 
-    const bulan = tempoMapping[data.statusJatuhTempo] || 6;
-    const tanggalJatuhTempo = addMonths(new Date(), bulan);
+  const tagihanList = await TagihanPinjaman.findAll({
+    where: {
+      pinjaman_id: pinjamanIds
+    },
+    order: [['tanggalTagihan', 'ASC']]
+  });
 
-    const totalPinjaman = data.jumlahPinjaman * (1 + BUNGA);
+  return tagihanList;
+};
 
-    const pinjamanData = {
-        ...data,
-        pinjaman_id: uuidv4(),
-        transaksi_id: transaksi.transaksi_id,
-        tanggalJatuhTempo,
-        jumlahPinjaman: totalPinjaman,
-        statusPinjaman: "PENDING",
-    };
+// ✅ 3. BAYAR TAGIHAN
+export const bayarTagihanPinjaman = async (tagihan_id: string, nasabah_id: string) => {
+  const tagihan = await TagihanPinjaman.findByPk(tagihan_id);
+  if (!tagihan) throw new Error("Tagihan tidak ditemukan");
+  if (tagihan.status === "LUNAS") throw new Error("Tagihan sudah dibayar");
 
-    const pinjaman = await Pinjaman.create(pinjamanData);
-    console.log("Pinjaman created:", pinjaman.pinjaman_id);
+  // ✅ Ambil data pinjaman terkait tagihan
+  const pinjaman = await Pinjaman.findOne({
+    where: { pinjaman_id: tagihan.pinjaman_id }
+  });
+  if (!pinjaman) throw new Error("Data pinjaman tidak ditemukan");
 
-    return { 
-        transaksi, 
-        pinjaman,
-        message: "Pengajuan pinjaman berhasil dibuat dan menunggu persetujuan"
-    };
+  // ✅ Ambil nasabah dan cek apakah sudah klaim pinjaman
+  const nasabah = await Nasabah.findByPk(nasabah_id);
+  if (!nasabah) throw new Error("Nasabah tidak ditemukan");
+
+  // Cek apakah nasabah sudah klaim pinjaman (buktinya saldo sudah bertambah)
+  const sudahKlaim = nasabah.saldo >= pinjaman.jumlahPinjaman;
+  if (!sudahKlaim) {
+    throw new Error("Anda belum mengklaim pinjaman. Silakan klaim terlebih dahulu.");
   }
 
-  static async update(id: string, data: any) {
-    const pinjaman = await Pinjaman.findByPk(id, { include: [Transaksi] });
-    if (!pinjaman) return null;
-
-    if (data.statusPinjaman === "REJECTED") {
-      if (pinjaman.transaksi_id) {
-        const transaksi = await Transaksi.findByPk(pinjaman.transaksi_id);
-        if (transaksi) {
-          await transaksi.destroy();
-        }
-      }
-      await pinjaman.destroy();
-      return null;
-    } else {
-      return await pinjaman.update(data);
-    }
+  // ✅ Cek saldo cukup untuk bayar tagihan
+  if (nasabah.saldo < tagihan.jumlahTagihan) {
+    throw new Error("Saldo tidak mencukupi untuk membayar tagihan");
   }
 
-  static async delete(id: string) {
-    const pinjaman = await Pinjaman.findByPk(id);
-    if (!pinjaman) return false;
-    await pinjaman.destroy();
-    return true;
+  // Kurangi saldo
+  nasabah.saldo -= tagihan.jumlahTagihan;
+  await nasabah.save();
+
+  // Buat transaksi
+  const transaksi = await Transaksi.create({
+    nasabah_id,
+    transaksiType: "KELUAR",
+    tanggalTransaksi: new Date(),
+    keterangan: "PINJAMAN"
+  });
+
+  // Buat debit
+  await Debit.create({
+    debit_id: transaksi.transaksi_id,
+    transaksi_id: transaksi.transaksi_id,
+    jumlahSaldoBerkurang: tagihan.jumlahTagihan
+  });
+
+  // Update status tagihan
+  tagihan.status = "LUNAS";
+  await tagihan.save();
+
+  return { transaksi, tagihan };
+};
+
+export const claimPinjamanService = async (nasabah_id: string, pinjaman_id: string) => {
+  const pinjaman = await Pinjaman.findOne({ where: { pinjaman_id } });
+  if (!pinjaman) throw new Error("Pinjaman tidak ditemukan");
+  if (pinjaman.statusPinjaman !== "ACCEPTED") throw new Error("Pinjaman belum disetujui");
+
+  // ✅ Cek apakah saldo sudah pernah diklaim (indikasi: tagihan SUDAH ADA dan nasabah sudah menerima saldo)
+  const existingTagihan = await TagihanPinjaman.findOne({ where: { pinjaman_id } });
+  if (!existingTagihan) throw new Error("Tagihan belum dibuat. Tunggu admin menyetujui pinjaman.");
+
+  const nasabah = await Nasabah.findByPk(nasabah_id);
+  if (!nasabah) throw new Error("Nasabah tidak ditemukan");
+
+  // ✅ Tambahan proteksi: jika saldo nasabah sudah naik karena pinjaman, jangan proses ulang
+  const hasClaimed = existingTagihan.createdAt && existingTagihan.createdAt < new Date();
+  const saldoSesudahClaim = pinjaman.jumlahPinjaman + 1; // Tambahkan ambang batas
+
+  if (nasabah.saldo >= saldoSesudahClaim) {
+    throw new Error("Pinjaman ini sudah pernah diclaim sebelumnya.");
   }
 
-  static async processMonthlyDeduction() {
-    const acceptedPinjamans = await Pinjaman.findAll({
-      where: { statusPinjaman: "ACCEPTED" },
-      include: [Transaksi]
-    });
+  // ✅ Tambahkan saldo ke nasabah
+  nasabah.saldo += pinjaman.jumlahPinjaman;
+  await nasabah.save();
 
-    const now = new Date();
+  return { message: "Claim berhasil! Saldo Anda telah bertambah." };
+};
 
-    for (const pinjaman of acceptedPinjamans) {
-      const transaksi = await Transaksi.findByPk(pinjaman.transaksi_id);
-      if (!transaksi) continue;
+export const getPinjamanStatusService = async (nasabah_id: string) => {
+  const transaksi = await Transaksi.findOne({
+    where: { nasabah_id, keterangan: "PINJAMAN" },
+    order: [["tanggalTransaksi", "DESC"]]
+  });
 
-      const nasabah = await Nasabah.findByPk(transaksi.nasabah_id);
-      if (!nasabah) continue;
+  if (!transaksi) return null;
 
-      const tenorMonths = tempoMapping[pinjaman.statusJatuhTempo] || 6;
+  const pinjaman = await Pinjaman.findOne({
+    where: { transaksi_id: transaksi.transaksi_id }
+  });
 
-      // Check if pinjaman duration reached tenor, delete if yes
-      const monthsPassed = monthDiff(pinjaman.createdAt, now);
-      if (monthsPassed >= tenorMonths) {
-        await pinjaman.destroy();
-        console.log(`Pinjaman ${pinjaman.pinjaman_id} reached tenor ${tenorMonths} months and deleted.`);
-        continue;
-      }
+  if (!pinjaman) return null;
 
-      const monthlyCicilan = pinjaman.jumlahPinjaman / tenorMonths;
+const nasabah = await Nasabah.findByPk(nasabah_id);
+const claimed = nasabah ? nasabah.saldo >= pinjaman.jumlahPinjaman : false;
 
-      if (nasabah.saldo < monthlyCicilan) {
-        console.log(`Nasabah ${nasabah.nasabah_id} saldo insufficient for monthly cicilan.`);
-        continue;
-      }
-
-      // Deduct monthly cicilan from nasabah saldo
-      nasabah.saldo -= monthlyCicilan;
-      await nasabah.save();
-
-      // Create transaksi record for monthly deduction
-      await Transaksi.create({
-        transaksi_id: uuidv4(),
-        nasabah_id: nasabah.nasabah_id,
-        transaksiType: "KELUAR",
-        tanggalTransaksi: now,
-        jumlahTransaksi: monthlyCicilan,
-        keterangan: `Cicilan pinjaman ${pinjaman.pinjaman_id}`,
-      });
-    }
-  }
-}
+return {
+  pinjaman_id: pinjaman.pinjaman_id,
+  jumlahPinjaman: pinjaman.jumlahPinjaman,
+  statusJatuhTempo: pinjaman.statusJatuhTempo,
+  statusPinjaman: pinjaman.statusPinjaman,
+  claimed
+};
+};

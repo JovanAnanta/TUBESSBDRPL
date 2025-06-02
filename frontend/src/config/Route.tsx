@@ -1,5 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { TagihanComponent } from "../Components/TagihanComponent";
+import { RegionSelector } from "../Components/RegionSelector";
+import { BillPreview } from "../Components/BillPreview";
 import AdminDashboard from "../page/AdminHomepage";
 import AdminLoanManagement from "../page/AdminLoanManagement";
 import AdminLogin from "../page/AdminLogin";
@@ -32,6 +34,7 @@ import RegisterPage from "../page/Register";
 import PinPage from "../page/SetPinPage";
 import UserLayout from "../page/UserLayout";
 import { ProtectedAdmin, ProtectedCS, ProtectedUser } from "./ProtectedRoute";
+import InformationBanking from "../page/InformationBanking";
 
 const checkAuth = () => {
   const token = localStorage.getItem("token");
@@ -53,6 +56,10 @@ const Routers = createBrowserRouter([
   {
     path: "",
     element: <LoginPage />
+  },
+  {
+    path: "info-layanan",
+    element: <InformationBanking />
   },
   {
     path: "/",
@@ -85,10 +92,9 @@ const Routers = createBrowserRouter([
       { path: "minfo/mutasi", element: <MutasiDatePage />},
       { path: "minfo/mutasi/list", element: <MutasiListPage /> },
       { path: "mtransfer/transfer", element: <Transfer /> },
-      { path: "mtransfer/top-up", element: <TopUp /> },
-      { path: "e-receipt/:transaksiId", element: <EReceipt /> },
-      { path: "mpayment", element: <MPayment /> },
-      { path: "mpayment/:type", element: <TagihanComponent /> },
+      { path: "mtransfer/top-up", element: <TopUp /> },      { path: "e-receipt/:transaksiId", element: <EReceipt /> },      { path: "mpayment", element: <MPayment /> },
+      { path: "tagihan/:type", element: <TagihanComponent /> },
+      { path: "tagihan/preview", element: <BillPreview /> },
       { path: "settings", element: <Setting /> },
       { path: "nasabah/ganti-pin", element: <GantiPin />},
       { path: "nasabah/ganti-password", element: <GantiPassword /> },

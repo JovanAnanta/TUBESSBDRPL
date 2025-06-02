@@ -1,104 +1,451 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Debit } from '../models/Debit';
+import { Sequelize, QueryTypes } from 'sequelize';
 import { Nasabah } from '../models/Nasabah';
-import { Tagihan } from '../models/Tagihan';
 import { Transaksi } from '../models/Transaksi';
+import { Tagihan } from '../models/Tagihan';
+import { Debit } from '../models/Debit';
+import * as pinService from './PinService';
+import { v4 as uuidv4 } from 'uuid';
 
-const validTypes = ['AIR', 'LISTRIK'];
+export class TagihanService {
+      /**
+     * Proses pembayaran tagihan (air/listrik)
+     */
+    static async bayarTagihan(
+        nasabahId: string, 
+        nomorTagihan: string, 
+        jumlahBayar: number, 
+        pin: string, 
+        statusTagihanType: 'AIR' | 'LISTRIK'
+    ) {
+        
+        let transaction;
+        
+        try {
+            transaction = await Nasabah.sequelize!.transaction();
+            
+            // 1. Validasi input
+            if (!nasabahId) {
+                throw new Error('Nasabah ID diperlukan');
+            }
+            if (!nomorTagihan) {
+                throw new Error('Nomor tagihan diperlukan');
+            }
+            if (!pin) {
+                throw new Error('PIN diperlukan');
+            }
+            if (jumlahBayar <= 0) {
+                throw new Error('Jumlah pembayaran harus lebih dari 0');
+            }
 
-export const bayarTagihan = async (
-    nasabah_id: string,
-    statusTagihanType: string,
-    nomorTagihan: string,
-    jumlahBayar: number
-) => {
-    if (!validTypes.includes(statusTagihanType)) {
-        throw new Error("Tipe tagihan tidak valid");
-    }
+            // 2. Validasi format nomor tagihan
+            const isValidFormat = this.validateNomorTagihan(nomorTagihan, statusTagihanType);
+            if (!isValidFormat) {
+                throw new Error(`Format nomor tagihan ${statusTagihanType.toLowerCase()} tidak valid`);
+            }
 
-    if (statusTagihanType === "AIR" && !nomorTagihan.startsWith("PDAM")) {
-        throw new Error("Nomor tagihan AIR harus dimulai dengan 'PDAM'");
-    }
+            // 3. Cari nasabah
+            const nasabah = await Nasabah.findByPk(nasabahId, { transaction });
+            if (!nasabah) {
+                throw new Error('Nasabah tidak ditemukan');
+            }
 
-    if (statusTagihanType === "LISTRIK" && !nomorTagihan.startsWith("PLN")) {
-        throw new Error("Nomor tagihan LISTRIK harus dimulai dengan 'PLN'");
-    }
+            // 4. Cek status nasabah
+            if (nasabah.status !== 'AKTIF') {
+                throw new Error('Akun tidak aktif. Silakan hubungi customer service');
+            }
 
-    try {
-        const nasabah = await Nasabah.findByPk(nasabah_id);
-        if (!nasabah) throw new Error("Nasabah tidak ditemukan");
+            // 5. Verifikasi PIN menggunakan PinService
+            try {
+                const pinVerificationResult = await pinService.verifyPin(nasabahId, pin);
+                if (!pinVerificationResult.success) {
+                    throw new Error(pinVerificationResult.message || 'PIN tidak valid');
+                }
+            } catch {
+                throw new Error('PIN tidak valid');
+            }
 
-        if (nasabah.saldo < jumlahBayar) throw new Error("Saldo tidak mencukupi");
+            // 6. Cek saldo mencukupi
+            if (nasabah.saldo < jumlahBayar) {
+                throw new Error(`Saldo tidak mencukupi. Saldo Anda: Rp ${nasabah.saldo.toLocaleString()}, Tagihan: Rp ${jumlahBayar.toLocaleString()}`);
+            }
 
-        const tagihan = await Tagihan.findOne({
-            where: {
+            // 7. Buat transaksi utama
+            const transaksiId = uuidv4();
+            // Use fixed description for tagihan
+            const keterangan = `TAGIHAN ${statusTagihanType}`;
+            
+            const transaksi = await Transaksi.create({
+                transaksi_id: transaksiId,
+                nasabah_id: nasabahId,
+                transaksiType: 'KELUAR',
+                tanggalTransaksi: new Date(),
+                keterangan
+            }, { transaction });
+
+            // 8. Buat record debit (pengeluaran)
+            const debitId = uuidv4();
+            
+            await Debit.create({
+                debit_id: debitId,
+                transaksi_id: transaksiId,
+                jumlahSaldoBerkurang: jumlahBayar
+            }, { transaction });
+
+            // 9. Buat record tagihan
+            const tagihanId = uuidv4();
+            
+            await Tagihan.create({
+                tagihan_id: tagihanId,
+                transaksi_id: transaksiId,
                 statusTagihanType,
                 nomorTagihan
-            },
-            include: [
-                {
-                    model: Transaksi,
-                    where: { nasabah_id }
+            }, { transaction });
+
+            // 10. Update saldo nasabah
+            const saldoBaru = nasabah.saldo - jumlahBayar;
+            
+            await nasabah.update({ 
+                saldo: saldoBaru 
+            }, { transaction });
+
+            // 11. Commit transaction
+            await transaction.commit();
+            
+            return {
+                success: true,
+                message: `Pembayaran tagihan ${statusTagihanType.toLowerCase()} berhasil`,
+                data: {
+                    transaksi_id: transaksiId,
+                    nasabah_id: nasabahId,
+                    statusTagihanType,
+                    nomorTagihan,
+                    jumlahBayar,
+                    saldoSebelum: nasabah.saldo,
+                    saldoSesudah: saldoBaru,
+                    tanggalTransaksi: transaksi.tanggalTransaksi,
+                    keterangan
                 }
-            ]
-        });
+            };
 
-        if (!tagihan) {
-            throw new Error("Tagihan tidak ditemukan");
+        } catch (error) {
+            if (transaction) {
+                await transaction.rollback();
+            }
+            throw error;
         }
-
-        const debitExists = await Debit.findOne({
-            where: { transaksi_id: tagihan.transaksi_id }
-        });
-        if (debitExists) {
-            throw new Error("Tagihan sudah dibayar");
+    }/**
+     * Generate dummy amount berdasarkan nomor tagihan untuk testing
+     */
+    static generateDummyAmount(nomorTagihan: string): number {
+        // Gunakan hash sederhana dari nomor tagihan untuk konsistensi
+        let hash = 0;
+        for (let i = 0; i < nomorTagihan.length; i++) {
+            const char = nomorTagihan.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
         }
+        
+        // Generate amount antara 50,000 sampai 500,000
+        const minAmount = 50000;
+        const maxAmount = 500000;
+        const range = maxAmount - minAmount;
+        const amount = minAmount + (Math.abs(hash) % range);
+        
+        // Round ke ribuan terdekat
+        return Math.round(amount / 1000) * 1000;
+    }
 
-        // Tentukan keterangan
-        const keterangan = statusTagihanType === "AIR" ? "TAGIHAN AIR" : "TAGIHAN LISTRIK";
+    /**
+     * Get informasi tagihan berdasarkan nomor untuk preview
+     */
+    static async getTagihanInfo(nomorTagihan: string, type: 'AIR' | 'LISTRIK') {
+        try {
+            // Validasi format nomor tagihan
+            if (!this.validateNomorTagihan(nomorTagihan, type)) {
+                throw new Error(`Format nomor tagihan ${type.toLowerCase()} tidak valid`);
+            }
 
-        console.log("Saldo sebelum bayar:", nasabah.saldo);
-        nasabah.saldo -= jumlahBayar;
-        console.log("Saldo setelah dikurangi:", nasabah.saldo);
-        await nasabah.save();
-        console.log("Saldo nasabah sudah disimpan");
+            // Generate dummy data untuk testing
+            const amount = this.generateDummyAmount(nomorTagihan);
+            const dummyCustomerData = this.generateDummyCustomerData(nomorTagihan, type);
 
-        const transaksi = await Transaksi.findOne({
-            include: [
-                {
+            return {
+                success: true,
+                data: {
+                    nomorTagihan,
+                    type,
+                    amount,
+                    ...dummyCustomerData,
+                    dueDate: this.generateDummyDueDate(),
+                    status: 'BELUM LUNAS'
+                }
+            };
+        } catch (error) {
+            console.error('Error in getTagihanInfo:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Generate dummy customer data untuk testing
+     */
+    private static generateDummyCustomerData(nomorTagihan: string, type: 'AIR' | 'LISTRIK') {
+        const names = ['Ahmad Wijaya', 'Siti Nurhaliza', 'Budi Santoso', 'Dewi Sartika', 'Joko Widodo'];
+        const addresses = [
+            'Jl. Merdeka No. 123, Jakarta',
+            'Jl. Sudirman No. 456, Bandung', 
+            'Jl. Diponegoro No. 789, Surabaya',
+            'Jl. Gatot Subroto No. 321, Yogyakarta',
+            'Jl. Ahmad Yani No. 654, Medan'
+        ];
+
+        // Use nomor tagihan untuk generate data yang konsisten
+        const index = parseInt(nomorTagihan.slice(-1)) % names.length;
+        
+        return {
+            customerName: names[index],
+            customerAddress: addresses[index],
+            periode: type === 'AIR' ? this.generateWaterPeriod() : this.generateElectricPeriod(),
+            tarif: type === 'AIR' ? 'R1/1300VA' : 'R1M/2200VA'
+        };
+    }
+
+    /**
+     * Generate dummy due date
+     */
+    private static generateDummyDueDate(): string {
+        const today = new Date();
+        const dueDate = new Date(today.getTime() + (7 * 24 * 60 * 60 * 1000)); // 7 days from now
+        return dueDate.toISOString().split('T')[0];
+    }
+
+    /**
+     * Generate dummy water period
+     */
+    private static generateWaterPeriod(): string {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        const currentMonth = new Date().getMonth();
+        const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        return `${months[prevMonth]} ${new Date().getFullYear()}`;
+    }
+
+    /**
+     * Generate dummy electric period  
+     */
+    private static generateElectricPeriod(): string {
+        const currentDate = new Date();
+        const prevMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1);
+        return `${prevMonth.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}`;
+    }    /**
+     * Get riwayat pembayaran tagihan nasabah
+     */
+    static async getRiwayatTagihan(nasabahId: string, limit: number = 10) {
+        try {
+            if (!nasabahId) {
+                throw new Error('Nasabah ID diperlukan');
+            }
+
+            const riwayat = await Transaksi.findAll({
+                where: { 
+                    nasabah_id: nasabahId,
+                    transaksiType: 'KELUAR'
+                },
+                include: [{
+                    model: Tagihan,
+                    required: true
+                }, {
+                    model: Debit,
+                    required: true
+                }],
+                order: [['tanggalTransaksi', 'DESC']],
+                limit
+            });
+
+            return {
+                success: true,
+                data: riwayat.map(transaksi => ({
+                    transaksi_id: transaksi.transaksi_id,
+                    tanggalTransaksi: transaksi.tanggalTransaksi,
+                    keterangan: transaksi.keterangan,
+                    statusTagihanType: transaksi.Tagihan?.statusTagihanType,
+                    nomorTagihan: transaksi.Tagihan?.nomorTagihan,
+                    jumlahBayar: transaksi.Debit?.jumlahSaldoBerkurang,
+                    status: 'BERHASIL'
+                }))
+            };
+
+        } catch (error) {
+            console.error('Error in getRiwayatTagihan:', error);
+            throw new Error(`Gagal mengambil riwayat tagihan: ${error}`);
+        }
+    }
+
+    /**
+     * Cek apakah tagihan sudah pernah dibayar
+     */
+    static async isTagihanSudahDibayar(nasabahId: string, nomorTagihan: string, type: 'AIR' | 'LISTRIK'): Promise<boolean> {
+        try {
+            const existingPayment = await Transaksi.findOne({
+                where: {
+                    nasabah_id: nasabahId
+                },
+                include: [{
                     model: Tagihan,
                     where: {
-                        statusTagihanType,
-                        nomorTagihan
+                        nomorTagihan,
+                        statusTagihanType: type
                     }
-                }
-            ],
-            where: { 
-                nasabah_id,
-                keterangan: statusTagihanType === "AIR" ? "TAGIHAN AIR" : "TAGIHAN LISTRIK"
-            }
-        });
+                }]
+            });
 
-        if (!transaksi || !transaksi.Tagihan) {
-            throw new Error("Tagihan tidak ditemukan");
+            return !!existingPayment;
+        } catch (error) {
+            console.error('Error checking payment history:', error);
+            return false;
         }
-        console.log("Transaksi baru dibuat:", transaksi.transaksi_id);
+    }    /**
+     * Get statistik pembayaran tagihan nasabah
+     */
+    static async getStatistikTagihan(nasabahId: string) {
+        try {
+            // Total transaksi tagihan
+            const totalTransaksi = await Transaksi.count({
+                where: { nasabah_id: nasabahId, transaksiType: 'KELUAR' },
+                include: [{ model: Tagihan, required: true }]
+            });
+              // Total nominal yang dibayar - menggunakan query manual untuk sum dengan join
+            const totalNominalResult = await Nasabah.sequelize!.query(`
+                SELECT COALESCE(SUM(d.jumlahSaldoBerkurang), 0) as total
+                FROM Debit d
+                INNER JOIN Transaksi t ON d.transaksi_id = t.transaksi_id
+                INNER JOIN Tagihan tg ON t.transaksi_id = tg.transaksi_id
+                WHERE t.nasabah_id = :nasabahId AND t.transaksiType = 'KELUAR'
+            `, {
+                replacements: { nasabahId },
+                type: QueryTypes.SELECT
+            });
 
-        const debit = await Debit.create({
-            debit_id: uuidv4(),
-            transaksi_id: transaksi.transaksi_id,
-            jumlahSaldoBerkurang: jumlahBayar
-        });
-        console.log("Debit baru dibuat:", debit.debit_id);
+            const totalNominal = (totalNominalResult[0] as any)?.total || 0;
 
-        return { 
-            status: "success", 
-            message: `Pembayaran tagihan ${statusTagihanType} berhasil`,
-            transaksi_id: transaksi.transaksi_id,
-            saldoSekarang: nasabah.saldo
-        };
-    } catch (error: any) {
-        console.error("Error in bayarTagihan:", error);
-        throw error; // Re-throw the error to be caught by the controller
+            // Jumlah tagihan air
+            const tagihanAir = await Transaksi.count({
+                where: { nasabah_id: nasabahId, transaksiType: 'KELUAR' },
+                include: [{ 
+                    model: Tagihan, 
+                    where: { statusTagihanType: 'AIR' },
+                    required: true 
+                }]
+            });
+
+            // Jumlah tagihan listrik
+            const tagihanListrik = await Transaksi.count({
+                where: { nasabah_id: nasabahId, transaksiType: 'KELUAR' },
+                include: [{ 
+                    model: Tagihan, 
+                    where: { statusTagihanType: 'LISTRIK' },
+                    required: true 
+                }]
+            });
+
+            return {
+                success: true,
+                data: {
+                    totalTransaksi: totalTransaksi || 0,
+                    totalNominal: parseInt(totalNominal) || 0,
+                    totalTagihanAir: tagihanAir || 0,
+                    totalTagihanListrik: tagihanListrik || 0,
+                    rataRataNominal: totalTransaksi > 0 ? Math.round(parseInt(totalNominal) / totalTransaksi) : 0
+                }
+            };
+        } catch (error) {
+            console.error('Error in getStatistikTagihan:', error);
+            throw new Error(`Gagal mengambil statistik tagihan: ${error}`);
+        }
+    }    /**
+     * Validasi format nomor tagihan
+     */
+    static validateNomorTagihan(nomorTagihan: string, type: 'AIR' | 'LISTRIK'): boolean {
+        // Strip optional 'PLN' prefix for electricity bills
+        if (!nomorTagihan || typeof nomorTagihan !== 'string') return false;
+        let cleanNumber = nomorTagihan.trim();
+        if (type === 'LISTRIK') {
+            cleanNumber = cleanNumber.replace(/^PLN/i, '');
+        }
+        // Strip optional 'PDAM' prefix for water bills
+        if (type === 'AIR') {
+            cleanNumber = cleanNumber.replace(/^PDAM/i, '');
+        }
+        // Remove any spaces
+        cleanNumber = cleanNumber.replace(/\s+/g, '');
+        // Must be numeric
+        if (!/^\d+$/.test(cleanNumber)) return false;
+        // Minimum length 8 digits for both types, max 15
+        const minLength = 8;
+        const maxLength = 15;
+        return cleanNumber.length >= minLength && cleanNumber.length <= maxLength;
     }
-};
+
+    /**
+     * Format nomor tagihan untuk display
+     */
+    static formatNomorTagihan(nomorTagihan: string, type: 'AIR' | 'LISTRIK'): string {
+    let input = nomorTagihan.trim();
+    // Detect and preserve 'PDAM' prefix for water bills
+    let prefix = '';
+    if (type === 'LISTRIK' && /^PLN/i.test(input)) {
+        prefix = 'PLN ';
+        input = input.replace(/^PLN/i, '');
+    }
+    if (type === 'AIR' && /^PDAM/i.test(input)) {
+        prefix = 'PDAM ';
+        input = input.replace(/^PDAM/i, '');
+    }
+    const cleanNumber = input.replace(/\s+/g, '');
+    
+    let formatted = '';
+    if (type === 'AIR') {
+        formatted = cleanNumber.replace(/(\d{4})(\d{4})(\d{0,3})/, '$1-$2-$3').replace(/-$/, '');
+    } else {
+        formatted = cleanNumber.replace(/(\d{4})(\d{4})(\d{0,4})/, '$1-$2-$3').replace(/-$/, '');
+    }
+    return prefix + formatted;
+    }
+
+    /**
+     * Validate input untuk pembayaran tagihan
+     */
+    static validatePaymentInput(data: {
+        nasabahId: string;
+        nomorTagihan: string;
+        pin: string;
+        type: 'AIR' | 'LISTRIK';
+    }): { valid: boolean; message?: string } {
+        const { nasabahId, nomorTagihan, pin, type } = data;
+
+        if (!nasabahId) {
+            return { valid: false, message: 'Nasabah ID diperlukan' };
+        }
+
+        if (!nomorTagihan) {
+            return { valid: false, message: 'Nomor tagihan diperlukan' };
+        }
+
+        if (!pin) {
+            return { valid: false, message: 'PIN diperlukan' };
+        }
+
+        if (!['AIR', 'LISTRIK'].includes(type)) {
+            return { valid: false, message: 'Tipe tagihan tidak valid' };
+        }
+
+        if (!/^\d{6}$/.test(pin)) {
+            return { valid: false, message: 'PIN harus 6 digit angka' };
+        }
+
+        if (!this.validateNomorTagihan(nomorTagihan, type)) {
+            return { valid: false, message: `Format nomor tagihan ${type.toLowerCase()} tidak valid` };
+        }
+
+        return { valid: true };
+    }
+}

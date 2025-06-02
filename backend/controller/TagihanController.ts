@@ -1,41 +1,128 @@
 import { Request, Response } from 'express';
-import * as pinService from '../service/PinService';
-import { bayarTagihan as bayarTagihanService } from '../service/TagihanService';
+import { TagihanService } from '../service/TagihanService';
+import { getRemainingAttempts, isAccountBlocked } from '../service/PinService';
 
-export const bayarTagihan = async (req: Request, res: Response) => {
-  try {
-    const { type } = req.params;
-    const tipeUpper = type.toUpperCase();
-    const { nomorTagihan, jumlahBayar, pin } = req.body;
+export class TagihanController {
+    static async bayarTagihanAir(req: Request, res: Response): Promise<void> {
+        const userId = (req as any).user?.id;
+        try {
+            const nasabahId = (req as any).user?.id;
+            const { nomorTagihan, jumlahBayar, pin } = req.body;
 
-    if (!nomorTagihan || !jumlahBayar || jumlahBayar <= 0) {
-      return res.status(400).json({ message: 'Data pembayaran tidak valid' });
+            // Validasi input
+            if (!nasabahId) {
+                res.status(401).json({ message: 'Unauthorized: User ID tidak ditemukan' });
+                return;
+            }
+
+            if (!nomorTagihan || !jumlahBayar || !pin) {
+                res.status(400).json({
+                    message: 'Nomor tagihan, jumlah bayar, dan PIN harus diisi'
+                });
+                return;
+            }
+
+            if (jumlahBayar <= 0) {
+                res.status(400).json({
+                    message: 'Jumlah pembayaran harus lebih dari 0'
+                });
+                return;
+            }
+
+            // Panggil service bayarTagihan
+            const result = await TagihanService.bayarTagihan(nasabahId, nomorTagihan, jumlahBayar, pin, 'AIR');
+            res.status(200).json(result);
+        } catch (error: any) {
+            const responseBody: any = { success: false, message: error.message };
+            // Sertakan info percobaan PIN
+            const remaining = getRemainingAttempts(userId);
+            const blocked = isAccountBlocked(userId);
+            if (remaining !== undefined) responseBody.remainingAttempts = remaining;
+            if (blocked !== undefined) responseBody.isBlocked = blocked;
+            console.error('Error di bayarTagihan:', error);
+            res.status(400).json(responseBody);
+        }
     }
 
-    const nasabahId = (req as any).user?.id;
-    if (!nasabahId) {
-      return res.status(401).json({ message: 'User tidak terautentikasi' });
+    /**
+     * Handle pembayaran tagihan listrik
+     * POST /api/tagihan/listrik
+     */    static async bayarTagihanListrik(req: Request, res: Response): Promise<void> {
+        const userId = (req as any).user?.id;
+        try {
+            const nasabahId = (req as any).user?.id;
+            const { nomorTagihan, jumlahBayar, pin } = req.body;
+
+            // Validasi input
+            if (!nasabahId) {
+                res.status(401).json({ message: 'Unauthorized: User ID tidak ditemukan' });
+                return;
+            }
+
+            if (!nomorTagihan || !jumlahBayar || !pin) {
+                res.status(400).json({
+                    message: 'Nomor tagihan, jumlah bayar, dan PIN harus diisi'
+                });
+                return;
+            }
+
+            if (jumlahBayar <= 0) {
+                res.status(400).json({
+                    message: 'Jumlah pembayaran harus lebih dari 0'
+                });
+                return;
+            }
+
+            // Panggil service bayarTagihan
+            const result = await TagihanService.bayarTagihan(nasabahId, nomorTagihan, jumlahBayar, pin, 'LISTRIK');
+            res.status(200).json(result);
+        } catch (error: any) {
+            const responseBody: any = { success: false, message: error.message };
+            // Sertakan info percobaan PIN
+            const remaining = getRemainingAttempts(userId);
+            const blocked = isAccountBlocked(userId);
+            if (remaining !== undefined) responseBody.remainingAttempts = remaining;
+            if (blocked !== undefined) responseBody.isBlocked = blocked;
+            console.error('Error di bayarTagihan:', error);
+            res.status(400).json(responseBody);
+        }
     }
 
-    if (!pin) {
-      return res.status(400).json({ message: 'PIN diperlukan untuk transaksi ini' });
-    }
-    
-    const verifyResult = await pinService.verifyPin(nasabahId, pin);
-    if (!verifyResult.success) {
-      return res.status(401).json({ message: verifyResult.message || 'PIN tidak valid' });
-    }
+    /**
+     * Get dummy bill amount untuk testing
+     * GET /api/tagihan/:type/amount/:nomorTagihan
+     */    static async getBillAmount(req: Request, res: Response): Promise<void> {
+        try {
+            const { type, nomorTagihan } = req.params;
 
-    const result = await bayarTagihanService(
-      nasabahId,
-      tipeUpper,
-      nomorTagihan,
-      jumlahBayar
-    );
+            if (!['air', 'listrik'].includes(type.toLowerCase())) {
+                res.status(400).json({
+                    message: 'Jenis tagihan tidak valid. Gunakan "air" atau "listrik"'
+                });
+                return;
+            }
 
-    return res.json(result);
-  } catch (error: any) {
-    console.error(error);
-    return res.status(500).json({ message: error.message || 'Terjadi kesalahan server' });
-  }
-};
+            // Generate dummy amount berdasarkan nomor tagihan
+            const amount = TagihanService.generateDummyAmount(nomorTagihan);
+            const customerName = `Pelanggan ${nomorTagihan.slice(-4)}`;
+
+            res.status(200).json({
+                message: 'Data tagihan ditemukan',
+                data: {
+                    nomorTagihan,
+                    amount,
+                    customerName,
+                    type: type.toUpperCase(),
+                    status: 'BELUM_LUNAS'
+                }
+            });
+
+        } catch (error: any) {
+            console.error('Error get bill amount:', error);
+            res.status(500).json({
+                message: 'Terjadi kesalahan saat mengambil data tagihan',
+                error: error.message
+            });
+        }
+    }
+}
