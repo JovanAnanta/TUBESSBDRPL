@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, PrimaryKey, ForeignKey } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, ForeignKey, BelongsTo } from "sequelize-typescript";
 import { Transaksi } from "./Transaksi";
 
 @Table({
@@ -24,5 +24,8 @@ export class Debit extends Model {
         allowNull: false
     })
     declare jumlahSaldoBerkurang: number;
-    
+
+    // ✅ Tambahkan relasi BelongsTo
+    @BelongsTo(() => Transaksi)
+    declare transaksi: Transaksi;
 }

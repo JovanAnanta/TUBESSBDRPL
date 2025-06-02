@@ -1,5 +1,6 @@
-import { BelongsTo, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, Model, Table, HasMany } from "sequelize-typescript";
 import { Transaksi } from "./Transaksi";
+import { TagihanPinjaman } from "./TagihanPinjaman";
 
 @Table({
     tableName: "pinjaman", timestamps: false
@@ -47,4 +48,7 @@ export class Pinjaman extends Model {
     @BelongsTo(() => Transaksi)
     declare transaksi: Transaksi;
 
+    // ✅ Tambahkan relasi ke TagihanPinjaman
+    @HasMany(() => TagihanPinjaman)
+    declare tagihan: TagihanPinjaman[];
 }
