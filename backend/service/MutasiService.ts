@@ -76,9 +76,7 @@ export const getMutasiRekening = async (
             };
         } else {
             whereCondition = { nasabah_id: nasabahId };
-        }
-
-        const transaksis = await Transaksi.findAll({
+        }        const transaksis = await Transaksi.findAll({
             where: whereCondition,
             include: [
                 { model: Credit, required: false },
@@ -91,8 +89,16 @@ export const getMutasiRekening = async (
             limit: _limit,
             offset: _offset
         });
-        
-        const transactions = transaksis.map((trx) => {
+
+        // Filter transaksi yang memiliki credit atau debit
+        const validTransaksis = transaksis.filter((trx) => {
+            const credit = (trx as any).Credit as Credit | null;
+            const debit = (trx as any).Debit as Debit | null;
+            
+            // Hanya tampilkan transaksi yang memiliki entri di tabel Credit atau Debit
+            return credit !== null || debit !== null;
+        });        
+        const transactions = validTransaksis.map((trx) => {
             const credit = (trx as any).Credit as Credit | null;
             const debit = (trx as any).Debit as Debit | null;
             const transfer = (trx as any).Transfer as Transfer | null;

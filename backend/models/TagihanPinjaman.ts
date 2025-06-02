@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, PrimaryKey, Default, ForeignKey } from "sequelize-typescript";
+import { Table, Column, Model, DataType, PrimaryKey, Default, ForeignKey, BelongsTo } from "sequelize-typescript";
 import { Pinjaman } from "./Pinjaman";
 
 @Table({
@@ -23,4 +23,8 @@ export class TagihanPinjaman extends Model {
 
   @Column({ type: DataType.ENUM("BELUM_BAYAR", "LUNAS"), defaultValue: "BELUM_BAYAR" })
   declare status: "BELUM_BAYAR" | "LUNAS";
+
+  // ✅ Tambahkan relasi ke Pinjaman
+  @BelongsTo(() => Pinjaman)
+  declare pinjaman: Pinjaman;
 }

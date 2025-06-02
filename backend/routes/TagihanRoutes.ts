@@ -13,4 +13,7 @@ router.post('/tagihan/listrik', authenticateToken, TagihanController.bayarTagiha
 // Route untuk mendapatkan dummy amount tagihan (untuk testing)
 router.get('/tagihan/:type/amount/:nomorTagihan', authenticateToken, TagihanController.getBillAmount);
 
+// Route untuk cek kelayakan pembayaran tagihan  
+router.get('/tagihan/cek-kelayakan/:type/:nomorTagihan', authenticateToken, TagihanController.cekKelayakanBayar);
+
 export default router;

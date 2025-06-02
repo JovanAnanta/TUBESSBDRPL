@@ -1,4 +1,3 @@
-import { Sequelize, QueryTypes } from 'sequelize';
 import { Nasabah } from '../models/Nasabah';
 import { Transaksi } from '../models/Transaksi';
 import { Tagihan } from '../models/Tagihan';
@@ -307,25 +306,33 @@ export class TagihanService {
      * Get statistik pembayaran tagihan nasabah
      */
     static async getStatistikTagihan(nasabahId: string) {
-        try {
-            // Total transaksi tagihan
+        try {            // Total transaksi tagihan
             const totalTransaksi = await Transaksi.count({
                 where: { nasabah_id: nasabahId, transaksiType: 'KELUAR' },
                 include: [{ model: Tagihan, required: true }]
             });
-              // Total nominal yang dibayar - menggunakan query manual untuk sum dengan join
-            const totalNominalResult = await Nasabah.sequelize!.query(`
-                SELECT COALESCE(SUM(d.jumlahSaldoBerkurang), 0) as total
-                FROM Debit d
-                INNER JOIN Transaksi t ON d.transaksi_id = t.transaksi_id
-                INNER JOIN Tagihan tg ON t.transaksi_id = tg.transaksi_id
-                WHERE t.nasabah_id = :nasabahId AND t.transaksiType = 'KELUAR'
-            `, {
-                replacements: { nasabahId },
-                type: QueryTypes.SELECT
+
+            // Total nominal yang dibayar - menggunakan Sequelize ORM findAll dengan attributes
+            const totalNominalData = await Transaksi.findAll({
+                where: { 
+                    nasabah_id: nasabahId, 
+                    transaksiType: 'KELUAR' 
+                },
+                include: [{
+                    model: Tagihan,
+                    required: true
+                }, {
+                    model: Debit,
+                    required: true,
+                    attributes: ['jumlahSaldoBerkurang']
+                }],
+                attributes: []
             });
 
-            const totalNominal = (totalNominalResult[0] as any)?.total || 0;
+            // Calculate total nominal from the results
+            const totalNominal = totalNominalData.reduce((sum, transaksi) => {
+                return sum + (transaksi.Debit?.jumlahSaldoBerkurang || 0);
+            }, 0);
 
             // Jumlah tagihan air
             const tagihanAir = await Transaksi.count({
@@ -345,16 +352,14 @@ export class TagihanService {
                     where: { statusTagihanType: 'LISTRIK' },
                     required: true 
                 }]
-            });
-
-            return {
+            });            return {
                 success: true,
                 data: {
                     totalTransaksi: totalTransaksi || 0,
-                    totalNominal: parseInt(totalNominal) || 0,
+                    totalNominal: totalNominal || 0,
                     totalTagihanAir: tagihanAir || 0,
                     totalTagihanListrik: tagihanListrik || 0,
-                    rataRataNominal: totalTransaksi > 0 ? Math.round(parseInt(totalNominal) / totalTransaksi) : 0
+                    rataRataNominal: totalTransaksi > 0 ? Math.round(totalNominal / totalTransaksi) : 0
                 }
             };
         } catch (error) {
@@ -365,20 +370,34 @@ export class TagihanService {
      * Validasi format nomor tagihan
      */
     static validateNomorTagihan(nomorTagihan: string, type: 'AIR' | 'LISTRIK'): boolean {
-        // Strip optional 'PLN' prefix for electricity bills
         if (!nomorTagihan || typeof nomorTagihan !== 'string') return false;
+        
+        const upperCaseNumber = nomorTagihan.trim().toUpperCase();
+        
+        // Validasi prefix restrictions
+        if (type === 'AIR' && upperCaseNumber.startsWith('PLN')) {
+            return false; // PLN prefix not allowed for water bills
+        }
+        if (type === 'LISTRIK' && upperCaseNumber.startsWith('PDAM')) {
+            return false; // PDAM prefix not allowed for electricity bills
+        }
+        
         let cleanNumber = nomorTagihan.trim();
-        if (type === 'LISTRIK') {
+        
+        // Strip valid prefixes
+        if (type === 'LISTRIK' && /^PLN/i.test(cleanNumber)) {
             cleanNumber = cleanNumber.replace(/^PLN/i, '');
         }
-        // Strip optional 'PDAM' prefix for water bills
-        if (type === 'AIR') {
+        if (type === 'AIR' && /^PDAM/i.test(cleanNumber)) {
             cleanNumber = cleanNumber.replace(/^PDAM/i, '');
         }
+        
         // Remove any spaces
         cleanNumber = cleanNumber.replace(/\s+/g, '');
+        
         // Must be numeric
         if (!/^\d+$/.test(cleanNumber)) return false;
+        
         // Minimum length 8 digits for both types, max 15
         const minLength = 8;
         const maxLength = 15;
@@ -447,5 +466,79 @@ export class TagihanService {
         }
 
         return { valid: true };
+    }
+
+    /**
+     * Cek kelayakan pembayaran tagihan berdasarkan aturan 1 bulan
+     */    static async cekKelayakanBayarTagihan(
+        nasabahId: string, 
+        nomorTagihan: string, 
+        type: 'AIR' | 'LISTRIK'
+    ): Promise<{ eligible: boolean; message?: string; lastPaymentDate?: Date }> {
+        try {
+            // Validasi input
+            if (!nasabahId) {
+                return { eligible: false, message: 'Nasabah ID diperlukan' };
+            }
+            if (!nomorTagihan) {
+                return { eligible: false, message: 'Nomor tagihan diperlukan' };
+            }
+            if (!['AIR', 'LISTRIK'].includes(type)) {
+                return { eligible: false, message: 'Tipe tagihan tidak valid' };
+            }
+
+            // Validasi format nomor tagihan
+            if (!this.validateNomorTagihan(nomorTagihan, type)) {
+                return { eligible: false, message: `Format nomor tagihan ${type.toLowerCase()} tidak valid` };
+            }
+
+            // Cari pembayaran terakhir untuk nomor tagihan yang sama
+            const lastPayment = await Transaksi.findOne({
+                where: {
+                    nasabah_id: nasabahId
+                },
+                include: [{
+                    model: Tagihan,
+                    where: {
+                        nomorTagihan,
+                        statusTagihanType: type
+                    }
+                }],
+                order: [['tanggalTransaksi', 'DESC']]
+            });
+
+            // Jika belum pernah bayar, maka boleh bayar
+            if (!lastPayment) {
+                return { eligible: true };
+            }
+
+            // Hitung selisih waktu dengan pembayaran terakhir
+            const lastPaymentDate = new Date(lastPayment.tanggalTransaksi);
+            const currentDate = new Date();
+            const timeDifference = currentDate.getTime() - lastPaymentDate.getTime();
+            const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+            // Aturan 1 bulan = 30 hari
+            const restrictionPeriod = 30;
+
+            if (daysDifference < restrictionPeriod) {
+                const remainingDays = restrictionPeriod - daysDifference;
+                return {
+                    eligible: false,
+                    message: `Tagihan ${nomorTagihan} sudah dibayar pada ${lastPaymentDate.toLocaleDateString('id-ID')}. Anda dapat membayar tagihan yang sama setelah ${remainingDays} hari lagi.`,
+                    lastPaymentDate
+                };
+            }
+
+            // Jika sudah lebih dari 30 hari, boleh bayar lagi
+            return { eligible: true, lastPaymentDate };
+
+        } catch (error) {
+            console.error('Error in cekKelayakanBayarTagihan:', error);
+            return { 
+                eligible: false, 
+                message: 'Terjadi kesalahan saat memeriksa kelayakan pembayaran' 
+            };
+        }
     }
 }

@@ -15,6 +15,7 @@ interface Pinjaman {
   jumlahPinjaman: number;
   statusJatuhTempo: string;
   statusPinjaman: "PENDING" | "ACCEPTED" | "REJECTED";
+  claimed?: boolean; // ✅ Tambahkan property ini saja
 }
 
 const tenorOptions = [
@@ -42,12 +43,29 @@ const PinjamanPage: React.FC = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      if (!token) {
+        showNotification("Token tidak ditemukan, silakan login ulang", "error");
+        return;
+      }
+      
       const headers = { Authorization: `Bearer ${token}` };
 
-      // Fetch tagihan dan status pinjaman bersamaan
+      // Fetch tagihan dan status pinjaman bersamaan dengan better error handling
       const [tagihanRes, pinjamanRes] = await Promise.all([
-        axios.get("/api/pinjaman/tagihan", { headers }),
-        axios.get("/api/pinjaman/status", { headers }),
+        axios.get("/api/pinjaman/tagihan", { headers }).catch(err => {
+          console.log("Tagihan API Error:", err.response?.status, err.response?.data);
+          if (err.response?.status === 401) {
+            showNotification("Sesi berakhir, silakan login ulang", "error");
+          }
+          return { data: { data: [] } };
+        }),
+        axios.get("/api/pinjaman/status", { headers }).catch(err => {
+          console.log("Status API Error:", err.response?.status, err.response?.data);
+          if (err.response?.status === 401) {
+            showNotification("Sesi berakhir, silakan login ulang", "error");
+          }
+          return { data: { data: null } };
+        })
       ]);
 
       setTagihanList(tagihanRes.data.data || []);
@@ -55,12 +73,13 @@ const PinjamanPage: React.FC = () => {
       if (pinjamanRes.data.data) {
         setPinjaman(pinjamanRes.data.data);
         setHasClaimed(pinjamanRes.data.data.claimed || false);
+      } else {
+        setPinjaman(null);
+        setHasClaimed(false);
       }
     } catch (err: any) {
-      console.error("Error fetching data:", err);
-      if (err.response?.status !== 404) {
-        showNotification(err.response?.data?.message || "Gagal memuat data", "error");
-      }
+      console.error("Unexpected error in fetchData:", err);
+      showNotification("Terjadi kesalahan saat memuat data", "error");
     }
     setLoading(false);
   };

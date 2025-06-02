@@ -10,9 +10,8 @@ const router = express.Router();
 
 router.post('/ajukan', authenticateToken, ajukanPinjaman);
 router.get('/tagihan', authenticateToken, getTagihanPinjaman);
-router.post("/tagihan/:id/bayar", authenticateToken, bayarTagihan);
+router.post("/tagihan/:tagihan_id/bayar", authenticateToken, bayarTagihan); // ✅ Ubah dari :id ke :tagihan_id
 router.post('/claim/:pinjaman_id', authenticateToken, claimPinjaman);
 router.get("/status", authenticateToken, getPinjamanStatus);
-
 
 export default router;

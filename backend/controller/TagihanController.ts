@@ -20,11 +20,17 @@ export class TagihanController {
                     message: 'Nomor tagihan, jumlah bayar, dan PIN harus diisi'
                 });
                 return;
-            }
-
-            if (jumlahBayar <= 0) {
+            }            if (jumlahBayar <= 0) {
                 res.status(400).json({
                     message: 'Jumlah pembayaran harus lebih dari 0'
+                });
+                return;
+            }
+
+            // Validasi prefix untuk tagihan air - harus PDAM atau numeric only
+            if (nomorTagihan.toUpperCase().startsWith('PLN')) {
+                res.status(400).json({
+                    message: 'PLN prefix tidak valid untuk tagihan air. Gunakan prefix PDAM atau nomor tanpa prefix.'
                 });
                 return;
             }
@@ -64,11 +70,17 @@ export class TagihanController {
                     message: 'Nomor tagihan, jumlah bayar, dan PIN harus diisi'
                 });
                 return;
-            }
-
-            if (jumlahBayar <= 0) {
+            }            if (jumlahBayar <= 0) {
                 res.status(400).json({
                     message: 'Jumlah pembayaran harus lebih dari 0'
+                });
+                return;
+            }
+
+            // Validasi prefix untuk tagihan listrik - harus PLN atau numeric only
+            if (nomorTagihan.toUpperCase().startsWith('PDAM')) {
+                res.status(400).json({
+                    message: 'PDAM prefix tidak valid untuk tagihan listrik. Gunakan prefix PLN atau nomor tanpa prefix.'
                 });
                 return;
             }
@@ -121,6 +133,77 @@ export class TagihanController {
             console.error('Error get bill amount:', error);
             res.status(500).json({
                 message: 'Terjadi kesalahan saat mengambil data tagihan',
+                error: error.message
+            });
+        }
+    }
+
+    /**
+     * Cek kelayakan pembayaran tagihan
+     * GET /api/tagihan/cek-kelayakan/:type/:nomorTagihan
+     */    static async cekKelayakanBayar(req: Request, res: Response): Promise<void> {
+        try {
+            const nasabahId = (req as any).user?.id;
+            const { type, nomorTagihan } = req.params;
+
+            console.log('=== Cek Kelayakan Controller ===');
+            console.log('nasabahId:', nasabahId);
+            console.log('type:', type);
+            console.log('nomorTagihan:', nomorTagihan);
+
+            // Validasi input
+            if (!nasabahId) {
+                console.log('Error: Unauthorized - no user ID');
+                res.status(401).json({ message: 'Unauthorized: User ID tidak ditemukan' });
+                return;
+            }
+
+            if (!['air', 'listrik'].includes(type.toLowerCase())) {
+                console.log('Error: Invalid type');
+                res.status(400).json({
+                    message: 'Jenis tagihan tidak valid. Gunakan "air" atau "listrik"'
+                });
+                return;
+            }
+
+            if (!nomorTagihan) {
+                console.log('Error: No nomor tagihan');
+                res.status(400).json({
+                    message: 'Nomor tagihan diperlukan'
+                });
+                return;
+            }
+
+            // Convert type to uppercase for service
+            const tagihanType = type.toUpperCase() as 'AIR' | 'LISTRIK';
+            console.log('Calling service with type:', tagihanType);
+
+            // Cek kelayakan pembayaran
+            const eligibilityResult = await TagihanService.cekKelayakanBayarTagihan(
+                nasabahId, 
+                nomorTagihan, 
+                tagihanType
+            );
+
+            console.log('Service result:', eligibilityResult);
+
+            res.status(200).json({
+                success: true,
+                eligible: eligibilityResult.eligible,
+                message: eligibilityResult.message,
+                lastPaymentDate: eligibilityResult.lastPaymentDate,
+                data: {
+                    nomorTagihan,
+                    type: tagihanType,
+                    canPay: eligibilityResult.eligible
+                }
+            });
+
+        } catch (error: any) {
+            console.error('Error cek kelayakan bayar:', error);
+            res.status(500).json({
+                success: false,
+                message: 'Terjadi kesalahan saat memeriksa kelayakan pembayaran',
                 error: error.message
             });
         }

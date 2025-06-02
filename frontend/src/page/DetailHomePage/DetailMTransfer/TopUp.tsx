@@ -31,12 +31,23 @@ const TopUp: React.FC = () => {
             setMessage('User tidak ditemukan. Silakan login ulang.');
             setLoading(false);
             return;
-        }
-
-        // Ubah nominal ke number
+        }        // Ubah nominal ke number
         const amount = Number(nominal.replace(/\./g, ''));
         if (isNaN(amount) || amount <= 0) {
             setMessage('Nominal tidak valid');
+            setLoading(false);
+            return;
+        }
+
+        // Validasi nominal minimum dan maksimum
+        if (amount < 10000) {
+            alert('Nominal harus lebih dari 10ribu');
+            setLoading(false);
+            return;
+        }
+
+        if (amount > 10000000) {
+            alert('Top-Up tidak bisa melebihi dari 10juta');
             setLoading(false);
             return;
         }
