@@ -58,6 +58,8 @@ import "../style/GantiPin.css";
             }}
             inputMode="numeric"
             pattern="[0-9]*"
+            minLength={6}
+            maxLength={6}
             required
         />
         <input
@@ -70,9 +72,18 @@ import "../style/GantiPin.css";
             }}
             inputMode="numeric"
             pattern="[0-9]*"
+            minLength={6}
+            maxLength={6}
             required
         />
-        <button type="submit" disabled={loading}>
+       
+        {oldPin && newPin && oldPin === newPin && (
+            <p className="ganti-pin-error">PIN baru tidak boleh sama dengan PIN lama</p>
+        )}
+        <button
+            type="submit"
+            disabled={loading || (!!oldPin && !!newPin && oldPin === newPin)}
+        >
             {loading ? "Memproses..." : "Ganti PIN"}
         </button>
         {message && <p className="ganti-pin-message">{message}</p>}
