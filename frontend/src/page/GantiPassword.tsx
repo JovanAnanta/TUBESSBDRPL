@@ -44,7 +44,12 @@ import '../style/GantiPassword.css';
         const data = await response.json();
 
         if (!response.ok) {
-            setError(data.message || 'Gagal mengganti password');
+            if (response.status === 401 || data.message?.toLowerCase().includes('password lama') || 
+                data.message?.toLowerCase().includes('old password')) {
+                setError('Password lama tidak sesuai');
+            } else {
+                setError(data.message || 'Gagal mengganti password');
+            }
             return;
         }
 
