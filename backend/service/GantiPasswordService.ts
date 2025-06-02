@@ -24,6 +24,10 @@ export const gantiPassword = async (
         throw new Error('Password lama tidak cocok');
     }
 
+    if (oldPassword === newPassword) {
+        throw new Error('Password baru tidak boleh sama dengan password lama');
+    }
+
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     nasabah.password = hashedNewPassword;
     await nasabah.save();

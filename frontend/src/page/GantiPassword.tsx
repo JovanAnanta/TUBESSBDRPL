@@ -20,9 +20,14 @@ import '../style/GantiPassword.css';
         return;
         }
 
+        if (newPassword === oldPassword) {
+            setError('Password baru tidak boleh sama dengan password lama');
+            return;
+        }
+
         if (newPassword !== confirmPassword) {
-        setError('Password baru dan konfirmasi tidak cocok');
-        return;
+            setError('Password baru dan konfirmasi tidak cocok');
+            return;
         }
 
         try {
@@ -47,6 +52,8 @@ import '../style/GantiPassword.css';
             if (response.status === 401 || data.message?.toLowerCase().includes('password lama') || 
                 data.message?.toLowerCase().includes('old password')) {
                 setError('Password lama tidak sesuai');
+            } else if (data.message?.toLowerCase().includes('tidak boleh sama')) {
+                setError('Password baru tidak boleh sama dengan password lama');
             } else {
                 setError(data.message || 'Gagal mengganti password');
             }
