@@ -1,4 +1,4 @@
-    import React, { useState } from "react";
+    import React, { useState, useEffect, } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style/GantiPin.css";
 
@@ -7,7 +7,27 @@ import "../style/GantiPin.css";
     const [newPin, setNewPin] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [fadeOut, setFadeOut] = useState(false);
     const navigate = useNavigate();
+
+   useEffect(() => {
+  if (message) {
+    setFadeOut(false); // reset fade-out setiap kali message muncul
+    const fadeTimer = setTimeout(() => {
+      setFadeOut(true); // aktifkan animasi fade-out
+    }, 2500); // animasi mulai setelah 2.5 detik
+
+    const removeTimer = setTimeout(() => {
+      setMessage(""); // hapus pesan setelah 3 detik
+    }, 3000);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }
+}, [message]);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -86,7 +106,11 @@ import "../style/GantiPin.css";
         >
             {loading ? "Memproses..." : "Ganti PIN"}
         </button>
-        {message && <p className="ganti-pin-message">{message}</p>}
+        {message && (
+  <p className={`ganti-pin-message ${fadeOut ? "fade-out" : ""}`}>
+    {message}
+  </p>
+)}
         </form>
         </div>
     );
