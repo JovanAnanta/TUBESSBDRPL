@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { navigateWithPinVerification, PinVerificationScenarios } from '../../utils/pinUtils';
-import '../../style/MInfo.css';
+import '../../style/MTransfer.css';
 
 export const Mtransfer = () => {
   const navigate = useNavigate();
 
   const handleFeatureClick = (featureName: string, targetPath: string) => {
-    // Bypass PIN for transfer and top-up
-    if (featureName === 'm-transfer' || featureName === 'top-up') {
+    // Bypass PIN for Transfer and Top Up
+    if (featureName === 'Transfer' || featureName === 'Top Up') {
       navigate(targetPath);
       return;
     }
@@ -19,50 +19,68 @@ export const Mtransfer = () => {
         ? PinVerificationScenarios.BALANCE_CHECK.message
         : PinVerificationScenarios.TRANSACTION_HISTORY.message
     });
-  };
-  const features = [
+  };  const features = [
     { 
-      name: "m-transfer", 
-      icon: "💰", 
+      name: "Transfer", 
+      icon: "💸", 
       path: "/user/mtransfer/transfer",
-      description: "Transfer antar rekening dan cek saldo"
+      description: "Transfer uang antar rekening"
     },
     { 
-      name: "top-up", 
-      icon: "📊", 
+      name: "Top Up", 
+      icon: "💳", 
       path: "/user/mtransfer/top-up",
-      description: "top-up saldo dan riwayat transaksi"
+      description: "Isi ulang saldo rekening"
     },
   ];
 
   return (
     <div className="mtransfer-container">
-      <h2 className="Mtransfer-title">M-Info</h2>
-      <p className="Mtransfer-subtitle">Informasi Rekening & Transaksi</p>
-      
-      <div className="features-grid">
-        {features.map((feature, index) => (
-          <div 
-            key={index} 
-            className="feature-link"
-            onClick={() => handleFeatureClick(feature.name, feature.path)}
-          >
-            <div className="feature-card">
-              <div className="feature-icon">{feature.icon}</div>
-              <div className="feature-content">
-                <div className="feature-label">{feature.name}</div>
-                <div className="feature-description">{feature.description}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="mtransfer-wrapper">
+        {/* Header Section */}
+        <div className="mtransfer-header">
+          <div className="mtransfer-icon">💸</div>
+          <h1 className="mtransfer-title">M-Transfer</h1>
+          <p className="mtransfer-subtitle">Transfer & Top Up Saldo</p>
+        </div>
 
-      {/* Back Button */}
-      <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/user')}>
-          ← Kembali ke Beranda
-        </button>
+        {/* Features Card */}
+        <div className="mtransfer-card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <span className="card-icon">💰</span>
+              Layanan Transfer
+            </h2>
+            <p className="card-subtitle">Kirim uang dan isi ulang saldo dengan mudah</p>
+          </div>
+          
+          <div className="features-grid">
+            {features.map((feature, index) => (
+              <div 
+                key={index} 
+                className="feature-link"
+                onClick={() => handleFeatureClick(feature.name, feature.path)}
+              >
+                <div className="feature-card">
+                  <div className="feature-icon">{feature.icon}</div>
+                  <div className="feature-content">
+                    <div className="feature-label">{feature.name}</div>
+                    <div className="feature-description">{feature.description}</div>
+                  </div>
+                  <div className="feature-arrow">→</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="back-button-container">
+          <button className="back-button" onClick={() => navigate('/user')}>
+            <span className="back-icon">←</span>
+            <span>Kembali ke Beranda</span>
+          </button>
+        </div>
       </div>
     </div>
   );

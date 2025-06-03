@@ -1,51 +1,252 @@
-/* HomePage.css */
+/* HomePage Elegant UI */
 .homepage-container {
-  padding: 2rem;
   min-height: 100vh;
-  background-color: #f3f4f6;
-  font-family: sans-serif;
+  background: linear-gradient(135deg, #f8fafe 0%, #f1f6fd 50%, #e8f2fc 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+}
+
+.homepage-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.homepage-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.homepage-welcome {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.15);
+  border: 1px solid rgba(52, 152, 219, 0.1);
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.homepage-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 4px 8px rgba(52, 152, 219, 0.2));
 }
 
 .homepage-title {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.homepage-subtitle {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.homepage-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.features-section {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.15);
+  border: 1px solid rgba(52, 152, 219, 0.1);
+}
+
+.features-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.features-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(52, 152, 219, 0.2));
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .feature-link {
   text-decoration: none;
   color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.feature-link:hover {
+  transform: translateY(-4px);
 }
 
 .feature-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafe 100%);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
   text-align: center;
-  transition: transform 0.2s, background-color 0.2s;
+  border: 2px solid rgba(52, 152, 219, 0.1);
+  transition: all 0.3s ease;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.feature-card:hover::before {
+  left: 100%;
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  background-color: #f0f0f0;
+  border-color: #3498db;
+  box-shadow: 0 12px 36px rgba(52, 152, 219, 0.2);
+  transform: translateY(-2px);
 }
 
 .feature-icon {
-  font-size: 32px;
-  margin-bottom: 0.5rem;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(52, 152, 219, 0.2));
 }
 
 .feature-label {
   font-weight: 600;
-  color: #374151;
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.feature-arrow {
+  color: #3498db;
+  font-size: 1.2rem;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-card:hover .feature-arrow {
+  opacity: 1;
+}
+
+.logout-section {
+  display: flex;
+  justify-content: center;
+}
+
+.logout-link {
+  max-width: 300px;
+  width: 100%;
+}
+
+.logout-card {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border-color: rgba(231, 76, 60, 0.3);
+}
+
+.logout-card:hover {
+  border-color: #e74c3c;
+  box-shadow: 0 12px 36px rgba(231, 76, 60, 0.3);
+}
+
+.logout-card .feature-label {
+  color: white;
+}
+
+.logout-card .feature-arrow {
+  color: white;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 8px 24px rgba(52, 152, 219, 0.4);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 32px rgba(52, 152, 219, 0.5);
+}
+
+.fab-icon {
+  font-size: 1.4rem;
+}
+
+.fab-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+  
+  .homepage-title {
+    font-size: 1.8rem;
+  }
+  
+  .homepage-wrapper {
+    padding: 1rem;
+  }
+  
+  .features-section {
+    padding: 1.5rem;
+  }
+  
+  .fab {
+    width: 56px;
+    height: 56px;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
 }

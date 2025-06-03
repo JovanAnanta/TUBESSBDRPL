@@ -34,35 +34,53 @@ export const MInfo = () => {
       description: "Riwayat transaksi dan mutasi"
     },
   ];
-
   return (
     <div className="minfo-container">
-      <h2 className="minfo-title">M-Info</h2>
-      <p className="minfo-subtitle">Informasi Rekening & Transaksi</p>
-      
-      <div className="features-grid">
-        {features.map((feature, index) => (
-          <div 
-            key={index} 
-            className="feature-link"
-            onClick={() => handleFeatureClick(feature.name, feature.path)}
-          >
-            <div className="feature-card">
-              <div className="feature-icon">{feature.icon}</div>
-              <div className="feature-content">
-                <div className="feature-label">{feature.name}</div>
-                <div className="feature-description">{feature.description}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="minfo-wrapper">
+        {/* Header Section */}
+        <div className="minfo-header">
+          <div className="minfo-icon">📱</div>
+          <h1 className="minfo-title">M-Info</h1>
+          <p className="minfo-subtitle">Informasi Rekening & Transaksi Anda</p>
+        </div>
 
-      {/* Back Button */}
-      <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/user')}>
-          ← Kembali ke Beranda
-        </button>
+        {/* Features Card */}
+        <div className="minfo-card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <span className="card-icon">🔍</span>
+              Pilihan Layanan
+            </h2>
+            <p className="card-subtitle">Akses informasi rekening dan riwayat transaksi</p>
+          </div>
+          
+          <div className="features-grid">
+            {features.map((feature, index) => (
+              <div 
+                key={index} 
+                className="feature-link"
+                onClick={() => handleFeatureClick(feature.name, feature.path)}
+              >
+                <div className="feature-card">
+                  <div className="feature-icon">{feature.icon}</div>
+                  <div className="feature-content">
+                    <div className="feature-label">{feature.name}</div>
+                    <div className="feature-description">{feature.description}</div>
+                  </div>
+                  <div className="feature-arrow">→</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Back Button */}
+        <div className="back-button-container">
+          <button className="back-button" onClick={() => navigate('/user')}>
+            <span className="back-icon">←</span>
+            <span>Kembali ke Beranda</span>
+          </button>
+        </div>
       </div>
     </div>
   );

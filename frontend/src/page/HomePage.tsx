@@ -40,40 +40,51 @@ const HomePage: React.FC = () => {
     { name: "M-Transfer", icon: "💸", path: "/user/mtransfer" },
     { name: "M-Payment", icon: "💳", path: "/user/mpayment" },
     { name: "Account Settings", icon: "⚙️", path: "/user/settings" },
-  ];
-  return (
-    // <div className="homepage-wrapper">
-    //   {error && <div className="error-message">{error}</div>}
-    //   {nasabah && (
-    //     <div className="user-info">
-    //       <img src={nasabah.profileImage || "default-profile.png"} alt="Profile" className="profile-image" />
-    //       <h3>{nasabah.nama}</h3>
-    //       <p>No Rekening: {nasabah.noRekening}</p>
-    //       <p>Saldo: {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(nasabah.saldo)}</p>
-    //     </div>
-    //   )}
-      <div className="homepage-container">
-        <h2 className="homepage-title">Welcome to BCA Mobile</h2>
-        <div className="features-grid">
-          {features.map((feature, index) => (
-            <Link to={feature.path} key={index} className="feature-link">
-              <div className="feature-card">
-                <div className="feature-icon">{feature.icon}</div>
-                <div className="feature-label">{feature.name}</div>
-              </div>
-            </Link>
-          ))}
+  ];  return (
+    <div className="homepage-container">
+      <div className="homepage-wrapper">
+        <div className="homepage-header">
+          <div className="homepage-welcome">
+            <div className="homepage-icon">🏦</div>
+            <h2 className="homepage-title">Selamat Datang di BCA Mobile</h2>
+            <p className="homepage-subtitle">Nikmati kemudahan perbankan digital</p>
+          </div>
+        </div>
 
-        <div className="feature-link" onClick={handleLogout}>
-          <div className="feature-card">
-            <div className="feature-icon">🚪</div>
-            <div className="feature-label">Logout</div>
+        <div className="homepage-content">
+          <div className="features-section">
+            <h3 className="features-title">
+              <span className="features-icon">⚡</span>
+              Layanan Utama
+            </h3>
+            <div className="features-grid">
+              {features.map((feature, index) => (
+                <Link to={feature.path} key={index} className="feature-link">
+                  <div className="feature-card">
+                    <div className="feature-icon">{feature.icon}</div>
+                    <div className="feature-label">{feature.name}</div>
+                    <div className="feature-arrow">→</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="logout-section">
+            <div className="feature-link logout-link" onClick={handleLogout}>
+              <div className="feature-card logout-card">
+                <div className="feature-icon">🚪</div>
+                <div className="feature-label">Keluar</div>
+                <div className="feature-arrow">→</div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Floating Action Button untuk Report */}
-        <button className="fab" onClick={() => setShowReportForm(true)}>
-          📝
+        <button className="fab" onClick={() => setShowReportForm(true)} title="Laporkan Masalah">
+          <span className="fab-icon">📝</span>
+          <span className="fab-text">Report</span>
         </button>
 
         {/* Report Form Modal */}
@@ -81,14 +92,6 @@ const HomePage: React.FC = () => {
           <ReportForm onClose={() => setShowReportForm(false)} />
         )}
       </div>
-
-      <button className="fab" onClick={() => setShowReportForm(true)}>
-        📝
-      </button>
-
-      {showReportForm && (
-        <ReportForm onClose={() => setShowReportForm(false)} />
-      )}
     </div>
   );
 };

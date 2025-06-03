@@ -63,65 +63,64 @@ const TopUp: React.FC = () => {
     };    return (
         <div className="topup-container">
             <div className="topup-wrapper">
-                {/* Header */}
+                {/* Header Section */}
                 <div className="topup-header">
-
-            <Link to="/user/mtransfer" className="topup-back-link">
-                <button className="topup-back-btn">
-                    <svg className="topup-back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-            </Link>
-                    <h1 className="topup-title">💰 Top Up Saldo</h1>
+                    <div className="topup-icon">💰</div>
+                    <h1 className="topup-title">Top Up Saldo</h1>
+                    <p className="topup-subtitle">Tambahkan saldo ke akun Anda</p>
                 </div>
 
-                {/* Top Up Form */}
+                {/* Content Card */}
                 <div className="topup-card">
-                    <div className="topup-card-header">
-                        <h2 className="topup-card-title">Isi Saldo Anda</h2>
-                        <p className="topup-card-subtitle">Masukkan nominal yang ingin ditambahkan</p>
-                    </div>
-                    
+                    {message && (
+                        <div className="error-message">
+                            <span className="error-icon">⚠️</span>
+                            <span>{message}</span>
+                        </div>
+                    )}
                     <form onSubmit={handleSubmit} className="topup-form">
-                        <div className="topup-input-group">
-                            <label htmlFor="nominal" className="topup-label">
-                                💵 Nominal Top Up
+                        <div className="input-group">
+                            <label htmlFor="nominal" className="input-label">
+                                Nominal Top Up
                             </label>
-                            <div className="topup-input-container">
-                                <span className="topup-currency-prefix">
-                                    Rp
-                                </span>
+                            <div className="input-field-container">
+                                <span className="currency-prefix">Rp</span>
                                 <input
                                     type="text"
                                     id="nominal"
                                     value={nominal}
                                     onChange={handleNominalChange}
                                     placeholder="0"
-                                    className="topup-input"
+                                    className="input-field"
                                     required
                                     disabled={loading}
                                 />
                             </div>
                         </div>
-                        
-                        {message && (
-                            <div className={`topup-message ${message.includes('berhasil') ? 'topup-success' : 'topup-error'}`}>
-                                {message}
-                            </div>
-                        )}
-                        
+
                         <button
                             type="submit"
-                            className={`topup-submit-btn ${loading ? 'topup-loading' : ''}`}
+                            className="submit-button"
                             disabled={loading}
                         >
-                            <span className="topup-btn-text">
-                                {loading ? '⏳ Memproses...' : '✅ Konfirmasi Top Up'}
+                            <span className="button-icon">
+                                {loading ? '⏳' : '✅'}
+                            </span>
+                            <span className="button-text">
+                                {loading ? 'Memproses...' : 'Konfirmasi Top Up'}
                             </span>
                         </button>
                     </form>
                 </div>
+
+                {/* Back Button */}
+                <button
+                    className="back-button"
+                    onClick={() => navigate('/user/mtransfer')}
+                >
+                    <span className="back-icon">←</span>
+                    <span>Kembali</span>
+                </button>
             </div>
         </div>
     );

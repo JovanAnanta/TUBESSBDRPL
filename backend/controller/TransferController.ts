@@ -5,7 +5,7 @@ import { Credit } from "../models/Credit";
 import { Debit } from "../models/Debit";
 import { Transfer } from "../models/Transfer";
 import * as pinService from '../service/PinService';
-import { encrypt } from '../enkripsi/Encryptor';
+import { encrypt, decrypt } from '../enkripsi/Encryptor';
 import { v4 as uuidv4 } from 'uuid';
 
 // Gunakan endpoint: PUT /api/user/top-up?nasabahId=xxx
@@ -157,6 +157,25 @@ export const topUpWithPin = async (req: Request, res: Response): Promise<void> =
 }
 
 // Handler untuk Transfer dengan PIN
+export const validateAccount = async (req: Request, res: Response): Promise<void> => {
+  const { noRekening } = req.params;
+  try {
+    const allNasabah = await Nasabah.findAll();
+    const target = allNasabah.find(n => {
+      try { return decrypt(n.noRekening) === noRekening; } catch { return false; }
+    });
+    if (!target) {
+      res.status(404).json({ success: false, message: 'Rekening tidak ditemukan' });
+      return;
+    }
+    const plainRekening = decrypt(target.noRekening);
+    res.status(200).json({ success: true, data: { nasabah_id: target.nasabah_id, noRekening: plainRekening } });
+  } catch (error) {
+    console.error('Error in validateAccount controller:', error);
+    res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
+  }
+};
+  
 export const transferWithPin = async (req: Request, res: Response): Promise<void> => {
     const { nasabahId, toRekening, amount, note, pin } = req.body;
     try {
@@ -173,20 +192,27 @@ export const transferWithPin = async (req: Request, res: Response): Promise<void
         }
         // Find source and target nasabah
         const source = await Nasabah.findOne({ where: { nasabah_id: nasabahId } });
-        const encryptedRekening = encrypt(toRekening);
-        const target = await Nasabah.findOne({ where: { noRekening: encryptedRekening } });
-        if (!source) {
-            res.status(404).json({ success: false, message: 'Nasabah pengirim tidak ditemukan' });
-            return;
-        }
-        if (!target) {
-            res.status(404).json({ success: false, message: 'Rekening tujuan tidak ditemukan' });
-            return;
-        }
-        if (source.saldo < amount) {
-            res.status(400).json({ success: false, message: 'Saldo tidak mencukupi' });
-            return;
-        }
+        // Account numbers are stored encrypted; decrypt each record to match plaintext input
+        const allNasabah = await Nasabah.findAll();
+        const target = allNasabah.find(n => {
+            try {
+                return decrypt(n.noRekening) === toRekening;
+            } catch {
+                return false;
+            }
+        });
+         if (!source) {
+             res.status(404).json({ success: false, message: 'Nasabah pengirim tidak ditemukan' });
+             return;
+         }
+         if (!target) {
+             res.status(404).json({ success: false, message: 'Rekening tujuan tidak ditemukan' });
+             return;
+         }
+         if (source.saldo < amount) {
+             res.status(400).json({ success: false, message: 'Saldo tidak mencukupi' });
+             return;
+         }
         // Update balances
         
 

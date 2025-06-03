@@ -1,0 +1,177 @@
+/* MutasiDatePage.css - Material-inspired + Neumorphic Blue theme */
+:root {
+  --primary: #3498DB;
+  --primary-dark: #2980B9;
+  --bg: #EBF4FA;
+  --surface: #F1F8FC;
+  --text: #2C3E50;
+  --elev-in: 4px 4px 8px rgba(52,152,219,0.1), -4px -4px 8px rgba(255,255,255,0.7);
+  --elev: 8px 8px 16px rgba(52,152,219,0.1), -8px -8px 16px rgba(255,255,255,0.7);
+  --radius: 20px;
+  --spacing: 20px;
+}
+
+.mutasi-container {
+  background: var(--bg);
+  min-height: 100vh;
+  padding: var(--spacing);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.mutasi-wrapper {
+  max-width: 600px;
+  margin: 0 auto;
+  animation: fadeIn 0.6s;
+}
+
+.mutasi-date-header {
+  background: var(--primary);
+  color: #fff;
+  padding: var(--spacing);
+  border-radius: var(--radius);
+  text-align: center;
+  box-shadow: var(--elev);
+  margin-bottom: var(--spacing);
+}
+
+.mutasi-date-header .mutasi-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.mutasi-date-header .mutasi-title {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.mutasi-date-header .mutasi-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.date-selection-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--spacing);
+  box-shadow: var(--elev-in);
+}
+
+.card-header h3 {
+  margin: 0;
+  color: var(--text);
+}
+
+.info-badge {
+  background: var(--primary);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  float: right;
+}
+
+.date-inputs-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--spacing);
+  margin-top: var(--spacing);
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.modern-date-input {
+  padding: 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: var(--radius);
+  outline: none;
+}
+
+.date-preview {
+  font-size: 0.9rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.date-separator svg {
+  fill: none;
+  stroke: var(--primary);
+}
+
+.quick-select-options h4 {
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.quick-select-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.quick-select-btn {
+  flex: 1;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--primary);
+  transition: background 0.2s;
+}
+
+.quick-select-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--spacing);
+}
+
+.back-button, .submit-button {
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.back-button {
+  background: var(--surface);
+  color: var(--primary);
+  border: 1px solid var(--primary);
+}
+
+.back-button:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.submit-button {
+  background: var(--primary);
+  color: #fff;
+}
+
+.submit-button:disabled {
+  background: #90CAF9;
+  cursor: not-allowed;
+}
+
+.submit-button .button-icon {
+  margin-right: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity:1; }
+}

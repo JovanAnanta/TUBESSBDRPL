@@ -138,57 +138,66 @@ export const BillPreview = () => {
 
   return (
     <div className="bill-preview-container">
-      <h2 className="bill-preview-title">Konfirmasi Pembayaran</h2>
-      
-      <div className="bill-details">
-        <div className="bill-header">
-          <h3>{getBillTitle()}</h3>
+      <div className="bill-preview-wrapper">
+        <div className="bill-preview-header">
+          <div className="bill-preview-icon">🧾</div>
+          <h1 className="bill-preview-title">Konfirmasi Pembayaran</h1>
+          <p className="bill-preview-subtitle">{getBillTitle()}</p>
         </div>
-          <div className="bill-info">
-          <div className="info-row">
-            <span className="label">Jenis Tagihan:</span>
-            <span className="value">{getBillTitle()}</span>
-          </div>
-            <div className="info-row">
-            <span className="label">Nama Pelanggan:</span>
-            <span className="value">{nasabahData?.nama || 'Loading...'}</span>
-          </div>
-          
-          <div className="info-row">
-            <span className="label">Wilayah:</span>
-            <span className="value">{billData.region}</span>
-          </div>
-          
-          <div className="info-row">
-            <span className="label">Nomor Tagihan:</span>
-            <span className="value">{billData.nomorTagihan}</span>
+
+        <div className="bill-preview-card">
+          <div className="bill-details">
+            <div className="bill-header">
+              <h3>{getBillTitle()}</h3>
+            </div>
+              <div className="bill-info">
+              <div className="info-row">
+                <span className="label">Jenis Tagihan:</span>
+                <span className="value">{getBillTitle()}</span>
+              </div>
+                <div className="info-row">
+                <span className="label">Nama Pelanggan:</span>
+                <span className="value">{nasabahData?.nama || 'Loading...'}</span>
+              </div>
+              
+              <div className="info-row">
+                <span className="label">Wilayah:</span>
+                <span className="value">{billData.region}</span>
+              </div>
+              
+              <div className="info-row">
+                <span className="label">Nomor Tagihan:</span>
+                <span className="value">{billData.nomorTagihan}</span>
+              </div>
+
+              <div className="info-row">
+                <span className="label">Saldo Rekening:</span>
+                <span className="value">{nasabahData ? formatCurrency(nasabahData.saldo) : 'Loading...'}</span>
+              </div>
+              
+              <div className="info-row total">
+                <span className="label">Total Tagihan:</span>
+                <span className="value amount">{formatCurrency(billData.amount)}</span>
+              </div>
+            </div>
           </div>
 
-          <div className="info-row">
-            <span className="label">Saldo Rekening:</span>
-            <span className="value">{nasabahData ? formatCurrency(nasabahData.saldo) : 'Loading...'}</span>
-          </div>
-          
-          <div className="info-row total">
-            <span className="label">Total Tagihan:</span>
-            <span className="value amount">{formatCurrency(billData.amount)}</span>
+          <div className="payment-actions">
+            <button 
+              className={`pay-button ${nasabahData && nasabahData.saldo < billData.amount ? 'insufficient-funds' : ''}`}
+              onClick={handlePayment}
+              disabled={!nasabahData || nasabahData.saldo < billData.amount}
+            >
+              {!nasabahData ? 'Loading...' : 
+               nasabahData.saldo < billData.amount ? 'Saldo Tidak Cukup' : 'Bayar Sekarang'}
+            </button>
           </div>
         </div>
-          <div className="payment-actions">
-          <button 
-            className={`pay-button ${nasabahData && nasabahData.saldo < billData.amount ? 'insufficient-funds' : ''}`}
-            onClick={handlePayment}
-            disabled={!nasabahData || nasabahData.saldo < billData.amount}
-          >
-            {!nasabahData ? 'Loading...' : 
-             nasabahData.saldo < billData.amount ? 'Saldo Tidak Cukup' : 'Bayar Sekarang'}
-          </button>
-          
-          <button 
-            className="cancel-button"
-            onClick={() => navigate(-1)}
-          >
-            Kembali
+
+        <div className="back-button-container">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            <span className="back-icon">←</span>
+            <span>Kembali</span>
           </button>
         </div>
       </div>

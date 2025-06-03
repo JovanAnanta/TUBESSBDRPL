@@ -56,62 +56,94 @@ import "../style/GantiPin.css";
         } finally {
         setLoading(false);
         }
-    };
-
-    return (
+    };    return (
         <div className="ganti-pin-container">
-            <button
-                className="pin-back-button"
-                onClick={() => navigate('/user/settings')}
-            >
-                Kembali
-        </button>
-        <h2>Ganti PIN</h2>
-        <form onSubmit={handleSubmit} className="ganti-pin-form">
-        <input
-            type="password"
-            placeholder="PIN Lama"
-            value={oldPin}
-            onChange={(e) => {
-            const onlyNums = e.target.value.replace(/\D/g, ""); // remove non-digits
-            setOldPin(onlyNums);
-            }}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            minLength={6}
-            maxLength={6}
-            required
-        />
-        <input
-            type="password"
-            placeholder="PIN Baru"
-            value={newPin}
-            onChange={(e) => {
-            const onlyNums = e.target.value.replace(/\D/g, "");
-            setNewPin(onlyNums);
-            }}
-            inputMode="numeric"
-            pattern="[0-9]*"
-            minLength={6}
-            maxLength={6}
-            required
-        />
-       
-        {oldPin && newPin && oldPin === newPin && (
-            <p className="ganti-pin-error">PIN baru tidak boleh sama dengan PIN lama</p>
-        )}
-        <button
-            type="submit"
-            disabled={loading || (!!oldPin && !!newPin && oldPin === newPin)}
-        >
-            {loading ? "Memproses..." : "Ganti PIN"}
-        </button>
-        {message && (
-  <p className={`ganti-pin-message ${fadeOut ? "fade-out" : ""}`}>
-    {message}
-  </p>
-)}
-        </form>
+            <div className="ganti-pin-wrapper">
+                <div className="ganti-pin-card">
+                    <div className="ganti-pin-header">
+                        <button
+                            className="ganti-pin-back-button"
+                            onClick={() => navigate('/user/settings')}
+                        >
+                            <span className="back-icon">←</span>
+                            <span>Kembali</span>
+                        </button>
+                        <div className="ganti-pin-title-section">
+                            <div className="ganti-pin-icon">🔢</div>
+                            <h2 className="ganti-pin-title">Ganti PIN</h2>
+                            <p className="ganti-pin-subtitle">Perbarui PIN keamanan Anda</p>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="ganti-pin-form">
+                        <div className="form-group">
+                            <label htmlFor="oldPin" className="form-label">PIN Lama</label>
+                            <input
+                                id="oldPin"
+                                type="password"
+                                className="form-input pin-input"
+                                placeholder="Masukkan PIN lama (6 digit)"
+                                value={oldPin}
+                                onChange={(e) => {
+                                    const onlyNums = e.target.value.replace(/\D/g, "");
+                                    setOldPin(onlyNums);
+                                }}
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                minLength={6}
+                                maxLength={6}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="newPin" className="form-label">PIN Baru</label>
+                            <input
+                                id="newPin"
+                                type="password"
+                                className="form-input pin-input"
+                                placeholder="Masukkan PIN baru (6 digit)"
+                                value={newPin}
+                                onChange={(e) => {
+                                    const onlyNums = e.target.value.replace(/\D/g, "");
+                                    setNewPin(onlyNums);
+                                }}
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                minLength={6}
+                                maxLength={6}
+                                required
+                            />
+                        </div>
+
+                        {oldPin && newPin && oldPin === newPin && (
+                            <div className="ganti-pin-warning">
+                                <span className="warning-icon">⚠️</span>
+                                <span>PIN baru harus berbeda dengan PIN lama</span>
+                            </div>
+                        )}
+
+                        <button
+                            type="submit"
+                            className="ganti-pin-submit-button"
+                            disabled={loading || (!!oldPin && !!newPin && oldPin === newPin)}
+                        >
+                            <span className="submit-button-text">
+                                {loading ? 'Memproses...' : 'Ganti PIN'}
+                            </span>
+                        </button>
+
+                        {message && (
+                            <div className={`ganti-pin-message ${fadeOut ? 'fade-out' : ''}`}>
+                                <span className="message-icon">
+                                    {message.includes('berhasil') ? '✅' : '❌'}
+                                </span>
+                                <span>{message}</span>
+                            </div>
+                        )}
+                    </form>
+                </div>
+            </div>
         </div>
     );
     };

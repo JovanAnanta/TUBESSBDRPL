@@ -1,10 +1,11 @@
-/* E-Receipt Modern UI Styles */
+/* E-Receipt Elegant UI Styles */
 
 .ereceipt-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #f8fafe 0%, #f1f6fd 50%, #e8f2fc 100%);
   padding: 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
 }
 
 .ereceipt-wrapper {
@@ -14,10 +15,11 @@
 }
 
 .ereceipt-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(52, 152, 219, 0.15);
+  border: 1px solid rgba(52, 152, 219, 0.1);
   overflow: hidden;
   animation: ereceipt-fade-in 0.6s ease-out;
 }
@@ -35,7 +37,7 @@
 
 /* Header */
 .ereceipt-header {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   padding: 2.5rem 2rem;
   text-align: center;
   color: white;

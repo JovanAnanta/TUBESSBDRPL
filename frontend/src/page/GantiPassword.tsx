@@ -68,48 +68,84 @@ import '../style/GantiPassword.css';
         setError('Terjadi kesalahan jaringan');
         console.error(err);
         }
-    };
-
-    return (
+    };    return (
         <div className="ganti-password-container">
-        <button
-            className="back-button"
-            onClick={() => navigate('/user')}
-        >
-            ← Kembali
-        </button>
+            <div className="ganti-password-wrapper">
+                <div className="ganti-password-card">
+                    <div className="ganti-password-header">
+                        <button
+                            className="ganti-password-back-button"
+                            onClick={() => navigate('/user')}
+                        >
+                            <span className="back-icon">←</span>
+                            <span>Kembali</span>
+                        </button>
+                        <div className="ganti-password-title-section">
+                            <div className="ganti-password-icon">🔒</div>
+                            <h2 className="ganti-password-title">Ganti Password</h2>
+                            <p className="ganti-password-subtitle">Perbarui password akun Anda</p>
+                        </div>
+                    </div>
 
-        <h2>Ganti Password</h2>
-        <form onSubmit={handleSubmit} className="ganti-password-form">
-            {error && <div className="error-message">{error}</div>}
-            {success && <div className="success-message">{success}</div>}
+                    <form onSubmit={handleSubmit} className="ganti-password-form">
+                        {error && (
+                            <div className="ganti-password-message error">
+                                <span className="message-icon">⚠️</span>
+                                <span>{error}</span>
+                            </div>
+                        )}
+                        {success && (
+                            <div className="ganti-password-message success">
+                                <span className="message-icon">✅</span>
+                                <span>{success}</span>
+                            </div>
+                        )}
 
-            <label>Password Lama</label>
-            <input
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-            />
+                        <div className="form-group">
+                            <label htmlFor="oldPassword" className="form-label">Password Lama</label>
+                            <input
+                                id="oldPassword"
+                                type="password"
+                                className="form-input"
+                                value={oldPassword}
+                                onChange={(e) => setOldPassword(e.target.value)}
+                                placeholder="Masukkan password lama"
+                                required
+                            />
+                        </div>
 
-            <label>Password Baru</label>
-            <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-            />
+                        <div className="form-group">
+                            <label htmlFor="newPassword" className="form-label">Password Baru</label>
+                            <input
+                                id="newPassword"
+                                type="password"
+                                className="form-input"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Masukkan password baru"
+                                required
+                            />
+                        </div>
 
-            <label>Konfirmasi Password Baru</label>
-            <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            />
+                        <div className="form-group">
+                            <label htmlFor="confirmPassword" className="form-label">Konfirmasi Password Baru</label>
+                            <input
+                                id="confirmPassword"
+                                type="password"
+                                className="form-input"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Konfirmasi password baru"
+                                required
+                            />
+                        </div>
 
-            <button type="submit">Ganti Password</button>
-        </form>
+                        <button type="submit" className="ganti-password-submit-button">
+                            <span className="submit-button-text">Ganti Password</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     );
     };

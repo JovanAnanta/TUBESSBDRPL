@@ -78,45 +78,83 @@ const InfoSaldo: React.FC = () => {
       minute: '2-digit'
     });
   };
-
   if (loading) {
     return (
       <div className="info-saldo-container">
-        <div className="loading">Loading...</div>
+        <div className="info-saldo-wrapper">
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <p>Memuat informasi saldo...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="info-saldo-container">
-      <h2 className="page-title">Info Saldo</h2>
-      
-      {error && (
-        <div className="error-message">
-          {error}
+      <div className="info-saldo-wrapper">
+        {/* Header Section */}
+        <div className="info-saldo-header">
+          <div className="info-saldo-icon">💰</div>
+          <h1 className="info-saldo-title">Info Saldo</h1>
+          <p className="info-saldo-subtitle">Informasi Rekening & Saldo</p>
         </div>
-      )}
 
-      {saldoInfo && (
-        <div className="saldo-card">
-          <div className="saldo-header">
-            <h3>Informasi Rekening</h3>
-            <div className="account-info">
-              <p className="account-name">{saldoInfo.nama}</p>
-              <p className="account-number">{saldoInfo.noRekening}</p>
+        {/* Content Card */}
+        <div className="info-saldo-card">
+          {error && (
+            <div className="error-message">
+              <span className="error-icon">⚠️</span>
+              <span>{error}</span>
             </div>
-          </div>
-          <div className="saldo-amount">
-            <span className="saldo-label">Saldo Tersedia</span>
-            <span className="saldo-value">{formatCurrency(saldoInfo.saldo)}</span>
-          </div>
-        </div>
-      )}
+          )}
 
-      <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/user/minfo')}>
-          ← Kembali ke M-Info
-        </button>
+          {saldoInfo && (
+            <>
+              <div className="saldo-section">
+                <div className="account-info">
+                  <h3 className="section-title">
+                    <span className="section-icon">👤</span>
+                    Informasi Rekening
+                  </h3>
+                  <div className="info-row">
+                    <span className="info-label">Nama Pemilik</span>
+                    <span className="info-value">{saldoInfo.nama}</span>
+                  </div>
+                  <div className="info-row">
+                    <span className="info-label">Nomor Rekening</span>
+                    <span className="info-value">{saldoInfo.noRekening}</span>
+                  </div>
+                </div>
+
+                <div className="saldo-display">
+                  <h3 className="section-title">
+                    <span className="section-icon">💳</span>
+                    Saldo Tersedia
+                  </h3>
+                  <div className="saldo-amount">
+                    <span className="currency">Rp</span>
+                    <span className="amount">{formatCurrency(saldoInfo.saldo).replace('Rp ', '')}</span>
+                  </div>
+                  <div className="last-update">
+                    <span className="update-icon">🕒</span>
+                    <span>Terakhir diperbarui: {new Date(saldoInfo.lastUpdate).toLocaleString('id-ID')}</span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Back Button */}
+          <button 
+            className="back-button" 
+            onClick={() => navigate('/user/minfo')}
+          >
+            <span className="back-icon">←</span>
+            <span>Kembali ke M-Info</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-    import React, { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../style/Tagihan.css";
 
@@ -198,74 +198,71 @@ export const TagihanComponent = () => {
     
     setLoading(false);
   };return (
-    <div className={`tagihan-container ${type?.toLowerCase()}`}>
-      <h2 className="tagihan-title">{currentConfig.title}</h2>
-      
-      <form onSubmit={handleSubmit} className="tagihan-form">
-        {/* Dropdown Wilayah */}
-        <div className="form-group">
-          <label htmlFor="wilayah-select">Pilih Wilayah:</label>
-          <select
-            id="wilayah-select"
-            value={formData.selectedWilayah}
-            onChange={handleRegionChange}
-            required
-            className="region-dropdown"
-          >
-            <option value="">-- Pilih Wilayah --</option>
-            {availableRegions.map((region, index) => (
-              <option key={index} value={region}>
-                {region}
-              </option>
-            ))}
-          </select>
-          <small className="input-hint">
-            Pilih wilayah tempat tinggal Anda
-          </small>
+    <div className="tagihan-container">
+      <div className="tagihan-wrapper">
+        <div className="tagihan-header">
+          <div className="tagihan-icon">🧾</div>
+          <h1 className="tagihan-title">{currentConfig.title}</h1>
+          <p className="tagihan-subtitle">Silakan masukkan detail tagihan Anda</p>
         </div>
 
-        {/* Input Nomor Tagihan */}
-        <div className="form-group">
-          <label htmlFor="nomorTagihan">{currentConfig.nomorLabel}:</label>
-          <input
-            id="nomorTagihan"
-            type="text"
-            value={formData.nomorTagihan}
-            onChange={handleTagihanChange}
-            required
-            placeholder={currentConfig.placeholder}
-          />
-          {error && <span className="error-message">{error}</span>}
-          <small className="input-hint">
-            Masukkan nomor tagihan sesuai format {currentConfig.prefix}
-          </small>
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={loading || !formData.nomorTagihan || !formData.selectedWilayah}
-        >
-          {loading ? "Mengecek..." : currentConfig.buttonText}
-        </button>
-      </form>
+        <div className="tagihan-card">
+          <form onSubmit={handleSubmit} className="tagihan-form">
+            {/* Dropdown Wilayah */}
+            <div className="form-group">
+              <label htmlFor="wilayah-select">Pilih Wilayah:</label>
+              <select
+                id="wilayah-select"
+                value={formData.selectedWilayah}
+                onChange={handleRegionChange}
+                required
+                className="region-dropdown"
+              >
+                <option value="">-- Pilih Wilayah --</option>
+                {availableRegions.map((region, index) => (
+                  <option key={index} value={region}>
+                    {region}
+                  </option>
+                ))}
+              </select>
+              <small className="input-hint">
+                Pilih wilayah tempat tinggal Anda
+              </small>
+            </div>
 
-      {/* Info section */}
-      <div className="info-section">
-        <h4>Contoh Nomor Tagihan:</h4>
-        <ul>
-          <li>{currentConfig.prefix}88899900 - Rp 200.000</li>
-          <li>{currentConfig.prefix}88899901 - Rp 150.000</li>
-          <li>{currentConfig.prefix}88899902 - Rp 300.000</li>
-          <li>{currentConfig.prefix}88899903 - Rp 175.000</li>
-        </ul>
+            {/* Input Nomor Tagihan */}
+            <div className="form-group">
+              <label htmlFor="nomorTagihan">{currentConfig.nomorLabel}:</label>
+              <input
+                id="nomorTagihan"
+                type="text"
+                value={formData.nomorTagihan}
+                onChange={handleTagihanChange}
+                required
+                placeholder={currentConfig.placeholder}
+              />
+              {error && <span className="error-message">{error}</span>}
+              <small className="input-hint">
+                Masukkan nomor tagihan sesuai format {currentConfig.prefix}
+              </small>
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={loading || !formData.nomorTagihan || !formData.selectedWilayah}
+            >
+              {loading ? "Mengecek..." : currentConfig.buttonText}
+            </button>
+          </form>
+        </div>
+
+        <div className="back-button-container">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            <span className="back-icon">←</span>
+            <span>Kembali</span>
+          </button>
+        </div>
       </div>
-
-      <button
-        className="tagihan-back-button"
-        onClick={() => navigate("/user/mpayment")}
-      >
-        Kembali
-      </button>
     </div>
   );
 };

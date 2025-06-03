@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { navigateWithPinVerification } from '../../../utils/pinUtils';
-import '../../../style/Transfer_new.css';
+import '../../../style/Transfer.css';
 
 type Nasabah = {
   nasabah_id: string;
@@ -146,113 +146,129 @@ const formatCurrency = (value: string) => {
 };    return (
         <div className="transfer-container">
             <div className="transfer-wrapper">
-                {/* Header */}
+                {/* Header Section */}
                 <div className="transfer-header">
-                    <Link to={"/user/mtransfer"} className="transfer-back-link">
-                    <button className="transfer-back-btn">
-                        <svg className="transfer-back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    </Link>
-                    <h1 className="transfer-title">💸 Transfer Dana</h1>
+                    <div className="transfer-icon">💸</div>
+                    <h1 className="transfer-title">Transfer Dana</h1>
+                    <p className="transfer-subtitle">Kirim uang dengan mudah dan aman</p>
                 </div>
 
-                {/* Transfer Form */}
+                {/* Transfer Form Card */}
                 <div className="transfer-card">
-                    <div className="transfer-card-header">
-                        <h2 className="transfer-card-title">Kirim Uang</h2>
-                        <p className="transfer-card-subtitle">Transfer dengan mudah dan aman</p>
-                    </div>
-
                     <form onSubmit={handleSubmit} className="transfer-form">
-                        {/* Dari Rekening */}
-                        <div className="transfer-field-group">
-                            <label htmlFor="fromAccount" className="transfer-label">
-                                🏦 Dari Rekening
-                            </label>
-                            <div className="transfer-account-display">
-                                <span className="transfer-account-number">
-                                    {nasabah?.noRekening || '****-****-****-****'}
-                                </span>
-                                <span className="transfer-balance">
+                        {/* Account Info Section */}
+                        <div className="account-info-section">
+                            <h3 className="section-title">
+                                <span className="section-icon">🏦</span>
+                                Informasi Rekening
+                            </h3>
+                            <div className="from-account-display">
+                                <div className="account-label">Dari Rekening</div>
+                                <div className="account-number">{nasabah?.noRekening || '****-****-****-****'}</div>
+                                <div className="account-balance">
                                     Saldo: Rp {nasabah?.saldo?.toLocaleString('id-ID') || '0'}
-                                </span>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Ke Rekening */}
-                        <div className="transfer-field-group">
-                            <label htmlFor="toAccount" className="transfer-label">
-                                🎯 Ke Rekening
-                            </label>
-                            <input
-                                type="text"
-                                id="toAccount"
-                                value={toAccount}
-                                onChange={e => {
-                                    const raw = e.target.value.replace(/\D/g, '');
-                                    setToAccount(formatAccountNumber(raw));
-                                }}
-                                placeholder="1234567890123456"
-                                className="transfer-input"
-                                required
-                            />
-                        </div>
-
-                        {/* Jumlah Uang */}
-                        <div className="transfer-field-group">
-                            <label htmlFor="amount" className="transfer-label">
-                                💰 Jumlah Transfer
-                            </label>
-                            <div className="transfer-amount-container">
-                                <span className="transfer-currency-prefix">
-                                    Rp
-                                </span>
+                        {/* Transfer Details */}
+                        <div className="transfer-details-section">
+                            <h3 className="section-title">
+                                <span className="section-icon">💰</span>
+                                Detail Transfer
+                            </h3>
+                            
+                            {/* Destination Account */}
+                            <div className="input-group">
+                                <label htmlFor="toAccount" className="input-label">
+                                    <span className="label-icon">🎯</span>
+                                    Rekening Tujuan
+                                </label>
                                 <input
                                     type="text"
-                                    id="amount"
-                                    value={amount}
+                                    id="toAccount"
+                                    value={toAccount}
                                     onChange={e => {
                                         const raw = e.target.value.replace(/\D/g, '');
-                                        setAmount(formatCurrency(raw));
+                                        setToAccount(formatAccountNumber(raw));
                                     }}
-                                    placeholder="0"
-                                    className="transfer-amount-input"
+                                    placeholder="Masukkan nomor rekening tujuan"
+                                    className="input-field"
                                     required
+                                />
+                            </div>
+
+                            {/* Amount */}
+                            <div className="input-group">
+                                <label htmlFor="amount" className="input-label">
+                                    <span className="label-icon">💵</span>
+                                    Jumlah Transfer
+                                </label>
+                                <div className="amount-input-container">
+                                    <span className="currency-prefix">Rp</span>
+                                    <input
+                                        type="text"
+                                        id="amount"
+                                        value={amount}
+                                        onChange={e => {
+                                            const raw = e.target.value.replace(/\D/g, '');
+                                            setAmount(formatCurrency(raw));
+                                        }}
+                                        placeholder="0"
+                                        className="amount-input"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Note */}
+                            <div className="input-group">
+                                <label htmlFor="note" className="input-label">
+                                    <span className="label-icon">💬</span>
+                                    Berita Transfer (Opsional)
+                                </label>
+                                <textarea
+                                    id="note"
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value)}
+                                    placeholder="Tambahkan catatan untuk transfer ini..."
+                                    rows={3}
+                                    className="textarea-field"
                                 />
                             </div>
                         </div>
 
-                        {/* Berita */}
-                        <div className="transfer-field-group">
-                            <label htmlFor="note" className="transfer-label">
-                                💬 Berita Transfer (Opsional)
-                            </label>
-                            <textarea
-                                id="note"
-                                value={note}
-                                onChange={(e) => setNote(e.target.value)}
-                                placeholder="Tambahkan catatan transfer..."
-                                rows={3}
-                                className="transfer-textarea"
-                            />
-                        </div>
-
+                        {/* Error Message */}
                         {error && (
-                            <div className="transfer-error">
-                                ⚠️ {error}
+                            <div className="error-message">
+                                <span className="error-icon">⚠️</span>
+                                <span>{error}</span>
                             </div>
-                        )}                        <button
+                        )}
+
+                        {/* Submit Button */}
+                        <button
                             type="submit"
-                            className="transfer-submit-btn"
+                            className="submit-button"
                             disabled={isValidatingAccount}
                         >
-                            <span className="transfer-btn-text">
-                                {isValidatingAccount ? '🔍 Memvalidasi Rekening...' : '✅ Konfirmasi Transfer'}
+                            <span className="button-icon">
+                                {isValidatingAccount ? '🔍' : '✅'}
+                            </span>
+                            <span className="button-text">
+                                {isValidatingAccount ? 'Memvalidasi Rekening...' : 'Konfirmasi Transfer'}
                             </span>
                         </button>
                     </form>
+
+                    {/* Back Button */}
+                    <button 
+                        className="back-button" 
+                        onClick={() => navigate('/user/mtransfer')}
+                    >
+                        <span className="back-icon">←</span>
+                        <span>Kembali ke M-Transfer</span>
+                    </button>
                 </div>
             </div>
         </div>

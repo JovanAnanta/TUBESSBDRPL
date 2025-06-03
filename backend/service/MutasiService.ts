@@ -15,6 +15,7 @@ export interface MutasiData {
     nominal: number;
     keterangan: string;
     saldoSetelahTransaksi: number;
+    berita?: string; // optional transfer note
 }
 
 export interface SaldoInfo {
@@ -152,6 +153,8 @@ export const getMutasiRekening = async (
                 keterangan = `PINJAMAN ${pinjaman.statusJatuhTempo} - ${pinjaman.jumlahPerBulan?.toLocaleString('id-ID') || ''}`;
             }
 
+            // Determine berita from transfer
+            const beritaValue = transfer && transfer.berita ? transfer.berita : undefined;
 
             let saldoSetelahTransaksi = nasabah.saldo;
             
@@ -161,7 +164,8 @@ export const getMutasiRekening = async (
                 transaksiType: trx.transaksiType as 'MASUK' | 'KELUAR',
                 nominal,
                 keterangan, // Gunakan keterangan yang sudah diolah atau dari DB
-                saldoSetelahTransaksi
+                saldoSetelahTransaksi,
+                berita: beritaValue
             };
         });
 

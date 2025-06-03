@@ -19,6 +19,7 @@ router.get('/pinStatus/:nasabahId', validateNasabahStatus, PinController.checkPi
 // Transfer & Top Up routes (with server-side PIN validation)
 router.post('/top-up', validateNasabahStatus, TransferController.topUpWithPin);
 router.post('/transfer', validateNasabahStatus, TransferController.transferWithPin);
+router.get('/validateAccount/:noRekening', validateNasabahStatus, TransferController.validateAccount);
 router.get('/e-receipt/:transaksiId', validateNasabahStatus, TransferController.getEReceipt);
 
 // Mutasi & Saldo routes

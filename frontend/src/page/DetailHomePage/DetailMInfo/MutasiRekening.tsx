@@ -9,6 +9,7 @@ type MutasiData = {
   nominal: number;
   keterangan: string;
   saldoSetelahTransaksi: number;
+  berita?: string;
 };
 
 const MutasiRekening: React.FC = () => {
@@ -112,62 +113,59 @@ const MutasiRekening: React.FC = () => {
   if (loading) {
     return (
       <div className="mutasi-container">
-        <div className="loading">Loading...</div>
+        <div className="mutasi-wrapper">
+          <div className="loading"><div className="loading-spinner"></div><p>Memuat mutasi...</p></div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="mutasi-container">
-      <h2 className="page-title">Mutasi Rekening</h2>
-      
-      {error && (
-        <div className="error-message">
-          {error}
+      <div className="mutasi-wrapper">
+        {/* Header Section */}
+        <div className="mutasi-header">
+          <div className="mutasi-icon">📊</div>
+          <h1 className="mutasi-title">Mutasi Rekening</h1>
+          <p className="mutasi-subtitle">Riwayat transaksi akun Anda</p>
         </div>
-      )}
 
-      <div className="mutasi-section">
-        <h3 className="mutasi-title">Riwayat Transaksi</h3>
-        {mutasiData.length > 0 ? (
+        {/* Content Card */}
+        <div className="mutasi-card">
+          {error && <div className="error-message"><span className="error-icon">⚠️</span><span>{error}</span></div>}
           <div className="mutasi-list">
-            {mutasiData.map((item: MutasiData, index: number) => (
-              <div key={item.transaksi_id} className="mutasi-item">
-                <div className="mutasi-info">
-                  <div className="mutasi-date">{formatDate(item.tanggalTransaksi)}</div>
-                  <div className="mutasi-description">{item.keterangan}</div>
-                  <div className="mutasi-type">{item.transaksiType}</div>
-                </div>
-                <div className="mutasi-amount">
-                  <span className={`amount ${item.transaksiType === 'KELUAR' ? 'debit' : 'credit'}`}>
-                    {item.transaksiType === 'KELUAR' ? '-' : '+'} {formatCurrency(item.nominal)}
-                  </span>
-                  <div className="saldo-after">
-                    Saldo: {formatCurrency(item.saldoSetelahTransaksi)}
+            {mutasiData.length > 0 ? (
+              mutasiData.map((item: MutasiData, index: number) => (
+                <div key={item.transaksi_id} className="mutasi-item">
+                  <div className="mutasi-info">
+                    <div className="mutasi-date">{formatDate(item.tanggalTransaksi)}</div>
+                    <div className="mutasi-description">{item.keterangan}</div>
+                    {item.berita && <div className="mutasi-berita">📝 {item.berita}</div>}
+                    <div className="mutasi-type">{item.transaksiType}</div>
+                  </div>
+                  <div className="mutasi-amount">
+                    <span className={`amount ${item.transaksiType === 'KELUAR' ? 'debit' : 'credit'}`}>
+                      {item.transaksiType === 'KELUAR' ? '-' : '+'} {formatCurrency(item.nominal)}
+                    </span>
+                    <div className="saldo-after">
+                      Saldo: {formatCurrency(item.saldoSetelahTransaksi)}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-            
-            {hasMore && (
-              <div className="load-more-container">
-                <button className="load-more-button" onClick={loadMoreData}>
-                  Muat Lebih Banyak
-                </button>
+              ))
+            ) : (
+              <div className="no-mutasi">
+                <p>Belum ada transaksi</p>
               </div>
             )}
           </div>
-        ) : (
-          <div className="no-mutasi">
-            <p>Belum ada transaksi</p>
-          </div>
-        )}
-      </div>
+          {hasMore && <button className="btn load-more-btn" onClick={loadMoreData}>Muat Lebih Banyak</button>}
 
-      <div className="back-button-container">
-        <button className="back-button" onClick={() => navigate('/user/minfo')}>
-          ← Kembali ke M-Info
-        </button>
+          {/* Back Button */}
+          <button className="back-button" onClick={() => navigate('/user/minfo')}>
+            <span className="back-icon">←</span> Kembali
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,18 @@
+/* MutasiListPage.css - Material+Neumorphic Blue theme */
+@import './MutasiRekening.css'; /* Base styles reused */
+
+/* Specific overrides */
+.mutasi-header .mutasi-subtitle {
+  opacity: 0.8;
+}
+
+.mutasi-card .mutasi-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Adjust nominal font size in mutasi list */
+.mutasi-list .amount {
+  font-size: 1.2rem;
+}
