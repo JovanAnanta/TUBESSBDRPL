@@ -361,7 +361,7 @@ const CSCustomerActivityPage: React.FC = () => {
               <div className="th-date">Tanggal</div>
               <div className="th-type">Tipe</div>
               <div className="th-amount">Jumlah</div>
-              <div className="th-desc">Deskripsi</div>
+              <div className="th-desc">Keterangan</div>
             </div>
             
             {filteredTransactions.length > 0 ? (
