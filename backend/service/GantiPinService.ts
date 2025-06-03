@@ -12,6 +12,11 @@ export const gantiPin = async (nasabah_id: string, oldPin: string, newPin: strin
         throw new Error("PIN lama salah.");
     }
 
+    // Prevent new PIN being the same as old PIN
+    if (newPin === oldPin) {
+        throw new Error("PIN baru dan lama tidak boleh sama.");
+    }
+
     const encryptedNewPin = encrypt(newPin);
     await nasabah.update({ pin: encryptedNewPin });
 

@@ -123,10 +123,8 @@
 .textarea-field {
   width: 100%;
   padding: 12px;
-  border: 1px solid #E0E0E0;
   border-radius: var(--mdc-border-radius);
   font-size: 1rem;
-  color: var(--mdc-text);
   outline: none;
   transition: border-color 0.2s;
 }
@@ -166,6 +164,7 @@
   border-bottom-right-radius: var(--mdc-border-radius);
   outline: none;
   transition: border-color 0.2s;
+  color: #000; /* Ensure transfer amount text is black */
 }
 
 .amount-input:focus {
@@ -187,6 +186,16 @@
 
 .error-icon {
   font-size: 1.2rem;
+}
+
+.input-field-rekening{
+  width: 100%;
+  padding: 12px;
+  border-radius: var(--mdc-border-radius);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  color: #000;
 }
 
 /* Submit button */

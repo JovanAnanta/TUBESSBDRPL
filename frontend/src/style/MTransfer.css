@@ -11,13 +11,11 @@
 .input-field{
     width: 95%;
     background: linear-gradient(135deg, #f8fafe 0%, #f1f6fd 50%, #e8f2fc 100%);
-    color: #ffffff;
     border: #92e4ff 2px solid;
 }
 
 .textarea-field{
     width: 95%;
-    color: #ffffff;
 }
 
 .mtransfer-wrapper {

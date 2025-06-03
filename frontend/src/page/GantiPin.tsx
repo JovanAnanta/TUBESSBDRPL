@@ -1,10 +1,11 @@
-    import React, { useState, useEffect, } from "react";
+import React, { useState, useEffect, } from "react";
 import { useNavigate } from "react-router-dom";
 import "../style/GantiPin.css";
 
     export const GantiPin = () => {
     const [oldPin, setOldPin] = useState("");
     const [newPin, setNewPin] = useState("");
+    const [confirmPin, setConfirmPin] = useState("");  // State for confirming new PIN
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [fadeOut, setFadeOut] = useState(false);
@@ -30,9 +31,28 @@ import "../style/GantiPin.css";
 
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+         e.preventDefault();
         setLoading(true);
         setMessage("");
+
+        if (!oldPin || !newPin || !confirmPin) {
+            setMessage('semua field harus di isi');
+            setLoading(false);
+        return;
+        }
+
+        if (newPin === oldPin) {
+            setMessage('pin baru dan lama tidak boleh sama');
+            setLoading(false);
+            return;
+        }
+
+        // Validate new PIN confirmation
+        if (newPin !== confirmPin) {
+            setMessage('Konfirmasi PIN baru tidak cocok');
+            setLoading(false);
+            return;
+        }
 
         const token = localStorage.getItem("token");
 
@@ -51,6 +71,7 @@ import "../style/GantiPin.css";
         setMessage(data.message);
         setOldPin("");
         setNewPin("");
+        setConfirmPin(""); // Clear confirm PIN state
         } catch (err: any) {
         setMessage(err.message);
         } finally {
@@ -115,6 +136,26 @@ import "../style/GantiPin.css";
                                 required
                             />
                         </div>
+                        {/* Confirm New PIN */}
+                        <div className="form-group">
+                            <label htmlFor="confirmPin" className="form-label">Konfirmasi PIN Baru</label>
+                            <input
+                                id="confirmPin"
+                                type="password"
+                                className="form-input pin-input"
+                                placeholder="Masukkan ulang PIN baru"
+                                value={confirmPin}
+                                onChange={(e) => {
+                                    const onlyNums = e.target.value.replace(/\D/g, "");
+                                    setConfirmPin(onlyNums);
+                                }}
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                minLength={6}
+                                maxLength={6}
+                                required
+                            />
+                        </div>
 
                         {oldPin && newPin && oldPin === newPin && (
                             <div className="ganti-pin-warning">
@@ -126,7 +167,7 @@ import "../style/GantiPin.css";
                         <button
                             type="submit"
                             className="ganti-pin-submit-button"
-                            disabled={loading || (!!oldPin && !!newPin && oldPin === newPin)}
+                            disabled={loading || (!!oldPin && !!newPin && oldPin === newPin) || newPin !== confirmPin}
                         >
                             <span className="submit-button-text">
                                 {loading ? 'Memproses...' : 'Ganti PIN'}

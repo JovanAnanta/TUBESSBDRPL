@@ -4,6 +4,7 @@ import { Transaksi } from "../models/Transaksi";
 import { Credit } from "../models/Credit";
 import { Debit } from "../models/Debit";
 import { Transfer } from "../models/Transfer";
+import { Tagihan } from "../models/Tagihan";
 import * as pinService from '../service/PinService';
 import { encrypt, decrypt } from '../enkripsi/Encryptor';
 import { v4 as uuidv4 } from 'uuid';
@@ -82,36 +83,60 @@ export const topUp = async (req: Request, res: Response): Promise<void> => {
 
 // Handler untuk E-Receipt
 export const getEReceipt = async (req: Request, res: Response): Promise<void> => {
-    const { transaksiId } = req.params;
-    try {
-        if (!transaksiId) {
-            res.status(400).json({ success: false, message: 'transaksiId harus diisi' });
-            return;
-        }
-        const transaksi = await Transaksi.findByPk(transaksiId);
-        if (!transaksi) {
-            res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
-            return;
-        }
-        // Fetch related records
-        const credit = await Credit.findOne({ where: { transaksi_id: transaksiId } });
-        const debit = await Debit.findOne({ where: { transaksi_id: transaksiId } });
-        const transfers = await Transfer.findAll({ where: { transaksi_id: transaksiId } });
+     const { transaksiId } = req.params;
+     try {
+         if (!transaksiId) {
+             res.status(400).json({ success: false, message: 'transaksiId harus diisi' });
+             return;
+         }
+         const transaksi = await Transaksi.findByPk(transaksiId);
+         if (!transaksi) {
+             res.status(404).json({ success: false, message: 'Transaksi tidak ditemukan' });
+             return;
+         }
+         // Fetch related records
+         const credit = await Credit.findOne({ where: { transaksi_id: transaksiId } });
+         const debit = await Debit.findOne({ where: { transaksi_id: transaksiId } });
+        const transfersRaw = await Transfer.findAll({ where: { transaksi_id: transaksiId } });
+        // Fetch related billing record, if any
+        const tagihanRecord = await Tagihan.findOne({ where: { transaksi_id: transaksiId } });
 
-        // Return full attributes
+          // Decrypt and shape transfer output
+          const transfers = transfersRaw.map(t => {
+              const json = t.toJSON() as any;
+              let fromPlain = '';
+              let toPlain = '';
+              try {
+                  // DB may store encrypted as Buffer
+                  const encFrom = typeof json.fromRekening === 'string' ? json.fromRekening : json.fromRekening.toString();
+                  fromPlain = decrypt(encFrom);
+              } catch { fromPlain = json.fromRekening.toString(); }
+              try {
+                  const encTo = typeof json.toRekening === 'string' ? json.toRekening : json.toRekening.toString();
+                  toPlain = decrypt(encTo);
+              } catch { toPlain = json.toRekening.toString(); }
+              return {
+                  ...json,
+                  fromRekening: fromPlain,
+                  toRekening: toPlain,
+                  nomorTagihan: json.berita || null
+              };
+          });
+        // Return full attributes including billing info
         res.status(200).json({
             success: true,
             data: {
                 transaksi: transaksi.toJSON(),
                 credit: credit ? credit.toJSON() : null,
                 debit: debit ? debit.toJSON() : null,
-                transfers: transfers.map(t => t.toJSON())
+                tagihan: tagihanRecord ? tagihanRecord.toJSON() : null,
+                transfers
             }
         });
-    } catch (error) {
-        console.error('Error in getEReceipt controller:', error);
-        res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
-    }
+     } catch (error) {
+         console.error('Error in getEReceipt controller:', error);
+         res.status(500).json({ success: false, message: 'Terjadi kesalahan sistem' });
+     }
 }
 
 // Combined handler: verify PIN then top-up

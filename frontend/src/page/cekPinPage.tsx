@@ -246,30 +246,38 @@ const CekPinPage: React.FC = () => {
 
 // **ACTION: AJUKAN PINJAMAN**
 if (additionalData?.action === 'ajukanPinjaman') {
-    const { jumlahPinjaman, statusJatuhTempo } = additionalData;
-    
-    const response = await fetch("http://localhost:3000/api/pinjaman/ajukan", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ 
-            jumlahPinjaman, 
-            statusJatuhTempo 
-        })
-    });
-
-    const resData = await response.json();
-    if (!response.ok) {
-        throw new Error(resData.message || 'Gagal mengajukan pinjaman');
-    }
-
-    alert('Pengajuan pinjaman berhasil dikirim! Menunggu persetujuan admin.');
-    navigate('/user/mpayment');
-    return;
-}
-
+                // Verify PIN first
+                const verifyRes = await fetch('/api/user/verifyPin', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                 body: JSON.stringify({ nasabahId, pin })
+                });
+                const verifyJson = await verifyRes.json();
+                if (!verifyRes.ok) {
+                    const newAttempts = attempts + 1;
+                    setAttempts(newAttempts);
+                    if (newAttempts >= maxAttempts) {
+                        setError('Akun Anda telah diblokir karena terlalu banyak percobaan PIN yang salah.');
+                    } else {
+                        setError(`PIN salah! Sisa percobaan: ${maxAttempts - newAttempts}`);
+                    }
+                    return;
+                }
+                // Proceed to loan application
+                const { jumlahPinjaman, statusJatuhTempo } = additionalData;
+                const response = await fetch('http://localhost:3000/api/pinjaman/ajukan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ jumlahPinjaman, statusJatuhTempo })
+                });
+                const resData = await response.json();
+                if (!response.ok) {
+                    throw new Error(resData.message || 'Gagal mengajukan pinjaman');
+                }
+                // Success
+                navigate(redirectTo, { state: { pinVerified: true, ...additionalData } });
+                return;
+            }
 // **ACTION: BAYAR TAGIHAN PINJAMAN**
 if (additionalData?.action === 'bayarTagihanPinjaman') {
     const { tagihanId, jumlahTagihan } = additionalData;
@@ -293,23 +301,57 @@ if (additionalData?.action === 'bayarTagihanPinjaman') {
     return;
 }
 
-            // Bukan aksi topup, transfer, atau mutasi: hanya verifikasi PIN
-            const verifyRes = await fetch('/api/user/verifyPin', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ nasabahId, pin }),
-            });
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok) {
-                throw new Error(verifyData.message || 'PIN salah');
+            // **ACTION: CAIRKAN DANA**
+            if (additionalData?.action === 'cairkanDana') {
+                // Verify PIN first
+                const verifyRes2 = await fetch('/api/user/verifyPin', {
+                     method: 'POST',
+                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                     body: JSON.stringify({ nasabahId, pin })
+                });
+                const verifyJson2 = await verifyRes2.json();
+                if (!verifyRes2.ok) {
+                    const newAttempts = attempts + 1;
+                    setAttempts(newAttempts);
+                    if (newAttempts >= maxAttempts) {
+                        setError('Akun Anda telah diblokir karena terlalu banyak percobaan PIN yang salah.');
+                    } else {
+                        setError(`PIN salah! Sisa percobaan: ${maxAttempts - newAttempts}`);
+                    }
+                    return;
+                }
+                // Proceed to fund disbursement
+                const { pinjaman_id } = additionalData;
+                const resClaim = await fetch(`http://localhost:3000/api/pinjaman/claim/${pinjaman_id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+                });
+                const claimJson = await resClaim.json();
+                if (!resClaim.ok) {
+                    throw new Error(claimJson.message || 'Cairkan dana gagal');
+                }
+                // Success
+                navigate(redirectTo, { state: { pinVerified: true, ...additionalData } });
+                return;
             }
 
-            // PIN benar - navigasi ke tujuan
-            const stateParams = { pinVerified: true, ...(additionalData || {}) };
-            navigate(redirectTo, { state: stateParams });
+            // Bukan aksi topup, transfer, atau mutasi: hanya verifikasi PIN
+            const verifyRes = await fetch('/api/user/verifyPin', {
+                 method: 'POST',
+                 headers: {
+                     'Content-Type': 'application/json',
+                     'Authorization': `Bearer ${token}`,
+                 },
+                 body: JSON.stringify({ nasabahId, pin }),
+             });
+             const verifyData = await verifyRes.json();
+             if (!verifyRes.ok) {
+                 throw new Error(verifyData.message || 'PIN salah');
+             }
+
+             // PIN benar - navigasi ke tujuan
+             const stateParams = { pinVerified: true, ...(additionalData || {}) };
+             navigate(redirectTo, { state: stateParams });
 
         } catch (err: any) {
             const newAttempts = attempts + 1;

@@ -15,6 +15,11 @@ export const gantiPin = async (req: Request, res: Response) => {
         res.status(200).json(result);
         return;
     } catch (error: any) {
+        // If old PIN is incorrect, send a clear status code
+        if (error.message === "PIN lama salah.") {
+            res.status(401).json({ error: "PIN lama salah." });
+            return;
+        }
         res.status(400).json({ error: error.message });
         return;
     }

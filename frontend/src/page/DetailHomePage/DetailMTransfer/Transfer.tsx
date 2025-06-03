@@ -165,9 +165,6 @@ const formatCurrency = (value: string) => {
                             <div className="from-account-display">
                                 <div className="account-label">Dari Rekening</div>
                                 <div className="account-number">{nasabah?.noRekening || '****-****-****-****'}</div>
-                                <div className="account-balance">
-                                    Saldo: Rp {nasabah?.saldo?.toLocaleString('id-ID') || '0'}
-                                </div>
                             </div>
                         </div>
 

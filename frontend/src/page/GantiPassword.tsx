@@ -15,15 +15,16 @@ import '../style/GantiPassword.css';
         setError(null);
         setSuccess(null);
 
+        if (newPassword === oldPassword) {
+            setError('Password baru tidak boleh sama dengan password lama');
+            return;
+        }
+
         if (!oldPassword || !newPassword || !confirmPassword) {
         setError('Semua field harus diisi');
         return;
         }
 
-        if (newPassword === oldPassword) {
-            setError('Password baru tidak boleh sama dengan password lama');
-            return;
-        }
 
         if (newPassword !== confirmPassword) {
             setError('Password baru dan konfirmasi tidak cocok');

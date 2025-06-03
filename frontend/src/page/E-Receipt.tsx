@@ -92,7 +92,22 @@ const EReceipt: React.FC = () => {
                   <span className="ereceipt-info-value">{data.transaksi?.keterangan || 'N/A'}</span>
                 </div>
               </div>
-            </div>            {/* Detail Saldo */}
+            </div>            {/* Show Tagihan number right after transaction info */}
+            {data.tagihan && (
+              <div className="ereceipt-section">
+                <h3 className="ereceipt-section-title">
+                  <span className="ereceipt-section-icon">📑</span>
+                  Tagihan yang Dibayar
+                </h3>
+                <div className="ereceipt-info-grid">
+                  <div className="ereceipt-info-item">
+                    <span className="ereceipt-info-label">Nomor Tagihan:</span>
+                    <span className="ereceipt-info-value">{data.tagihan.nomorTagihan}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Detail Saldo */}
             {data.credit && (
               <div className="ereceipt-section">
                 <h3 className="ereceipt-section-title">
@@ -116,12 +131,6 @@ const EReceipt: React.FC = () => {
                   Pengurangan Saldo
                 </h3>
                 <div className="ereceipt-info-grid">
-                  {data.tagihan?.nomorTagihan && (
-                   <div className="ereceipt-info-item">
-                     <span className="ereceipt-info-label">Nomor Tagihan:</span>
-                     <span className="ereceipt-info-value">{data.tagihan.nomorTagihan}</span>
-                   </div>
-                  )}
                   <div className="ereceipt-info-item">
                     <span className="ereceipt-info-label">Jumlah Keluar:</span>
                     <span className="ereceipt-info-value ereceipt-amount-out">
@@ -146,6 +155,14 @@ const EReceipt: React.FC = () => {
                     <span className="ereceipt-info-label">Ke:</span>
                     <span className="ereceipt-info-value">{data.transfers[0].toRekening}</span>
                   </div>
+                  {/* Show billing number if available */}
+                  {data.transfers[0].nomorTagihan && (
+                    <div className="ereceipt-info-item">
+                      <span className="ereceipt-info-label">Nomor Tagihan:</span>
+                      <span className="ereceipt-info-value">{data.transfers[0].nomorTagihan}</span>
+                    </div>
+                  )}
+                  {/* Show original note if provided */}
                   {data.transfers[0].berita && (
                     <div className="ereceipt-info-item">
                       <span className="ereceipt-info-label">Catatan:</span>

@@ -266,6 +266,9 @@ button:disabled {
   border-radius: 12px;
   padding: 20px;
   width: 100%;
+  max-width: 450px; /* adjust this value to change simulation card width */
+  margin-left: auto; /* center align */
+  margin-right: auto;
 }
 
 .calculation-title {

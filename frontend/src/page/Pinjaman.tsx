@@ -97,41 +97,29 @@ const PinjamanPage: React.FC = () => {
     }, 3000);
   };
 
-  const handleAjukan = async (e: React.FormEvent) => {
+  const handleAjukan = (e: React.MouseEvent) => {
     e.preventDefault();
-    
-    // Validasi input
+    // Validate inputs
     if (!jumlahPinjaman || !tenor) {
       showNotification("Lengkapi semua data pinjaman", "error");
       return;
     }
-    
     if (Number(jumlahPinjaman) < 1000000) {
       showNotification("Jumlah pinjaman minimal Rp 1.000.000", "error");
       return;
     }
-
+    // Route to PIN verification for loan application
     setConfirmDialog(false);
-    setLoading(true);
-    
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "/api/pinjaman/ajukan",
-        { jumlahPinjaman: Number(jumlahPinjaman), statusJatuhTempo: tenor },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      showNotification("Pengajuan pinjaman berhasil! Menunggu konfirmasi admin", "success");
-      
-      setJumlahPinjaman("");
-      setTenor("");
-      fetchData();
-    } catch (err: any) {
-      showNotification(err.response?.data?.message || "Gagal mengajukan pinjaman", "error");
-    }
-    
-    setLoading(false);
+    navigate('/user/verify-pin', {
+      state: {
+        redirectTo: '/user/mpayment/pinjaman',
+        data: {
+          action: 'ajukanPinjaman',
+          jumlahPinjaman: Number(jumlahPinjaman),
+          statusJatuhTempo: tenor
+        }
+      }
+    });
   };
 
   const handleBayar = async (tagihan_id: string) => {
@@ -157,23 +145,17 @@ const PinjamanPage: React.FC = () => {
     setLoading(false);
   };
 
-  const handleClaim = async (pinjaman_id: string) => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `/api/pinjaman/claim/${pinjaman_id}`, 
-        {}, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      setHasClaimed(true);
-      showNotification(res.data.message || "Berhasil klaim pinjaman! Saldo Anda bertambah", "success");
-      fetchData();
-    } catch (err: any) {
-      showNotification(err.response?.data?.message || "Gagal klaim pinjaman", "error");
-    }
-    setLoading(false);
+  const handleClaim = (pinjaman_id: string) => {
+    // Route to PIN verification for fund disbursement
+    navigate('/user/verify-pin', {
+      state: {
+        redirectTo: '/user/mpayment/pinjaman',
+        data: {
+          action: 'cairkanDana',
+          pinjaman_id
+        }
+      }
+    });
   };
 
   const angsuranPerbulan = () => {
@@ -389,9 +371,6 @@ const PinjamanPage: React.FC = () => {
             <div className="tagihan-content">
               {Object.entries(groupedTagihan).map(([pinjamanId, tagihans]) => (
                 <div key={pinjamanId} className="tagihan-group">
-                  <h3 className="tagihan-group-title">
-                    Pinjaman ID: {pinjamanId}
-                  </h3>
                   <div className="tagihan-list">
                     {tagihans.map((tagihan) => (
                       <React.Fragment key={tagihan.tagihan_id}>
@@ -511,7 +490,7 @@ const PinjamanPage: React.FC = () => {
 
         {/* Back Button */}
         <div className="back-button-container">
-          <button className="back-button" onClick={() => navigate(-1)}>
+          <button className="back-button" onClick={() => navigate('/user/mpayment')}>
             <span className="back-icon">←</span>
             <span>Kembali</span>
           </button>
