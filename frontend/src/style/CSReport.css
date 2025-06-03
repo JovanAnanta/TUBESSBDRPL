@@ -1,156 +1,189 @@
-.cs-report-container {
-  background-color: #f5f5f5;
-  min-height: 100vh;
-}
-
-.cs-report-header {
-  margin-bottom: 2rem;
-}
-
-.cs-report-header h1 {
-  color: #333;
-  margin-bottom: 1.5rem;
-}
-
 .cs-report-filters {
   display: flex;
+  justify-content: center;
   gap: 1rem;
-  margin-bottom: 2rem;
+  padding: 2rem;
+  flex-wrap: wrap;
 }
 
 .filter-btn {
-  padding: 0.5rem 1rem;
-  border: 2px solid #FF6B6B;
-  border-radius: 8px;
-  background: transparent;
-  color: #FF6B6B;
+  padding: 0.5rem 1.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: #6c757d;
+}
+
+.filter-btn:hover {
+  background-color: #f0f0f0;
 }
 
 .filter-btn.active {
-  background: #FF6B6B;
+  background-color: #1a2236;
   color: white;
+  border-color: #1a2236;
 }
 
 .reports-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+  padding: 0 2rem 2rem;
 }
 
 .report-card {
-  background: white;
+  background-color: white;
   border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.report-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .report-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  padding: 1.5rem 1.5rem 1rem;
 }
 
 .status-badge {
   padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  width: fit-content;
 }
 
 .status-badge.diproses {
-  background: #FEF3C7;
-  color: #D97706;
+  background-color: #fff4de;
+  color: #ff9800;
 }
 
 .status-badge.diterima {
-  background: #DEF7EC;
-  color: #057A55;
+  background-color: #e6f7ee;
+  color: #28a745;
 }
 
 .status-badge.diabaikan {
-  background: #FDE2E2;
-  color: #DC2626;
+  background-color: #feeceb;
+  color: #dc3545;
 }
 
 .report-date {
-  color: #6B7280;
-  font-size: 0.875rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .report-content {
-  margin-bottom: 1.5rem;
+  padding: 0 1.5rem 1rem;
 }
 
 .report-email {
-  color: #4B5563;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #1a2236;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
 }
 
 .report-description {
-  color: #6B7280;
-  line-height: 1.5;
+  color: #6c757d;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  min-height: 3rem;
 }
 
 .report-actions {
   display: flex;
   gap: 1rem;
+  padding: 1rem 1.5rem;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e5e7eb;
 }
 
 .action-btn {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border: none;
   border-radius: 6px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
+  font-size: 0.9rem;
 }
 
 .action-btn.accept {
-  background: #057A55;
+  background-color: #28a745;
   color: white;
 }
 
 .action-btn.accept:hover {
-  background: #046C4E;
+  background-color: #218838;
+  transform: translateY(-1px);
 }
 
 .action-btn.reject {
-  background: #DC2626;
+  background-color: #dc3545;
   color: white;
 }
 
 .action-btn.reject:hover {
-  background: #B91C1C;
+  background-color: #c82333;
+  transform: translateY(-1px);
 }
 
 .loading-spinner {
-  text-align: center;
-  padding: 2rem;
-  color: #6B7280;
-}
-
-.header-top {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  height: 300px;
+  color: #6c757d;
+  font-size: 1.2rem;
 }
 
-.back-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  background: white;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.loading-spinner:before {
+  content: '⏳';
+  font-size: 2rem;
+  margin-right: 1rem;
+  animation: spin 2s linear infinite;
 }
 
-.back-button:hover {
-  background: #1a1a1a;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .cs-report-filters {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .filter-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .reports-grid {
+    grid-template-columns: 1fr;
+    padding: 0 1rem 1rem;
+    gap: 1rem;
+  }
+  
+  .report-actions {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    padding: 1rem;
+  }
 }

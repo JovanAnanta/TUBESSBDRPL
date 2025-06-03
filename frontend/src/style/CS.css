@@ -1,148 +1,60 @@
+/* Base CS Container - Following HomePage pattern */
 .cs-container {
-  padding: 2rem;
   min-height: 100vh;
-  background-color: #f5f5f5;
-  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f8fafe 0%, #f1f6fd 50%, #e8f2fc 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+  padding: 0;
 }
 
+/* Modern Header - Consistent with Admin */
 .cs-header {
+  background-color: white;
+  padding: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2.5rem;
-  padding: 1.5rem 2rem;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.2);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
 }
 
 .cs-title {
-  font-size: 2rem;
-  color: white;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a2236;
   margin: 0;
-  font-weight: 600;
 }
 
 .cs-logout {
-  padding: 0.75rem 1.5rem;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #dc3545;
   color: white;
-  border: 2px solid white;
-  border-radius: 8px;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(220, 53, 69, 0.2);
 }
 
 .cs-logout:hover {
-  background-color: white;
-  color: #FF6B6B;
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
-.cs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 1rem;
-}
-
-.cs-card {
-  background: white;
-  border-radius: 15px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.cs-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.cs-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(255, 107, 107, 0.15);
-}
-
-.cs-card:hover::before {
-  opacity: 0.05;
-}
-
-.cs-card-icon {
-  font-size: 3rem;
-  margin-bottom: 1.5rem;
-  position: relative;
-  z-index: 2;
-}
-
-.cs-card-title {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #FF6B6B;
-  margin-bottom: 1rem;
-  position: relative;
-  z-index: 2;
-}
-
-.cs-card-description {
-  color: #666;
-  font-size: 1rem;
-  line-height: 1.6;
-  position: relative;
-  z-index: 2;
-}
-
-/* Stats section */
-.cs-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-}
-
-.cs-stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-}
-
-.cs-stat-number {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #FF6B6B;
-  margin-bottom: 0.5rem;
-}
-
-.cs-stat-label {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-/* Currently validated customer banner */
+/* Validated Customer Banner */
 .cs-validated-customer {
-  background-color: #e6f4ea;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  margin-bottom: 2rem;
+  background-color: #28a745;
+  color: white;
+  padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin: 0 2rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(40, 167, 69, 0.2);
 }
 
 .validated-customer-info {
@@ -152,86 +64,307 @@
 }
 
 .validated-icon {
-  background-color: #0f9d58;
-  color: white;
-  width: 36px;
-  height: 36px;
+  font-size: 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-}
-
-.validated-customer-info h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  color: #0f9d58;
-}
-
-.validated-customer-info p {
-  margin: 0.25rem 0 0;
-  color: #202124;
-  font-size: 0.9rem;
 }
 
 .clear-validation-btn {
-  background-color: transparent;
-  border: 1px solid #dadce0;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
   padding: 0.5rem 1rem;
-  color: #5f6368;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .clear-validation-btn:hover {
-  background-color: #f1f3f4;
-  color: #d93025;
-  border-color: #d93025;
+  background: rgba(255, 255, 255, 0.3);
 }
 
-/* Card disabled state */
-.cs-card-disabled {
-  opacity: 0.75;
-  position: relative;
+/* Stats Cards - Following Admin pattern yang lebih baik */
+.cs-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  padding: 0 2rem;
 }
 
-.cs-card-disabled::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.5);
+.cs-stat-card {
+  background-color: white;
   border-radius: 12px;
-  pointer-events: none;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  border: 1px solid #e5e7eb;
 }
 
-/* Validation indicator */
-.validation-indicator {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+.cs-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cs-stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a2236;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.cs-stat-label {
+  color: #6c757d;
   font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+  margin: 0;
 }
 
-.validation-indicator.required {
-  background-color: #fce8e6;
-  color: #d93025;
+/* Feature Grid - Cards yang lebih konsisten */
+.cs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 0 2rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.cs-card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cs-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.cs-card-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.3);
+}
+
+.cs-card-disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cs-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.cs-card-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  margin: 0 auto 1.5rem;
+}
+
+/* Icon colors yang lebih baik */
+.cs-card-icon.reset {
+  background-color: #fff4de;
+  color: #ff9800;
+}
+
+.cs-card-icon.activity {
+  background-color: #e1f0ff;
+  color: #0d6efd;
+}
+
+.cs-card-icon.validation {
+  background-color: #e6f7ee;
+  color: #28a745;
+}
+
+.cs-card-icon.reports {
+  background-color: #feeceb;
+  color: #dc3545;
+}
+
+.cs-card-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1a2236;
+  line-height: 1.3;
+}
+
+.cs-card-description {
+  margin: 0 0 1.5rem 0;
+  color: #6c757d;
+  font-size: 1rem;
+  line-height: 1.6;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+.validation-indicator {
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: auto;
 }
 
 .validation-indicator.available {
-  background-color: #e6f4ea;
-  color: #0f9d58;
+  background-color: #e6f7ee;
+  color: #28a745;
 }
 
-/* Enhance the card to handle validation badge overlay */
-.cs-card {
-  position: relative;
-  padding-bottom: 2.5rem;
+.validation-indicator.required {
+  background-color: #fff4de;
+  color: #ff9800;
+}
+
+/* Loading States */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.loading-indicator div {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Error States */
+.error-message {
+  background-color: #feeceb;
+  color: #dc3545;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  margin: 2rem;
+  font-weight: 500;
+  border: 1px solid #f5c6cb;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.error-message div {
+  font-size: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .cs-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .cs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .cs-header {
+    padding: 1.5rem;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0 0 2rem 0;
+  }
+  
+  .cs-title {
+    font-size: 1.8rem;
+  }
+  
+  .cs-stats {
+    grid-template-columns: 1fr;
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+  
+  .cs-grid {
+    grid-template-columns: 1fr;
+    padding: 0 1rem 1rem;
+    gap: 1rem;
+  }
+  
+  .cs-card {
+    padding: 1.5rem;
+    min-height: 250px;
+  }
+  
+  .cs-card-icon {
+    font-size: 3rem;
+    width: 60px;
+    height: 60px;
+  }
+  
+  .cs-validated-customer {
+    margin: 0 1rem 2rem;
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .cs-stats {
+    padding: 0 0.5rem;
+  }
+  
+  .cs-grid {
+    padding: 0 0.5rem 0.5rem;
+  }
+  
+  .cs-validated-customer {
+    margin: 0 0.5rem 1rem;
+  }
 }
